@@ -77,7 +77,7 @@ define( 'DOTFLOW_INBOUND_WEBHOOK_TOKEN', 'replace-with-a-random-secret-of-at-lea
 
 ### Event-triggered workflows
 
-Groundhogg's visual workflow builder includes the native `dotflow_event` benchmark. Configure an exact DotFlow event name (for example, `email.inbound.received`) and optionally an exact source (for example, `email`). The benchmark only starts a workflow when the event is linked to an existing contact.
+Groundhogg's visual workflow builder includes the native `dotflow_event` benchmark. Use `dotflow/list-event-types` to discover observed event names and sources, then configure an exact DotFlow event name (for example, `email.inbound.received`) and optionally an exact source (for example, `email`). The discovery ability returns only event name/source, occurrence count and last-seen time; it never returns payloads or contact IDs. The benchmark only starts a workflow when the event is linked to an existing contact.
 
 - Events are durably stored before workflow listeners run.
 - Duplicate source/event IDs do not fire workflow listeners a second time.
