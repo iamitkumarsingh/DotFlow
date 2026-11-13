@@ -70,6 +70,9 @@ jobs:
       - name: Install test tooling and PHPUnit polyfills
         run: composer install --no-interaction --prefer-dist
 
+      - name: Audit installed Composer dependencies
+        run: composer audit --locked
+
       - name: Install Subversion for WordPress test suite
         run: |
           sudo apt-get update
