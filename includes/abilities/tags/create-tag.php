@@ -90,6 +90,15 @@ class Create_Tag extends Ability {
 			}
 		}
 
+		Audit::record(
+			$existed ? 'tag.updated' : 'tag.created',
+			'tag',
+			$tag_id,
+			[
+				'fields' => array_values( array_keys( $data ) ),
+			]
+		);
+
 		return array_merge( Tag_Schema::transform( $tag ), [
 			'created' => ! $existed,
 		] );
