@@ -221,6 +221,22 @@ class Create_Contact extends Ability {
 
 		$submission->add_posted_data( sanitize_payload( $posted_data ) );
 
+		// Record only field names and operation metadata. Never copy contact values,
+		// email addresses or custom-field contents into the DotFlow audit payload.
+		$audit_fields = array_values( array_intersect( [ 'email', 'first_name', 'last_name', 'optin_status', 'owner' ], array_keys( $data ) ) );
+		$audit_meta_fields = ! empty( $meta ) ? array_map( 'sanitize_key', array_keys( $meta ) ) : [];
+
+		Audit::record(
+			$existing ? 'contact.upserted' : 'contact.created',
+			'contact',
+			$contact->get_id(),
+			[
+				'fields'             => $audit_fields,
+				'tags_applied_count' => empty( $input['tags'] ) ? 0 : count( (array) $input['tags'] ),
+				'custom_field_keys'  => $audit_meta_fields,
+			]
+		);
+
 		$expand = $input['expand'] ?? [ 'tags' ];
 
 		return [
