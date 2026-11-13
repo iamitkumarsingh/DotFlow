@@ -147,7 +147,7 @@ final class Routes {
 				],
 			],
 			'write_policy' => [
-				'rest_mutations'       => 'No generic REST CRUD. Only the token-authenticated provider-neutral inbound email endpoint is writable.'
+				'rest_mutations'       => 'No generic REST CRUD. Only the token-authenticated provider-neutral inbound email endpoint is writable.',
 				'preferred_interface' => 'Purpose-built WordPress Abilities with strict schemas and capability checks.',
 				'arbitrary_sql'        => false,
 				'credential_readback'  => false,
