@@ -4,6 +4,7 @@ use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\DotFlow\Events\Event;
 use Groundhogg\DotFlow\Events\Store;
+use Groundhogg\Pii;
 use function Groundhogg\get_db;
 
 class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
@@ -145,5 +146,21 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 			}
 		}
 	}
+
+	public function test_restricted_admin_cannot_read_raw_event_payloads() {
+
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$user    = get_userdata( $user_id );
+		$user->add_cap( Pii::CAP, false );
+		wp_set_current_user( $user_id );
+
+		$reflection = new ReflectionClass( List_Events::class );
+		$ability    = $reflection->newInstanceWithoutConstructor();
+		$result     = $ability( [ 'limit' => 5 ] );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'groundhogg_pii_restricted', $result->get_error_code() );
+	}
+
 
 }
