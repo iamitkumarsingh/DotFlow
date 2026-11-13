@@ -3,6 +3,7 @@
 namespace Groundhogg\DotFlow\Abilities;
 
 use Groundhogg\Abilities\Ability;
+use Groundhogg\Pii;
 use WP_Error;
 use function Groundhogg\get_contactdata;
 use function Groundhogg\get_db;
