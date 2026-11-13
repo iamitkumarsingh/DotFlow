@@ -2,8 +2,6 @@
 
 namespace Groundhogg\DotFlow\Events;
 
-use WP_Error;
-
 /**
  * Persists DotFlow events with source-scoped idempotency and secret redaction.
  */
