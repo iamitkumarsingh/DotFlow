@@ -40,7 +40,7 @@ class DotFlow_System_Manifest_Tests extends GH_UnitTestCase {
 			$modules[ $module['id'] ] = $module;
 		}
 
-		$this->assertSame( 'planned', $modules['messaging']['status'] );
+		$this->assertSame( 'foundation', $modules['messaging']['status'] );
 		$this->assertSame( 'planned', $modules['integrations']['status'] );
 	}
 }
