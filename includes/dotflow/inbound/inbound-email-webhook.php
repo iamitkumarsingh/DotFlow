@@ -176,8 +176,11 @@ final class Inbound_Email_Webhook {
 
 		$from = $input['from'] ?? '';
 
-		if ( ( ! is_string( $from ) && ! is_array( $from ) ) || strlen( wp_json_encode( $from ) ) > 512 ) {
+		if ( ( ! is_string( $from ) && ! is_array( $from ) ) || strlen( (string) wp_json_encode( $from ) ) > 512 ) {
 			return self::invalid_payload( 'A sender address is required.' );
+		}
+		if ( is_array( $from ) && ( ! isset( $from['email'] ) || ! is_string( $from['email'] ) ) ) {
+			return self::invalid_payload( 'A sender address must include a string email field.' );
 		}
 
 		[ $sender ] = Message::parse_address( $from );
@@ -208,6 +211,11 @@ final class Inbound_Email_Webhook {
 
 		$html = $input['html'] ?? '';
 		$text = $input['text'] ?? '';
+
+		$subject_input = $input['subject'] ?? '';
+		if ( ! is_string( $subject_input ) ) {
+			return self::invalid_payload( 'The message subject must be a string.' );
+		}
 
 		if ( ! is_string( $html ) || ! is_string( $text ) || strlen( $html ) > self::MAX_BODY_BYTES || strlen( $text ) > self::MAX_BODY_BYTES ) {
 			return self::invalid_payload( 'Message content must be text or HTML within the accepted size limit.' );
@@ -257,7 +265,10 @@ final class Inbound_Email_Webhook {
 			if ( ! is_string( $value ) && ! is_array( $value ) ) {
 				return self::invalid_payload( 'Reply reference fields must be strings or lists.' );
 			}
-			if ( strlen( wp_json_encode( $value ) ) > 5000 ) {
+			if ( is_array( $value ) && ( count( $value ) > 50 || count( array_filter( $value, 'is_scalar' ) ) !== count( $value ) ) ) {
+				return self::invalid_payload( 'Reply reference lists must contain no more than 50 scalar values.' );
+			}
+			if ( strlen( (string) wp_json_encode( $value ) ) > 5000 ) {
 				return self::invalid_payload( 'Reply reference fields exceed the accepted length.' );
 			}
 		}
@@ -273,7 +284,7 @@ final class Inbound_Email_Webhook {
 			'to'            => $input['to'] ?? '',
 			'cc'            => $input['cc'] ?? '',
 			'envelope_to'   => $envelope_addresses,
-			'subject'       => substr( sanitize_text_field( (string) ( $input['subject'] ?? '' ) ), 0, 998 ),
+			'subject'       => substr( sanitize_text_field( $subject_input ), 0, 998 ),
 			'html'          => $html,
 			'text'          => $text,
 			'message_id'    => $message_ids[0],
