@@ -4,6 +4,8 @@ use Groundhogg\Abilities\Schemas\License_Schema;
 use Groundhogg\Abilities\Settings\List_Settings;
 use Groundhogg\Abilities\Settings\Update_Settings;
 use Groundhogg\License;
+use Groundhogg\Plugin;
+use Groundhogg\Settings;
 
 class DotFlow_Secret_Readback_Tests extends GH_UnitTestCase {
 
