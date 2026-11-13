@@ -4,6 +4,7 @@ namespace Groundhogg\DotFlow;
 
 use Groundhogg\Abilities\Abilities;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
+use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -44,6 +45,13 @@ final class Bootstrap {
 		add_action( 'groundhogg/abilities/register_categories', [ __CLASS__, 'register_ability_category' ] );
 		add_action( 'groundhogg/abilities/register_abilities', [ __CLASS__, 'register_abilities' ] );
 
+		// Elementor is optional. Register native widgets only after its API is available.
+		if ( did_action( 'elementor/loaded' ) || class_exists( '\\Elementor\\Plugin' ) ) {
+			self::register_elementor_hooks();
+		} else {
+			add_action( 'elementor/loaded', [ __CLASS__, 'register_elementor_hooks' ] );
+		}
+
 		/**
 		 * Fires when the DotFlow domain layer is ready.
 		 *
@@ -71,6 +79,41 @@ final class Bootstrap {
 	 */
 	public static function register_abilities() {
 		Abilities::add_ability( Get_System_Manifest::class );
+	}
+
+	/**
+	 * Register Elementor hooks once Elementor's public API is available.
+	 *
+	 * @return void
+	 */
+	public static function register_elementor_hooks() {
+		add_action( 'elementor/elements/categories_registered', [ __CLASS__, 'register_elementor_category' ] );
+		add_action( 'elementor/widgets/register', [ __CLASS__, 'register_elementor_widgets' ] );
+	}
+
+	/**
+	 * Add the DotFlow category to Elementor's widget panel.
+	 *
+	 * @param object $elements_manager Elementor elements manager.
+	 * @return void
+	 */
+	public static function register_elementor_category( $elements_manager ) {
+		$elements_manager->add_category( 'dotflow', [
+			'title' => __( 'DotFlow', 'groundhogg' ),
+			'icon'  => 'fa fa-plug',
+		] );
+	}
+
+	/**
+	 * Register DotFlow's native Elementor widgets.
+	 *
+	 * @param object $widgets_manager Elementor widgets manager.
+	 * @return void
+	 */
+	public static function register_elementor_widgets( $widgets_manager ) {
+		if ( class_exists( Form_Widget::class ) ) {
+			$widgets_manager->register( new Form_Widget() );
+		}
 	}
 }
 
