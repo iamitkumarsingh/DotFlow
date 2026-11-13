@@ -103,7 +103,7 @@ Widgets must register only when Elementor is active, expose native controls and 
 - DotFlow-specific CTA/dynamic tags: planned.
 - WordPress Abilities category and MCP abilities for the system manifest, published form discovery and event history: initial implementation.
 - Read-only `dotflow/v1` REST discovery routes for manifest, schema and administrator-only event history: implemented; runtime route and permission tests still required.
-- Mutation audit helper: implemented for DotFlow's message read-state MCP mutation; broader coverage across all AI-writable records is still required.
+- Mutation audit helper: implemented for message read-state, contact create/upsert/update, tag create/update and custom-field-definition create/update Abilities. Audit payloads record operation metadata and field names rather than contact values; campaign, workflow and other mutations still need coverage.
 - Conversation MCP access: initial read/list and read-state mutation abilities are implemented against the inherited message store; runtime privacy tests remain pending.
 
 ## 8. Compatibility and validation
