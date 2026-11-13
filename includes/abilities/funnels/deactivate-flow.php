@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Funnels;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -135,6 +136,12 @@ class Deactivate_Flow extends Ability {
 		$funnel->update( [
 			'status'       => 'inactive',
 			'last_updated' => current_time( 'mysql' ),
+		] );
+
+		Audit::record( 'flow.deactivated', 'flow', $funnel->get_id(), [
+			'status' => [ 'before' => 'active', 'after' => 'inactive' ],
+			'pending_changes' => $input['pending_changes'] ?? null,
+			'deleted_steps_count' => count( $outcomes ),
 		] );
 
 		// Mirrors the REST update path's own action for other code hooking flow
