@@ -5,6 +5,7 @@ namespace Groundhogg\DotFlow\Abilities;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Contact_Schema;
 use Groundhogg\Abilities\Schemas\Note_Schema;
+use Groundhogg\Pii;
 use WP_Error;
 use function Groundhogg\get_contactdata;
 use function Groundhogg\get_db;
@@ -95,6 +96,10 @@ class Get_Contact_Profile extends Ability {
 		];
 
 		if ( ! empty( $input['include_notes'] ) ) {
+
+			if ( Pii::is_restricted() ) {
+				return Pii::restricted_error( __( 'Contact notes are not available to accounts restricted from personal information.', 'groundhogg' ) );
+			}
 
 			if ( ! current_user_can( 'view_notes' ) ) {
 				return new WP_Error(
