@@ -50,5 +50,6 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'email.inbound.received', $schema['event_name']['sanitize']( 'email.inbound.received' ) );
 		$this->assertSame( '', $schema['event_name']['sanitize']( 'Email Inbound' ) );
 		$this->assertSame( 'provider_1', $schema['source']['sanitize']( 'Provider_1' ) );
+		$this->assertSame( 64, strlen( $schema['source']['sanitize']( str_repeat( 'a', 80 ) ) ) );
 	}
 }
