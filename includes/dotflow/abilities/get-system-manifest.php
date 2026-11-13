@@ -168,7 +168,7 @@ class Get_System_Manifest extends Ability {
 				'private_data_requires_capability' => true,
 				'credentials_exposed_to_ai'        => false,
 				'mutations_audited'                => false,
-				'audit_coverage'                   => 'Partial: DotFlow message read-state, Groundhogg contact create/upsert/update, tag create/update and custom-field-definition create/update Abilities emit privacy-minimised audit events; campaign, workflow and other mutations still need coverage.',
+				'audit_coverage'                   => 'Partial: DotFlow message read-state; contact create/upsert/update; tag create/update; custom-field-definition create/update; campaign create/upsert and association; and flow create/edit/activate/deactivate/publish/discard Abilities emit privacy-minimised audit events. Broadcast, email-template, settings, deletion and other mutation paths still need coverage.',
 			],
 		];
 	}
