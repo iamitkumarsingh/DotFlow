@@ -3,6 +3,7 @@
 namespace Groundhogg\Abilities\Tags;
 
 use Groundhogg\Abilities\Ability;
+use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\Abilities\Schemas\Tag_Schema;
 use Groundhogg\Tag;
 use function Groundhogg\get_db;
