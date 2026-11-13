@@ -75,6 +75,16 @@ define( 'DOTFLOW_INBOUND_WEBHOOK_TOKEN', 'replace-with-a-random-secret-of-at-lea
 - The custom addresses are only activated when a Groundhogg relay inbox is not provisioned; DotFlow will not overwrite an existing relay's addresses or license state.
 - Successful inbound messages emit `email.inbound.received` events containing message/contact IDs, thread ID and provider name only. Message bodies, sender addresses and headers are not copied into the event payload.
 
+### Event-triggered workflows
+
+Groundhogg's visual workflow builder includes the native `dotflow_event` benchmark. Configure an exact DotFlow event name (for example, `email.inbound.received`) and optionally an exact source (for example, `email`). The benchmark only starts a workflow when the event is linked to an existing contact.
+
+- Events are durably stored before workflow listeners run.
+- Duplicate source/event IDs do not fire workflow listeners a second time.
+- Only event name, source and stable event ID are passed into workflow args; arbitrary event payloads are never copied.
+- `ai.mutation.completed` audit events are deliberately excluded to prevent governance activity from becoming a customer-journey trigger or creating automation loops.
+- Workflow execution remains subject to Groundhogg's active-step state, queue and contact eligibility rules.
+
 ## 4. AI data contract
 
 All returned records should use JSON with:
