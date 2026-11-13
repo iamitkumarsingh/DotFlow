@@ -54,7 +54,7 @@ class Activate_License extends Ability {
 
 		Audit::record( 'license.activated', 'license', 0, [
 			'activated' => true,
-			'license_key_recorded' => false,
+			'credential_value_recorded' => false,
 		] );
 
 		return License_Schema::transform( $license_key, $result );
