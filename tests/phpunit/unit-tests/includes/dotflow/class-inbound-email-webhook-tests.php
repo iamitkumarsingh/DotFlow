@@ -205,6 +205,48 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		$this->assertSame( substr( $message_id, 1, 16 ), Inbox::verify_reply( [ $reply_to ] ) );
 	}
 
+	public function test_webhook_rejects_unsupported_attachments_and_oversized_payloads() {
+
+		$payload = [
+			'from'        => 'sender@example.com',
+			'envelope_to' => 'private-inbox@example.com',
+			'provider_event_id' => 'attachment-test',
+			'text'        => 'Message body.',
+			'attachments' => [
+				[ 'filename' => 'invoice.pdf', 'content' => 'base64-data' ],
+			],
+		];
+
+		$unsupported = Inbound_Email_Webhook::receive( $this->request( $payload ) );
+
+		$this->assertWPError( $unsupported );
+		$this->assertSame( 'dotflow_inbound_invalid_payload', $unsupported->get_error_code() );
+
+		$request = $this->request( [] );
+		$request->set_body( str_repeat( 'x', Inbound_Email_Webhook::MAX_BODY_BYTES + 1 ) );
+		$oversized = Inbound_Email_Webhook::receive( $request );
+
+		$this->assertWPError( $oversized );
+		$this->assertSame( 'dotflow_inbound_payload_too_large', $oversized->get_error_code() );
+	}
+
+	public function test_webhook_does_not_accept_messages_sent_to_an_unconfigured_address() {
+
+		$payload = [
+			'from'              => 'sender@example.com',
+			'envelope_to'       => 'attacker-controlled@example.com',
+			'provider_event_id' => 'wrong-recipient',
+			'text'              => 'This must not enter the CRM.',
+		];
+
+		$response = Inbound_Email_Webhook::receive( $this->request( $payload ) );
+
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertSame( 202, $response->get_status() );
+		$this->assertFalse( $response->get_data()['accepted'] );
+		$this->assertSame( 'no_match', $response->get_data()['reason'] );
+	}
+
 	public function test_independent_mode_never_overrides_a_provisioned_groundhogg_relay() {
 
 		update_option( Inbox::ID_OPTION, 'existing-relay-inbox-id', false );
