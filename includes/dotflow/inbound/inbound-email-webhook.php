@@ -216,6 +216,9 @@ final class Inbound_Email_Webhook {
 		if ( ! is_string( $html ) || ! is_string( $text ) || strlen( $html ) > self::MAX_BODY_BYTES || strlen( $text ) > self::MAX_BODY_BYTES ) {
 			return self::invalid_payload( 'Message content must be text or HTML within the accepted size limit.' );
 		}
+		if ( trim( $html ) === '' && trim( $text ) === '' ) {
+			return self::invalid_payload( 'The inbound message must include non-empty text or HTML content.' );
+		}
 
 		if ( ! empty( $input['attachments'] ) ) {
 			return self::invalid_payload( 'Attachments are not supported by this inbound webhook version.' );
