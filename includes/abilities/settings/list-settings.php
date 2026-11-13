@@ -101,7 +101,16 @@ class List_Settings extends Ability {
 
 		foreach ( $settings as $id => $args ) {
 
-			$schema = $settings_registry->get_setting_schema( $id );
+			$schema    = $settings_registry->get_setting_schema( $id );
+			$sensitive = $settings_registry->is_setting_sensitive( $id );
+
+			if ( $sensitive ) {
+				if ( array_key_exists( 'default', $schema ) ) {
+					$schema['default'] = $settings_registry->get_redacted_value( $id, $schema['default'], false );
+				}
+
+				$schema['description'] = trim( (string) $schema['description'] . ' ' . __( 'Sensitive setting: values are always redacted in AI responses.', 'groundhogg' ) );
+			}
 
 			$short_id  = preg_replace( '/^gh_/', '', $id );
 			$value     = $settings_registry->get_redacted_value( $id, $settings_registry->get_option( $id ), false );
@@ -109,7 +118,7 @@ class List_Settings extends Ability {
 			$list[] = array_merge( $schema, [
 				'id'        => $short_id,
 				'group'     => $args['group'],
-				'sensitive' => $settings_registry->is_setting_sensitive( $id ),
+				'sensitive' => $sensitive,
 				'value'     => $value,
 			] );
 		}
