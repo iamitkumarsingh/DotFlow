@@ -32,10 +32,10 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		update_option( Inbox::SITE_URL_OPTION, Inbox::normalize_url( home_url() ), false );
 
 		$this->inbox_filter = function ( $value ) {
-			return 'private-inbox@example.test';
+			return 'private-inbox@example.com';
 		};
 		$this->reply_filter = function ( $value ) {
-			return 'reply@example.test';
+			return 'reply@example.com';
 		};
 		$this->token_filter = function ( $value ) {
 			return 'test-webhook-token-0123456789-abcdef';
@@ -122,16 +122,16 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		wp_set_current_user( $user_id );
 
 		$contact_id = self::factory()->contacts->create( [
-			'email'      => 'sender@example.test',
+			'email'      => 'sender@example.com',
 			'first_name' => 'Sender',
 		] );
 
 		$payload = [
 			'source'          => 'test-provider',
 			'provider_event_id' => 'provider-event-001',
-			'from'            => 'Sender <sender@example.test>',
-			'to'              => 'private-inbox@example.test',
-			'envelope_to'     => 'private-inbox@example.test',
+			'from'            => 'Sender <sender@example.com>',
+			'to'              => 'private-inbox@example.com',
+			'envelope_to'     => 'private-inbox@example.com',
 			'subject'         => 'Question about my appointment',
 			'text'            => 'Please call me about my appointment.',
 			'date'            => '2026-11-13T12:00:00Z',
@@ -166,7 +166,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'test-provider', $event_payload['provider'] );
 		$this->assertArrayNotHasKey( 'content', $event_payload );
 		$this->assertArrayNotHasKey( 'from', $event_payload );
-		$this->assertStringNotContainsString( 'sender@example.test', wp_json_encode( $event_payload ) );
+		$this->assertStringNotContainsString( 'sender@example.com', wp_json_encode( $event_payload ) );
 		$this->assertStringNotContainsString( 'Please call me', wp_json_encode( $event_payload ) );
 
 		$duplicate_request = $this->request( $payload );
@@ -202,7 +202,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		update_option( Inbox::ID_OPTION, 'existing-relay-inbox-id', false );
 
 		$this->assertFalse( Inbox_Addresses::is_enabled() );
-		$this->assertSame( 'existing@example.test', Inbox_Addresses::inbox_address( 'existing@example.test' ) );
-		$this->assertSame( 'reply-existing@example.test', Inbox_Addresses::reply_address( 'reply-existing@example.test' ) );
+		$this->assertSame( 'existing@example.com', Inbox_Addresses::inbox_address( 'existing@example.com' ) );
+		$this->assertSame( 'reply-existing@example.com', Inbox_Addresses::reply_address( 'reply-existing@example.com' ) );
 	}
 }
