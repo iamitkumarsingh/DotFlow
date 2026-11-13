@@ -102,7 +102,7 @@ class Imap_Inbox {
 
 		if ( $is_ipv6 ) {
 			$host = '[' . $host . ']';
-		} elseif ( ! $is_ipv4 && ! preg_match( '/\\A(?=.{1,253}\\z)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\\z/i', $host ) ) {
+		} elseif ( ! $is_ipv4 && ! preg_match( '/\\A(?=.{1,253}\\z)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*\\z/i', $host ) ) {
 			return new \WP_Error( 'imap_invalid_host', __( 'The configured IMAP server host is invalid.', 'groundhogg' ) );
 		}
 
