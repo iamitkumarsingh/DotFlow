@@ -97,7 +97,7 @@ Widgets must register only when Elementor is active, expose native controls and 
 - DotFlow Form Elementor widget with active-form selection, server-side form-type/status revalidation and CRM shortcode rendering: initial implementation; runtime validation still required.
 - DotFlow-specific CTA/dynamic tags: planned.
 - WordPress Abilities category and MCP abilities for the system manifest, published form discovery and event history: initial implementation.
-- Provider-specific integrations and mutation audit trail: planned.
+- Mutation audit helper: implemented for DotFlow's message read-state MCP mutation; broader coverage across all AI-writable records is still required.
 - Conversation MCP access: initial read/list and read-state mutation abilities are implemented against the inherited message store; runtime privacy tests remain pending.
 
 ## 8. Compatibility and validation
@@ -106,4 +106,4 @@ Widgets must register only when Elementor is active, expose native controls and 
 - Preserve existing page structures when editing.
 - Use Elementor's save lifecycle and regenerate caches through supported APIs.
 - Test with Elementor absent, Elementor 3.x and Elementor 4.x where feasible.
-- Test MCP discovery, permission-denied paths, invalid schemas, PII restrictions, idempotency and audit records.
+- Test MCP discovery, permission-denied paths, invalid schemas, PII restrictions, idempotency and audit records. PHPUnit coverage has been added but has not yet been executed in a live WordPress test environment.
