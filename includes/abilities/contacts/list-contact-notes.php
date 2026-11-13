@@ -37,7 +37,7 @@ class List_Contact_Notes extends Ability {
 
 		return [
 			'label'       => __( 'List Contact Notes', 'groundhogg' ),
-			'description' => __( 'List the notes on a contact, most recent first. If the current user can view_notes but not view_others_notes, only their own notes on this contact are returned.', 'groundhogg' ),
+			'description' => __( 'List the notes on a contact, most recent first. Requires PII access and view_notes. If the current user can view_notes but not view_others_notes, only their own notes on this contact are returned.', 'groundhogg' ),
 
 			'input_schema' => [
 				'type'                 => 'object',
