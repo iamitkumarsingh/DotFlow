@@ -1,0 +1,105 @@
+# DotFlow — AI, MCP and Elementor Integration Contract
+
+## Product requirement
+
+DotFlow must be discoverable and manageable by authorised AI agents through structured WordPress capabilities. AI must not need to scrape admin HTML, infer database schemas or execute arbitrary SQL to understand or update DotFlow data.
+
+Elementor MCP and WordPress data management are distinct surfaces. Elementor MCP edits Elementor documents; DotFlow's WordPress Abilities and REST API manage CRM and automation records.
+
+## 1. Elementor MCP surface
+
+Elementor MCP is responsible for Elementor documents:
+- Create and edit landing pages and page sections.
+- Edit native Elementor containers, widgets, templates and supported global styles.
+- Insert DotFlow-owned Elementor widgets and controls when the integration is installed.
+- Configure DotFlow form embeds and supported front-end experiences.
+- Read Elementor document structures and return concise semantic summaries.
+
+Elementor content must be saved through Elementor's document/save lifecycle, not by raw SQL or direct unvalidated writes to the _elementor_data meta key. Native widgets and controls are preferred so users can continue editing output in Elementor's visual editor.
+
+Elementor MCP does not automatically provide safe CRUD access to CRM contacts, campaigns, workflow executions or message records. Those records belong to DotFlow's management API.
+
+## 2. WordPress MCP / Abilities surface
+
+DotFlow exposes machine-readable WordPress Abilities for AI clients that support the WordPress Abilities API and MCP adapter.
+
+Existing Groundhogg abilities are reused for inherited data:
+- Contacts: search, get, create, update, custom fields, notes and tags.
+- Campaigns and email: list/create campaigns, list/create/update templates and broadcasts.
+- Automation: list/get/create/edit/simulate/publish/activate/deactivate flows.
+- Reporting: discover report types and retrieve reports.
+- Settings: only registered settings with their own capability checks.
+
+DotFlow-specific abilities are registered under the dotflow-platform category. Every ability must define a strict input schema, output schema, permission callback and read/write annotations.
+
+## 3. REST API surface
+
+Namespace: dotflow/v1
+
+Planned endpoints:
+- GET /manifest — versioned machine-readable product/module manifest.
+- GET /schema — discover supported object types, fields, relationships and writable fields.
+- GET /events — paginated, filterable DotFlow event history.
+- POST /events — validated event ingestion with source authentication and idempotency.
+- GET /integrations — provider names, connection state and supported capabilities; never return secrets.
+- POST /integrations/{provider}/test — test a provider connection without exposing credentials.
+- Provider-specific webhook endpoints — signature verification, replay protection and idempotent ingestion.
+
+The REST API is not a generic database proxy. No arbitrary SQL, arbitrary option writes or unrestricted object mutation endpoints are exposed.
+
+## 4. AI data contract
+
+All returned records should use JSON with:
+- Stable record ID.
+- Object type and schema version.
+- UTC timestamps in ISO 8601.
+- Explicit field types and nullable fields.
+- Pagination metadata.
+- Related-record IDs rather than large nested expansions by default.
+- Provenance for externally synchronised data (source, external_id, last_synced_at).
+- Machine-readable error code and actionable message.
+
+Private fields are minimised. Credentials, API keys, SMTP passwords, IMAP passwords and webhook signing secrets are never returned to AI clients. PII access follows the same WordPress capabilities and per-contact ownership rules as the admin UI.
+
+## 5. Write safety model
+
+Read operations are annotated read-only and idempotent.
+
+Write operations:
+- Require a relevant WordPress capability and per-object authorization.
+- Validate against strict schemas and allowlisted writable fields.
+- Respect contact consent and suppression.
+- Use optimistic concurrency or version checks for workflow edits.
+- Are idempotent where possible.
+- Record actor, timestamp, object, operation and outcome in an audit trail.
+- Return the changed record and a revision/version identifier.
+
+High-impact actions (send a campaign, publish a workflow, delete/erase records, change provider credentials) require explicit confirmation or an approval mechanism. AI must never receive secret values back after writing them.
+
+## 6. Elementor widgets and dynamic data
+
+Planned native Elementor integration:
+- DotFlow Form widget with a selectable published form/experience.
+- DotFlow CTA widget with configurable tracked action and destination.
+- DotFlow Contact Field widget only for explicitly public, consent-appropriate fields.
+- DotFlow event/analytics bindings for supported page interactions.
+
+Widgets must register only when Elementor is active, expose native controls and use Elementor's render lifecycle. Do not place private CRM records in public page markup or expose contact data through public dynamic tags.
+
+## 7. Current implementation status
+
+- DotFlow bootstrap and typed in-process event envelope: implemented.
+- DotFlow event dispatcher: implemented.
+- Machine-readable system manifest ability: initial implementation.
+- Native inherited Groundhogg MCP abilities: available from the foundation.
+- Durable DotFlow event storage and event-query ability: not yet implemented.
+- DotFlow-specific Elementor widgets and dynamic tags: planned.
+- Provider-specific integrations and mutation audit trail: planned.
+
+## 8. Compatibility and validation
+
+- Elementor 3.x classic widgets/containers and Elementor 4.x atomic elements have different document formats. Detect installed version and use corresponding native APIs/schema.
+- Preserve existing page structures when editing.
+- Use Elementor's save lifecycle and regenerate caches through supported APIs.
+- Test with Elementor absent, Elementor 3.x and Elementor 4.x where feasible.
+- Test MCP discovery, permission-denied paths, invalid schemas, PII restrictions, idempotency and audit records.
