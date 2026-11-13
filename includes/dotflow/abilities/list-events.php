@@ -115,6 +115,13 @@ class List_Events extends Ability {
 
 		global $wpdb;
 
+		// Stored event payloads may contain personal data from external providers
+		// and form submissions; administrator status alone does not override the
+		// explicit contact PII restriction.
+		if ( Pii::is_restricted() ) {
+			return Pii::restricted_error( __( 'Event payloads are not available to accounts restricted from personal information.', 'groundhogg' ) );
+		}
+
 		$db = \Groundhogg\get_db( 'dotflow_events' );
 
 		if ( ! $db ) {
