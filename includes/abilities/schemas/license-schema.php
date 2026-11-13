@@ -17,12 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class License_Schema {
 
+	public const REDACTED = '[REDACTED]';
+
 	public static function get_schema(): array {
 
 		return [
 			'type'       => 'object',
 			'properties' => [
-				'license_key'           => [ 'type' => 'string' ],
+				'license_key'           => [ 'type' => 'string', 'description' => __( 'Always redacted in AI responses. The key is accepted as input only and is never returned.', 'groundhogg' ) ],
 				'valid'                 => [ 'type' => 'boolean' ],
 				'status'                => [
 					'type'        => 'string',
@@ -61,7 +63,7 @@ class License_Schema {
 	public static function transform( string $license_key, License $license ): array {
 
 		return [
-			'license_key'          => $license_key,
+			'license_key'          => self::REDACTED,
 			'valid'                => $license->is_valid(),
 			'status'               => $license->license,
 			'item_id'              => $license->item_id,
