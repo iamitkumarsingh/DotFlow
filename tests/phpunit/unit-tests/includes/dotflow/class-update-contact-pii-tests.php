@@ -6,6 +6,22 @@ use function Groundhogg\get_contactdata;
 
 class DotFlow_Update_Contact_Pii_Tests extends GH_UnitTestCase {
 
+	protected $event_contact_ids = [];
+
+	public function tearDown(): void {
+
+		global $wpdb;
+		$db = get_db( 'dotflow_events' );
+
+		if ( $db ) {
+			foreach ( $this->event_contact_ids as $contact_id ) {
+				$wpdb->delete( $db->get_table_name(), [ 'contact_id' => $contact_id ], [ '%d' ] );
+			}
+		}
+
+		parent::tearDown();
+	}
+
 	public function test_restricted_admin_cannot_change_identity_or_pii_meta_but_can_change_safe_meta() {
 
 		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
@@ -19,6 +35,7 @@ class DotFlow_Update_Contact_Pii_Tests extends GH_UnitTestCase {
 			'email'      => 'pii-guard@example.test',
 			'first_name' => 'Original',
 		] );
+		$this->event_contact_ids[] = $contact_id;
 
 		$reflection = new ReflectionClass( Update_Contact::class );
 		$ability    = $reflection->newInstanceWithoutConstructor();
