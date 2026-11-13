@@ -38,7 +38,7 @@ DotFlow does not expose SMTP passwords, IMAP passwords, API keys, webhook signin
 
 DotFlow includes an optional HTTPS webhook at `/wp-json/dotflow/v1/inbound/email`. It accepts a normalized provider envelope, authenticates with a server-side bearer token, and reuses Groundhogg's native message ingestion, signed reply-token verification, threading and duplicate detection. It does not provision or call the paid Groundhogg relay. Provider-specific payload adapters and live provider delivery validation remain in development; see the [integration guide](docs/MCP-AND-ELEMENTOR-INTEGRATION.md) for configuration.
 
-See [MCP and Elementor Integration](docs/MCP-AND-ELEMENTOR-INTEGRATION.md) and the [Implementation Blueprint](docs/DOTFLOW-IMPLEMENTATION-PLAN.md).
+See [MCP and Elementor Integration](docs/MCP-AND-ELEMENTOR-INTEGRATION.md), the [Implementation Blueprint](docs/DOTFLOW-IMPLEMENTATION-PLAN.md) and the [phased delivery roadmap](docs/DELIVERY-ROADMAP.md).
 
 ## Elementor
 
