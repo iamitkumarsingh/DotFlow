@@ -46,7 +46,7 @@ class Update_Settings extends Ability {
 						'type'                 => 'object',
 						'additionalProperties' => true,
 						'description'          => __( 'Key/value pairs to update, keyed by setting id - see groundhogg/list-settings.', 'groundhogg' ),
-					],,
+					],
 				],
 			],
 
@@ -111,7 +111,7 @@ class Update_Settings extends Ability {
 			$settings_registry->update_option( $id, $value );
 
 			$after = $settings_registry->get_option( $id );
-
+			$short_id = preg_replace( '/^gh_/', '', $id );
 
 			$updated[] = [
 				'id'      => $short_id,
