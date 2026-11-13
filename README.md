@@ -4,14 +4,14 @@ DotFlow is a self-hosted WordPress CRM, email marketing and automation platform 
 
 **Product direction:** manage contacts, conversations, campaigns, automations, events and integrations in WordPress — with structured, permission-aware tools that AI agents can read and update.
 
-> **Development status:** early development. This branch is not a production release and must not be installed on a live site.
+> **Development status:** early development. This branch is not a production release and must not be installed on a live site. CI runs PHP syntax checks and WordPress/MariaDB integration tests on PHP 7.4, 8.2 and 8.3.
 
 ## What DotFlow is building
 
 - **CRM:** contacts, custom fields, tags, notes, consent and suppression.
 - **Campaigns:** email templates, broadcasts, delivery-provider adapters and reporting.
 - **Automation:** visual workflows with triggers, conditions, delays, actions and execution history.
-- **Conversations:** inbound and outbound message history, reply ingestion and contact timelines.
+- **Conversations:** inbound and outbound message history, independent provider-neutral inbound webhook, signed reply routing and contact timelines.
 - **Behaviour tracking:** consent-aware page, form and CTA events with attribution.
 - **Integrations:** Elementor, DotForm, HubSpot, WooCommerce, GA4, SMTP/email APIs and webhooks.
 - **AI/MCP management:** structured WordPress Abilities and REST contracts for safe discovery, reading and editing.
@@ -30,9 +30,13 @@ Initial DotFlow abilities include:
 | dotflow/list-messages | Read contact-scoped conversations; message bodies are opt-in |
 | dotflow/set-message-read-state | Mark an authorised conversation message read/unread |
 
-The inherited foundation also provides abilities for contacts, tags, campaigns, email templates, broadcasts, visual flows, settings and reports. Every operation remains subject to WordPress capabilities and per-contact permissions.
+The inherited foundation also provides abilities for contacts, notes, tags, campaigns, email templates, broadcasts, visual flows, settings and reports. Every operation remains subject to WordPress capabilities and per-contact permissions. All currently exposed AI mutation abilities emit privacy-minimised audit events; this is not a claim of platform-wide auditing.
 
 DotFlow does not expose SMTP passwords, IMAP passwords, API keys, webhook signing secrets or other credentials to AI clients. Sensitive keys in event payloads are redacted before storage.
+
+### Independent inbound email
+
+DotFlow includes an optional HTTPS webhook at `/wp-json/dotflow/v1/inbound/email`. It accepts a normalized provider envelope, authenticates with a server-side bearer token, and reuses Groundhogg's native message ingestion, signed reply-token verification, threading and duplicate detection. It does not provision or call the paid Groundhogg relay. Provider-specific payload adapters and live provider delivery validation remain in development; see the [integration guide](docs/MCP-AND-ELEMENTOR-INTEGRATION.md) for configuration.
 
 See [MCP and Elementor Integration](docs/MCP-AND-ELEMENTOR-INTEGRATION.md) and the [Implementation Blueprint](docs/DOTFLOW-IMPLEMENTATION-PLAN.md).
 
