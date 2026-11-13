@@ -45,6 +45,7 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		Bootstrap::register_step_type_schema();
 
 		$this->assertContains( 'dotflow_event', Step_Type_Schema::supported_types() );
+		$this->assertTrue( Step_Type_Schema::get_type_info( 'dotflow_event' )['buildable'] );
 
 		$schema = Step_Type_Schema::settings_schema( 'dotflow_event' );
 
