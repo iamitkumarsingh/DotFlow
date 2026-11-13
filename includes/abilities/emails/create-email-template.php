@@ -6,6 +6,7 @@ use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Email_Schema;
 use Groundhogg\Campaign;
 use Groundhogg\Email;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 use function Groundhogg\email_kses;
 use function Groundhogg\get_sender_profiles;
@@ -280,6 +281,12 @@ class Create_Email_Template extends Ability {
 				$email->create_relationship( new Campaign( $campaign_id ) );
 			}
 		}
+
+		Audit::record( 'email_template.created', 'email', $email->get_id(), [
+			'fields' => array_values( array_diff( array_keys( $data ), [ 'content', 'plain_text' ] ) ),
+			'meta_fields' => array_values( array_keys( $meta_updates ) ),
+			'campaign_ids' => ! empty( $input['campaigns'] ) ? wp_parse_id_list( $input['campaigns'] ) : [],
+		] );
 
 		// Mirrors Emails_Api::do_object_created_action() so anything hooked to the
 		// REST create path (cache busting, integrations, etc.) also fires here.
