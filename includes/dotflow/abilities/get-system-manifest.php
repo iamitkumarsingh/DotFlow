@@ -133,13 +133,13 @@ class Get_System_Manifest extends Ability {
 					'label'       => 'DotFlow domain events',
 					'status'      => 'implemented',
 					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction and administrator-only event history discovery.',
-					'abilities'   => [ 'dotflow/list-events' ],
+					'abilities'   => [ 'dotflow/list-events', 'dotflow/list-contact-events' ],
 				],
 				[
 					'id'          => 'conversations',
 					'label'       => 'Conversation history',
 					'status'      => 'implemented',
-					'description' => 'AI-readable inbound/outbound message history with contact-level permission checks and an authorised read/unread mutation.',
+					'description' => 'Contact-scoped activity event metadata and inbound/outbound message history with per-contact permission checks and an authorised read/unread mutation.',
 					'abilities'   => [ 'dotflow/list-messages', 'dotflow/set-message-read-state' ],
 				],
 				[
