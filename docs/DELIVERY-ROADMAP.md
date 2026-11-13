@@ -35,6 +35,7 @@ Scope:
 - Permission-scoped contact search/profile, custom fields, tags, notes, campaigns, workflows and conversation reads.
 - Explicitly bounded write operations for contact updates, notes, tags, custom fields and workflow enrolment.
 - Consistent schemas, validation, consent/opt-in handling, audit metadata and pagination.
+- PII-restricted users receive redacted contact fields and cannot read free-form notes or conversation bodies; contact activity remains metadata-only.
 - No direct SQL writes from AI clients.
 
 Exit gates:
