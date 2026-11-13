@@ -6,7 +6,7 @@ class DotFlow_REST_Routes_Tests extends GH_UnitTestCase {
 
 	public function test_read_only_discovery_routes_are_registered() {
 
-		Routes::register();
+		do_action( 'rest_api_init' );
 
 		$routes = rest_get_server()->get_routes();
 
