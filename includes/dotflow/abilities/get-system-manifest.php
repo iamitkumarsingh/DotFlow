@@ -69,6 +69,7 @@ class Get_System_Manifest extends Ability {
 							'pii_restrictions_enforced'         => [ 'type' => 'boolean' ],
 							'high_impact_mutations_marked_destructive' => [ 'type' => 'boolean' ],
 							'mutations_audited'                => [ 'type' => 'boolean' ],
+							'ai_mutations_audited'             => [ 'type' => 'boolean' ],
 							'audit_coverage'                   => [ 'type' => 'string' ],
 						],
 					],
@@ -174,7 +175,8 @@ class Get_System_Manifest extends Ability {
 				'pii_restrictions_enforced'         => true,
 				'high_impact_mutations_marked_destructive' => true,
 				'mutations_audited'                => false,
-				'audit_coverage'                   => 'Partial: DotFlow message read-state; contact create/upsert/update; tag create/update; custom-field-definition create/update; campaign create/upsert and association; and flow create/edit/activate/deactivate/publish/discard Abilities emit privacy-minimised audit events. Broadcast schedule/cancel, email-template create/update, and changed settings also emit privacy-minimised audit events. Contact-note creation, workflow enrolment, composed/template/test email sends, media uploads, extension installation, license activation and license status checks (successes and failures) are also audited. Deletion and remaining mutation paths still need coverage.',
+				'ai_mutations_audited'             => true,
+				'audit_coverage'                   => 'All currently exposed AI mutation Abilities emit privacy-minimised audit events, including contact, tag, custom-field, campaign, workflow, broadcast, email, settings, media, extension, license and conversation changes. Full platform coverage is not claimed: direct wp-admin and third-party plugin mutations are outside this audit trail, and no generic deletion ability is exposed.',
 			],
 		];
 	}
