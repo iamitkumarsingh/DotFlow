@@ -152,6 +152,41 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$this->assertStringNotContainsString( 'private-profile@example.test', wp_json_encode( $result ) );
 	}
 
+	public function test_pii_restricted_users_cannot_read_free_form_contact_notes() {
+
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
+		$contact_id = self::factory()->contacts->create();
+		$note_reflection = new ReflectionClass( \\Groundhogg\\Abilities\\Contacts\\Add_Contact_Note::class );
+		$note_ability = $note_reflection->newInstanceWithoutConstructor();
+		$created = $note_ability->__invoke( [
+			'contact_id' => $contact_id,
+			'content'    => 'Confidential patient details in a free-form note.',
+		] );
+		$this->assertNotWPError( $created );
+
+		$user = get_userdata( $user_id );
+		$user->add_cap( Pii::CAP, false );
+		wp_set_current_user( $user_id );
+		$this->assertTrue( Pii::is_restricted() );
+
+		$profile = $this->ability()->__invoke( [
+			'contact_id'    => $contact_id,
+			'include_notes' => true,
+		] );
+
+		$this->assertWPError( $profile );
+		$this->assertSame( 'groundhogg_pii_restricted', $profile->get_error_code() );
+
+		$list_reflection = new ReflectionClass( \\Groundhogg\\Abilities\\Contacts\\List_Contact_Notes::class );
+		$list_ability = $list_reflection->newInstanceWithoutConstructor();
+		$notes = $list_ability->__invoke( [ 'contact_id' => $contact_id ] );
+
+		$this->assertWPError( $notes );
+		$this->assertSame( 'groundhogg_pii_restricted', $notes->get_error_code() );
+	}
+
 	public function test_profile_rejects_a_missing_contact() {
 
 		$this->admin_user();
