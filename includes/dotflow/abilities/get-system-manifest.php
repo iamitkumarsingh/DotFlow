@@ -65,6 +65,9 @@ class Get_System_Manifest extends Ability {
 						'properties' => [
 							'private_data_requires_capability' => [ 'type' => 'boolean' ],
 							'credentials_exposed_to_ai'        => [ 'type' => 'boolean' ],
+							'sensitive_values_always_redacted' => [ 'type' => 'boolean' ],
+							'pii_restrictions_enforced'         => [ 'type' => 'boolean' ],
+							'high_impact_mutations_marked_destructive' => [ 'type' => 'boolean' ],
 							'mutations_audited'                => [ 'type' => 'boolean' ],
 							'audit_coverage'                   => [ 'type' => 'string' ],
 						],
@@ -167,6 +170,9 @@ class Get_System_Manifest extends Ability {
 			'data_policy'    => [
 				'private_data_requires_capability' => true,
 				'credentials_exposed_to_ai'        => false,
+				'sensitive_values_always_redacted' => true,
+				'pii_restrictions_enforced'         => true,
+				'high_impact_mutations_marked_destructive' => true,
 				'mutations_audited'                => false,
 				'audit_coverage'                   => 'Partial: DotFlow message read-state; contact create/upsert/update; tag create/update; custom-field-definition create/update; campaign create/upsert and association; and flow create/edit/activate/deactivate/publish/discard Abilities emit privacy-minimised audit events. Broadcast schedule/cancel, email-template create/update, and changed settings also emit privacy-minimised audit events. Contact-note creation, workflow enrolment, composed/template/test email sends, media uploads, extension installation and license activation are also audited. Deletion and remaining mutation paths still need coverage.',
 			],
