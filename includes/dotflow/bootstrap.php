@@ -16,6 +16,7 @@ use Groundhogg\DotFlow\Events\Store;
 use Groundhogg\DotFlow\REST\Routes;
 use Groundhogg\DotFlow\Inbound\Inbox_Addresses;
 use Groundhogg\DotFlow\Inbound\Message_Events;
+use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -35,6 +36,7 @@ final class Bootstrap {
 	public static function register() {
 		spl_autoload_register( [ __CLASS__, 'autoload' ], true, true );
 		add_action( 'groundhogg/init/v2', [ __CLASS__, 'init' ], 10 );
+		add_action( 'groundhogg/steps/init', [ __CLASS__, 'register_steps' ], 10, 1 );
 	}
 
 	/**
@@ -117,6 +119,19 @@ final class Bootstrap {
 	public static function register_database( $manager ) {
 		if ( ! $manager->dotflow_events ) {
 			$manager->dotflow_events = new DotFlow_Events_DB();
+		}
+	}
+
+	/**
+	 * Register DotFlow's native workflow benchmark without touching paid step types.
+	 *
+	 * @param object $manager Groundhogg step manager.
+	 * @return void
+	 */
+	public static function register_steps( $manager ) {
+
+		if ( is_object( $manager ) && method_exists( $manager, 'add_step' ) ) {
+			$manager->add_step( new DotFlow_Event() );
 		}
 	}
 
