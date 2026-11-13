@@ -13,7 +13,7 @@ use function Groundhogg\get_db;
 /**
  * Returns a permission-scoped CRM profile with explicitly requested context.
  *
- * Notes and activity are opt-in expansions. Event payloads are never included.
+ * Notes and activity are opt-in expansions. Notes require both view_notes and PII access; event payloads are never included.
  */
 class Get_Contact_Profile extends Ability {
 
