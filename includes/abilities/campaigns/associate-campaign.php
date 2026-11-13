@@ -7,6 +7,7 @@ use Groundhogg\Broadcast;
 use Groundhogg\Campaign;
 use Groundhogg\Email;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -108,6 +109,10 @@ class Associate_Campaign extends Ability {
 			return new WP_Error( 'groundhogg_invalid_object', sprintf( __( 'No %s exists with that id.', 'groundhogg' ), $input['object_type'] ) );
 		}
 
+		$previous_campaign_ids = array_map( function ( $related ) {
+			return absint( $related->get_id() );
+		}, $object->get_related_objects( 'campaign' ) );
+
 		$action = $input['action'] ?? 'add';
 
 		if ( $action === 'remove' ) {
@@ -120,9 +125,24 @@ class Associate_Campaign extends Ability {
 			return $related->get_id();
 		}, $object->get_related_objects( 'campaign' ) );
 
+		$campaign_ids = array_values( array_unique( array_map( 'absint', $campaign_ids ) ) );
+
+		if ( $previous_campaign_ids !== $campaign_ids ) {
+			Audit::record(
+				'campaign.association.' . ( $action === 'remove' ? 'removed' : 'added' ),
+				$input['object_type'],
+				$object->get_id(),
+				[
+					'campaign_id' => $campaign->get_id(),
+					'campaign_ids_before' => $previous_campaign_ids,
+					'campaign_ids_after'  => $campaign_ids,
+				]
+			);
+		}
+
 		return [
 			'associated'   => $action !== 'remove',
-			'campaign_ids' => array_values( array_unique( array_map( 'absint', $campaign_ids ) ) ),
+			'campaign_ids' => $campaign_ids,
 		];
 	}
 }
