@@ -148,7 +148,7 @@ class DotFlow_Event extends Benchmark {
 			'source' => [
 				'default'  => '',
 				'sanitize' => function ( $value ) {
-					return sanitize_key( (string) $value );
+					return substr( sanitize_key( (string) $value ), 0, 64 );
 				},
 			],
 		];
