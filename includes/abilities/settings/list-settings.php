@@ -109,7 +109,7 @@ class List_Settings extends Ability {
 					$schema['default'] = $settings_registry->get_redacted_value( $id, $schema['default'], false );
 				}
 
-				$schema['description'] = trim( (string) $schema['description'] . ' ' . __( 'Sensitive setting: values are always redacted in AI responses.', 'groundhogg' ) );
+				$schema['description'] = __( 'Sensitive setting. Its value and default are always redacted in AI responses.', 'groundhogg' );
 			}
 
 			$short_id  = preg_replace( '/^gh_/', '', $id );
