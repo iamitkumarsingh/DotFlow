@@ -427,6 +427,7 @@ class Plugin {
 		require __DIR__ . '/custom-object-type.php';
 		require __DIR__ . '/cli/bootstrap.php';
 		require __DIR__ . '/ai/actions.php';
+		require __DIR__ . '/dotflow/bootstrap.php';
 	}
 }
 
