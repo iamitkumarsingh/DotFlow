@@ -14,7 +14,7 @@ class Get_System_Manifest extends Ability {
 
 	protected const NAME       = 'dotflow/get-system-manifest';
 	protected const CATEGORY   = 'dotflow-platform';
-	protected const CAPABILITY = 'manage_options';
+	protected const CAPABILITY = 'read';
 
 	protected const READONLY   = true;
 	protected const IDEMPOTENT = true;
@@ -37,6 +37,7 @@ class Get_System_Manifest extends Ability {
 					'api_version'    => [ 'type' => 'string' ],
 					'foundation'     => [ 'type' => 'string' ],
 					'api_base'       => [ 'type' => 'string' ],
+					'rest_namespace' => [ 'type' => 'string' ],
 					'elementor'      => [
 						'type'       => 'object',
 						'properties' => [
@@ -82,7 +83,8 @@ class Get_System_Manifest extends Ability {
 			'plugin_version' => defined( 'DOTFLOW_VERSION' ) ? DOTFLOW_VERSION : '0.1.0-dev',
 			'api_version'    => defined( 'DOTFLOW_API_VERSION' ) ? DOTFLOW_API_VERSION : 'v1',
 			'foundation'     => 'Groundhogg GPLv3-derived WordPress plugin',
-			'api_base'       => untrailingslashit( rest_url( 'dotflow/v1' ) ),
+			'api_base'       => untrailingslashit( rest_url() ),
+			'rest_namespace' => 'dotflow/v1 (planned; not yet registered)',
 			'elementor'      => [
 				'available' => (bool) $elementor_available,
 				'version'   => (string) $elementor_version,
@@ -95,7 +97,7 @@ class Get_System_Manifest extends Ability {
 					'label'       => 'Contacts and CRM',
 					'status'      => 'inherited',
 					'description' => 'Groundhogg contact records, custom fields, tags, notes, search and contact permissions.',
-					'abilities'   => [ 'groundhogg/search-contacts', 'groundhogg/get-contact', 'groundhogg/create-contact', 'groundhogg/update-contact', 'groundhogg/list-tags', 'groundhogg/create-tag' ],
+					'abilities'   => [ 'groundhogg/search-contacts', 'groundhogg/get-contact', 'groundhogg/create-contact', 'groundhogg/update-contact', 'groundhogg/list-tags', 'groundhogg/create-tag', 'groundhogg/describe-table', 'groundhogg/query-table' ],
 				],
 				[
 					'id'          => 'campaigns',
