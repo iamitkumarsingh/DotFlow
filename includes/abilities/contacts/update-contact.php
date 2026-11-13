@@ -8,6 +8,7 @@ use Groundhogg\Abilities\Schemas\Contact_Schema;
 use Groundhogg\Abilities\Traits\Has_Optin_Status;
 use Groundhogg\Abilities\Traits\Has_Owner_Validation;
 use Groundhogg\Preferences;
+use Groundhogg\Pii;
 use Groundhogg\Submission;
 use WP_Error;
 use function Groundhogg\get_contactdata;
@@ -122,6 +123,23 @@ class Update_Contact extends Ability {
 		// at all; this is the same per-object check create-contact's upsert path and
 		// the REST API's update_single() both use - a sales rep with edit_contacts
 		// isn't necessarily allowed to edit every contact (team scoping).
+		if ( Pii::is_restricted() ) {
+
+			foreach ( [ 'email', 'first_name', 'last_name' ] as $pii_field ) {
+				if ( array_key_exists( $pii_field, $input ) ) {
+					return Pii::restricted_error( __( 'Your account is not allowed to change a contact\'s personal identity fields.', 'groundhogg' ) );
+				}
+			}
+
+			if ( ! empty( $input['meta'] ) && is_array( $input['meta'] ) ) {
+				foreach ( array_keys( $input['meta'] ) as $meta_key ) {
+					if ( ! Pii::can_expose_meta_key( sanitize_key( $meta_key ) ) ) {
+						return Pii::restricted_error( __( 'Your account is not allowed to change this personal or unclassified custom field.', 'groundhogg' ) );
+					}
+				}
+			}
+		}
+
 		if ( ! current_user_can( 'edit_contact', $contact ) ) {
 			return new WP_Error(
 				'groundhogg_cannot_edit_contact',
