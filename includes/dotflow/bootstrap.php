@@ -78,7 +78,7 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function register_abilities() {
-		Abilities::add_ability( Get_System_Manifest::class );
+		Abilities::add_ability( Get_System_Manifest::class );\n\t\tAbilities::add_ability( List_Published_Forms::class );
 	}
 
 	/**
