@@ -24,6 +24,9 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		remove_action( 'dotflow/event', [ $benchmark, 'reset' ], 97 );
 		remove_action( 'dotflow/event', [ $benchmark, 'setup' ], 98 );
 		remove_action( 'dotflow/event', [ $benchmark, 'complete' ], 99 );
+		remove_filter( 'groundhogg/steps/benchmarks', [ $benchmark, 'register' ] );
+		remove_action( 'wp_enqueue_scripts', [ $benchmark, 'frontend_scripts' ] );
+		remove_action( 'admin_enqueue_scripts', [ $benchmark, 'admin_scripts' ] );
 	}
 
 	public function test_event_benchmark_schema_accepts_only_valid_event_names_and_sources() {
