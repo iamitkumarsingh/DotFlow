@@ -32,7 +32,7 @@ class DotFlow_REST_Routes_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'v1', $schema['api_version'] );
 		$this->assertFalse( $schema['write_policy']['arbitrary_sql'] );
 		$this->assertFalse( $schema['write_policy']['credential_readback'] );
-		$this->assertSame( 'Not exposed in this initial API version.', $schema['write_policy']['rest_mutations'] );
+		$this->assertSame( 'No generic REST CRUD. Only the token-authenticated provider-neutral inbound email endpoint is writable.', $schema['write_policy']['rest_mutations'] );
 		$this->assertContains( 'groundhogg/update-contact', $schema['objects']['contact']['write_abilities'] );
 	}
 }
