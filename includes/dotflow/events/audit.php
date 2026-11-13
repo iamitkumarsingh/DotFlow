@@ -25,8 +25,9 @@ final class Audit {
 		$event = new Event( 'ai.mutation.completed', [
 			'action'      => preg_replace( '/[^a-z0-9._-]/', '', strtolower( sanitize_text_field( $action ) ) ),
 			'object_type' => sanitize_key( $object_type ),
-			'object_id'   => absint( $object_id ),
-			'changes'     => $changes,
+			'object_id'      => absint( $object_id ),
+			'actor_user_id'  => get_current_user_id(),
+			'changes'        => $changes,
 		], sanitize_key( $source ) );
 
 		return Dispatcher::dispatch( $event );
