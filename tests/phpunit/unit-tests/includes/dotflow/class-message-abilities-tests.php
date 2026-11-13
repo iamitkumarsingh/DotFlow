@@ -63,3 +63,5 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 				$db->delete( $message_id );
 			}
 		}
+	}
+}
