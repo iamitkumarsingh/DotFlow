@@ -123,9 +123,9 @@ class Get_System_Manifest extends Ability {
 				[
 					'id'          => 'domain-events',
 					'label'       => 'DotFlow domain events',
-					'status'      => 'foundation',
-					'description' => 'Typed in-process event envelopes and generic/event-specific WordPress hooks. Durable event storage and event-query abilities are not yet implemented.',
-					'abilities'   => [],
+					'status'      => 'implemented',
+					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction and administrator-only event history discovery.',
+					'abilities'   => [ 'dotflow/list-events' ],
 				],
 				[
 					'id'          => 'messaging',
