@@ -182,6 +182,18 @@ class Add_Custom_Field extends Ability {
 
 		self::save_properties( $all );
 
+		Audit::record(
+			'custom_field.created',
+			'custom_field',
+			0,
+			[
+				'field_id'   => $field['id'],
+				'field_name' => $field['name'],
+				'field_type' => $field['type'],
+				'pii'        => ! empty( $field['pii'] ),
+			]
+		);
+
 		return [
 			'field' => Property_Field_Schema::transform( $field ),
 		];
