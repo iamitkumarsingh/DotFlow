@@ -6,6 +6,7 @@ use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Step_Type_Schema;
 use Groundhogg\Campaign;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -179,6 +180,12 @@ class Create_Flow extends Ability {
 				$funnel->create_relationship( new Campaign( $campaign_id ) );
 			}
 		}
+
+		Audit::record( 'flow.created', 'flow', $funnel->get_id(), [
+			'status' => 'inactive',
+			'step_count' => count( $steps_out ),
+			'campaign_ids' => ! empty( $input['campaigns'] ) ? wp_parse_id_list( $input['campaigns'] ) : [],
+		] );
 
 		// Mirrors the REST create path's own action for other code hooking flow
 		// creation (cache busting, integrations, etc.).
