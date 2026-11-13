@@ -5,6 +5,8 @@ namespace Groundhogg\DotFlow;
 use Groundhogg\Abilities\Abilities;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
 use Groundhogg\DotFlow\Abilities\List_Events;
+use Groundhogg\DotFlow\Abilities\List_Messages;
+use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
 use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
@@ -100,7 +102,9 @@ final class Bootstrap {
 	public static function register_abilities() {
 		Abilities::add_ability( Get_System_Manifest::class );
 		Abilities::add_ability( List_Published_Forms::class );
-		Abilities::add_ability( List_Events::class );\n\t\tAbilities::add_ability( List_Messages::class );\n\t\tAbilities::add_ability( Set_Message_Read_State::class );
+		Abilities::add_ability( List_Events::class );
+		Abilities::add_ability( List_Messages::class );
+		Abilities::add_ability( Set_Message_Read_State::class );
 	}
 
 	/**
