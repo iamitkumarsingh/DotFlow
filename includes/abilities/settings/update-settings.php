@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Settings;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Plugin;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -128,6 +129,19 @@ class Update_Settings extends Ability {
 				'value'   => $settings_registry->get_redacted_value( $id, $after, $requested ),
 				'changed' => $before !== $after,
 			];
+		}
+
+		$changed_ids = array_values( array_map( function ( $item ) {
+			return $item['id'];
+		}, array_filter( $updated, function ( $item ) {
+			return $item['changed'];
+		} ) ) );
+
+		if ( ! empty( $changed_ids ) ) {
+			Audit::record( 'settings.updated', 'settings', 0, [
+				'changed_setting_ids' => $changed_ids,
+				'changed_count' => count( $changed_ids ),
+			] );
 		}
 
 		return [
