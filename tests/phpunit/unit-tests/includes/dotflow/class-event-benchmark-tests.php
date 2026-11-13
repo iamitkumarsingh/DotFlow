@@ -27,7 +27,7 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 			}
 		};
 
-		Bootstrap::register_steps( $manager );
+		do_action( 'groundhogg/steps/init', $manager );
 
 		$this->assertArrayHasKey( 'dotflow_event', $manager->steps );
 		$this->assertInstanceOf( DotFlow_Event::class, $manager->steps['dotflow_event'] );
