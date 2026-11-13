@@ -31,7 +31,8 @@ class Install_Extension extends Ability {
 	protected const CATEGORY   = 'groundhogg-extensions';
 	protected const CAPABILITY = 'install_plugins';
 
-	protected const IDEMPOTENT = true;
+	protected const DESTRUCTIVE = true;
+	protected const IDEMPOTENT  = true;
 
 	public function can_execute( $input = null ) {
 		return parent::can_execute( $input ) && current_user_can( 'activate_plugins' );
