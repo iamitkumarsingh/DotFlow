@@ -90,12 +90,12 @@ class Imap_Inbox {
 	 * The host and port are configuration values, not trusted IMAP flags. Validate
 	 * them before interpolating either into the mailbox path.
 	 *
-	 * @return string|\\WP_Error
+	 * @return string|\WP_Error
 	 */
 	protected function mailbox_path() {
 
 		$host = trim( (string) $this->get_mail_server() );
-		$port = absint( $this->get_port() );
+		$port = filter_var( $this->get_port(), FILTER_VALIDATE_INT, [ 'options' => [ 'min_range' => 1, 'max_range' => 65535 ] ] );
 
 		$is_ipv4 = filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 		$is_ipv6 = filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
@@ -103,11 +103,11 @@ class Imap_Inbox {
 		if ( $is_ipv6 ) {
 			$host = '[' . $host . ']';
 		} elseif ( ! $is_ipv4 && ! preg_match( '/\\A(?=.{1,253}\\z)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\\z/i', $host ) ) {
-			return new \\WP_Error( 'imap_invalid_host', __( 'The configured IMAP server host is invalid.', 'groundhogg' ) );
+			return new \WP_Error( 'imap_invalid_host', __( 'The configured IMAP server host is invalid.', 'groundhogg' ) );
 		}
 
 		if ( $port < 1 || $port > 65535 ) {
-			return new \\WP_Error( 'imap_invalid_port', __( 'The configured IMAP server port is invalid.', 'groundhogg' ) );
+			return new \WP_Error( 'imap_invalid_port', __( 'The configured IMAP server port is invalid.', 'groundhogg' ) );
 		}
 
 		// Deliberately omit /novalidate-cert: certificate and hostname verification
@@ -118,7 +118,7 @@ class Imap_Inbox {
 	/**
 	 * Test the bounce inbox connection.
 	 *
-	 * @return bool|\\WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function do_test_connection() {
 		if ( ! is_admin() || ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( get_request_var( '_wpnonce' ) ) ) {
@@ -139,7 +139,7 @@ class Imap_Inbox {
 	/**
 	 * Test the bounce inbox connection using validated TLS.
 	 *
-	 * @return bool|\\WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function test_connection() {
 
@@ -150,7 +150,7 @@ class Imap_Inbox {
 		}
 
 		if ( ! function_exists( 'imap_open' ) ) {
-			return new \\WP_Error( 'imap_extension_missing', __( 'The PHP IMAP extension is required to test this connection.', 'groundhogg' ) );
+			return new \WP_Error( 'imap_extension_missing', __( 'The PHP IMAP extension is required to test this connection.', 'groundhogg' ) );
 		}
 
 		$mailbox = $this->mailbox_path();
@@ -163,14 +163,14 @@ class Imap_Inbox {
 			$connection = @imap_open( $mailbox, (string) $this->inbox, (string) $this->password, OP_READONLY );
 
 			if ( ! $connection ) {
-				return new \\WP_Error( 'imap_connection_failed', __( 'A secure connection to the configured IMAP server could not be established. Check the host, port, credentials and TLS certificate.', 'groundhogg' ) );
+				return new \WP_Error( 'imap_connection_failed', __( 'A secure connection to the configured IMAP server could not be established. Check the host, port, credentials and TLS certificate.', 'groundhogg' ) );
 			}
 
 			imap_close( $connection );
 
 			return true;
-		} catch ( \\Throwable $error ) {
-			return new \\WP_Error( 'imap_connection_failed', __( 'A secure connection to the configured IMAP server could not be established.', 'groundhogg' ) );
+		} catch ( \Throwable $error ) {
+			return new \WP_Error( 'imap_connection_failed', __( 'A secure connection to the configured IMAP server could not be established.', 'groundhogg' ) );
 		}
 	}
 
@@ -219,7 +219,7 @@ class Imap_Inbox {
 
 			// Contact email is validated first; additionally escape IMAP quoted-string
 			// delimiters before placing it into the search expression.
-			$search_email = str_replace( [ '\\\\', '"' ], [ '\\\\\\\\', '\\\\"' ], $email );
+			$search_email = addcslashes( $email, "\\\\\\\"" );
 			$criteria     = sprintf( 'OR FROM "%s" TO "%s"', $search_email, $search_email );
 			$uids         = @imap_search( $connection, $criteria, SE_UID );
 
@@ -249,7 +249,7 @@ class Imap_Inbox {
 			}
 
 			return $messages;
-		} catch ( \\Throwable $error ) {
+		} catch ( \Throwable $error ) {
 			return [];
 		} finally {
 			if ( $connection ) {
