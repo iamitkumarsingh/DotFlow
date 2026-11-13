@@ -73,7 +73,7 @@ class List_Event_Types extends Ability {
 			return new WP_Error( 'dotflow_event_store_unavailable', __( 'The DotFlow event store is not available.', 'groundhogg' ) );
 		}
 
-		$search = isset( $input['search'] ) ? sanitize_text_field( (string) $input['search'] ) : '';
+		$search = isset( $input['search'] ) ? substr( sanitize_text_field( (string) $input['search'] ), 0, 100 ) : '';
 		$limit  = isset( $input['limit'] ) ? absint( $input['limit'] ) : 50;
 		$limit  = max( 1, min( 100, $limit ) );
 
@@ -94,7 +94,20 @@ class List_Event_Types extends Ability {
 			$limit
 		);
 
-		$rows = $wpdb->get_results( $sql, ARRAY_A );
+		$count_sql = $wpdb->prepare(
+			"SELECT COUNT(*) FROM (
+				SELECT event_name, source FROM {$table}
+				WHERE event_name NOT LIKE %s
+				AND ( event_name LIKE %s OR source LIKE %s )
+				GROUP BY event_name, source
+			) AS observed_event_types",
+			'ai.mutation.%',
+			$like,
+			$like
+		);
+
+		$total = absint( $wpdb->get_var( $count_sql ) );
+		$rows  = $wpdb->get_results( $sql, ARRAY_A );
 
 		if ( ! is_array( $rows ) ) {
 			return new WP_Error( 'dotflow_event_types_query_failed', __( 'Observed DotFlow event types could not be loaded.', 'groundhogg' ) );
@@ -111,7 +124,7 @@ class List_Event_Types extends Ability {
 
 		return [
 			'event_types' => $event_types,
-			'total'       => count( $event_types ),
+			'total'       => $total,
 		];
 	}
 }
