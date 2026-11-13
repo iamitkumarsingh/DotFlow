@@ -62,14 +62,14 @@ Exit gates:
 
 ## Phase 4 — Campaigns, workflows and event automation
 
-**Status: inherited CRM automation abilities available; durable idempotent event dispatch is implemented; workflow-trigger integration remains to be built and validated.**
+**Status: inherited CRM automation abilities and the DotFlow Event workflow benchmark are implemented; end-to-end enqueue, retry and simulation validation continues.**
 
 Scope:
 - Connect consent-aware form, page, CTA and CRM events to workflow triggers.
 - Typed workflow editing, validation, simulation, publishing and enrolment.
 - Campaign/broadcast scheduling, cancellation, approval annotations and delivery outcomes.
 - Durable event dispatch: listeners run only after a new event row is committed; duplicate source/event IDs are acknowledged without re-firing listeners.
-- Next: connect selected DotFlow events to typed workflow benchmarks with bounded event matching and observable enqueue outcomes.
+- A native `dotflow_event` benchmark matches a configured event name and optional source, requires a linked contact, and passes only event name/source/ID into workflow args. Arbitrary event payloads and AI mutation audit events are excluded.
 
 Exit gates:
 - Duplicate and out-of-order event tests.
