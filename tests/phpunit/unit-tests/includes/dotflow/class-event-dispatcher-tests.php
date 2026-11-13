@@ -39,14 +39,20 @@ class DotFlow_Event_Dispatcher_Tests extends GH_UnitTestCase {
 		$handled  = 0;
 		$duplicate = 0;
 
-		$recorded_callback = function () use ( &$recorded ) {
-			$recorded++;
+		$recorded_callback = function ( $record_id, $dispatched_event ) use ( &$recorded, $event_id ) {
+			if ( $dispatched_event instanceof Event && $dispatched_event->get_id() === $event_id ) {
+				$recorded++;
+			}
 		};
-		$event_callback = function () use ( &$handled ) {
-			$handled++;
+		$event_callback = function ( $dispatched_event ) use ( &$handled, $event_id ) {
+			if ( $dispatched_event instanceof Event && $dispatched_event->get_id() === $event_id ) {
+				$handled++;
+			}
 		};
-		$duplicate_callback = function () use ( &$duplicate ) {
-			$duplicate++;
+		$duplicate_callback = function ( $record_id, $dispatched_event ) use ( &$duplicate, $event_id ) {
+			if ( $dispatched_event instanceof Event && $dispatched_event->get_id() === $event_id ) {
+				$duplicate++;
+			}
 		};
 
 		add_action( 'dotflow/event/recorded', $recorded_callback, 10, 2 );
