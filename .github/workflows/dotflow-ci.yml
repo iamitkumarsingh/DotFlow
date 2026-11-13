@@ -45,7 +45,6 @@ jobs:
         image: mariadb:10.11
         env:
           MARIADB_ROOT_PASSWORD: root
-          MARIADB_DATABASE: wordpress_test
         ports:
           - 3306:3306
         options: >-
