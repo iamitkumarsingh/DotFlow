@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Extensions;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\License_Schema;
 use Groundhogg\License_Manager;
+use WP_Error;
 use Groundhogg\DotFlow\Events\Audit;
 
 /**
@@ -18,7 +19,8 @@ class Activate_License extends Ability {
 	protected const CATEGORY   = 'groundhogg-extensions';
 	protected const CAPABILITY = 'manage_gh_licenses';
 
-	protected const IDEMPOTENT = true;
+	protected const DESTRUCTIVE = true;
+	protected const IDEMPOTENT  = true;
 
 	protected function get_args(): array {
 
