@@ -65,7 +65,8 @@ Elementor MCP edits page layouts and widget settings. WordPress Abilities/MCP ed
 
 - DotFlow bootstrap and typed domain event envelope.
 - Durable event table registered with Groundhogg's database manager.
-- Source-scoped event idempotency and recursive sensitive-key redaction.
+- Source-scoped event idempotency and recursive sensitive-key redaction; duplicate event IDs do not re-fire downstream listeners.
+- Native `dotflow_event` workflow benchmark for contact-linked events, with exact event-name/source matching and no arbitrary payload forwarding.
 - Permission-scoped WordPress Abilities for contact profiles, event history, published forms and conversation access; inherited typed CRM, campaign, email and workflow abilities remain available.
 - Privacy-minimised audit events for every currently exposed AI mutation ability; platform-wide wp-admin/third-party mutation auditing is not claimed.
 - Native Elementor form widget with active-form revalidation.
