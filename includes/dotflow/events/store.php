@@ -35,9 +35,26 @@ final class Store {
 	 */
 	public static function record( Event $event ) {
 
+		$result = self::record_with_status( $event );
+
+		return $result ? $result['id'] : false;
+	}
+
+	/**
+	 * Persist an event and distinguish a newly inserted event from a duplicate.
+	 *
+	 * This lets dispatchers make idempotency meaningful for downstream listeners,
+	 * not only for the database row. A duplicate delivery must not enqueue the
+	 * same automation trigger again.
+	 *
+	 * @param Event $event Event envelope.
+	 * @return array|false { id: int, inserted: bool } or false on failure.
+	 */
+	public static function record_with_status( Event $event ) {
+
 		global $wpdb;
 
-		$db = \Groundhogg\get_db( 'dotflow_events' );
+		$db = \\Groundhogg\\get_db( 'dotflow_events' );
 
 		if ( ! $db ) {
 			return false;
@@ -50,7 +67,7 @@ final class Store {
 			return false;
 		}
 
-		$table    = $db->get_table_name();
+		$table = $db->get_table_name();
 
 		$existing_id = $wpdb->get_var(
 			$wpdb->prepare(
@@ -61,7 +78,10 @@ final class Store {
 		);
 
 		if ( $existing_id ) {
-			return absint( $existing_id );
+			return [
+				'id'       => absint( $existing_id ),
+				'inserted' => false,
+			];
 		}
 
 		$payload = self::redact_sensitive_values( $event->get_payload() );
@@ -79,8 +99,8 @@ final class Store {
 			$occurred_timestamp = time();
 		}
 
-		$contact_id = isset( $payload['contact_id'] ) ? absint( $payload['contact_id'] ) : 0;
-		$object_id  = isset( $payload['object_id'] ) ? absint( $payload['object_id'] ) : 0;
+		$contact_id  = isset( $payload['contact_id'] ) ? absint( $payload['contact_id'] ) : 0;
+		$object_id   = isset( $payload['object_id'] ) ? absint( $payload['object_id'] ) : 0;
 		$object_type = isset( $payload['object_type'] ) ? sanitize_key( $payload['object_type'] ) : '';
 
 		$inserted_id = $db->insert( [
@@ -97,7 +117,10 @@ final class Store {
 		] );
 
 		if ( $inserted_id ) {
-			return absint( $inserted_id );
+			return [
+				'id'       => absint( $inserted_id ),
+				'inserted' => true,
+			];
 		}
 
 		// A concurrent request may have inserted the same event after our first lookup.
@@ -109,7 +132,10 @@ final class Store {
 			)
 		);
 
-		return $existing_id ? absint( $existing_id ) : false;
+		return $existing_id ? [
+			'id'       => absint( $existing_id ),
+			'inserted' => false,
+		] : false;
 	}
 
 	/**
