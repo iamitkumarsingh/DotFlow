@@ -13,6 +13,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 	protected $reply_filter;
 	protected $token_filter;
 	protected $https_value;
+	protected $server_port_value;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -45,8 +46,10 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		add_filter( 'dotflow/inbound/webhook_token', $this->token_filter );
 
 		Inbox_Addresses::register();
-		$this->https_value = $_SERVER['HTTPS'] ?? null;
-		$_SERVER['HTTPS'] = 'on';
+		$this->https_value      = $_SERVER['HTTPS'] ?? null;
+		$this->server_port_value = $_SERVER['SERVER_PORT'] ?? null;
+		$_SERVER['HTTPS']       = 'on';
+		$_SERVER['SERVER_PORT'] = '443';
 
 		\Groundhogg\DotFlow\Events\Store::maybe_install();
 	}
@@ -69,6 +72,11 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 			unset( $_SERVER['HTTPS'] );
 		} else {
 			$_SERVER['HTTPS'] = $this->https_value;
+		}
+		if ( null === $this->server_port_value ) {
+			unset( $_SERVER['SERVER_PORT'] );
+		} else {
+			$_SERVER['SERVER_PORT'] = $this->server_port_value;
 		}
 
 		parent::tearDown();
@@ -98,6 +106,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'dotflow_inbound_unauthorized', $denied->get_error_code() );
 
 		$_SERVER['HTTPS'] = 'off';
+		$_SERVER['SERVER_PORT'] = '80';
 		$request->set_header( 'x-dotflow-token', 'test-webhook-token-0123456789-abcdef' );
 		$insecure = Inbound_Email_Webhook::authorize( $request );
 
