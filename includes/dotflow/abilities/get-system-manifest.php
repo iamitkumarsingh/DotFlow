@@ -174,7 +174,7 @@ class Get_System_Manifest extends Ability {
 				'pii_restrictions_enforced'         => true,
 				'high_impact_mutations_marked_destructive' => true,
 				'mutations_audited'                => false,
-				'audit_coverage'                   => 'Partial: DotFlow message read-state; contact create/upsert/update; tag create/update; custom-field-definition create/update; campaign create/upsert and association; and flow create/edit/activate/deactivate/publish/discard Abilities emit privacy-minimised audit events. Broadcast schedule/cancel, email-template create/update, and changed settings also emit privacy-minimised audit events. Contact-note creation, workflow enrolment, composed/template/test email sends, media uploads, extension installation and license activation are also audited. Deletion and remaining mutation paths still need coverage.',
+				'audit_coverage'                   => 'Partial: DotFlow message read-state; contact create/upsert/update; tag create/update; custom-field-definition create/update; campaign create/upsert and association; and flow create/edit/activate/deactivate/publish/discard Abilities emit privacy-minimised audit events. Broadcast schedule/cancel, email-template create/update, and changed settings also emit privacy-minimised audit events. Contact-note creation, workflow enrolment, composed/template/test email sends, media uploads, extension installation, license activation and license status refreshes are also audited. Deletion and remaining mutation paths still need coverage.',
 			],
 		];
 	}
