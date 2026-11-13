@@ -2,6 +2,7 @@
 
 use Groundhogg\DotFlow\Abilities\List_Messages;
 use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
+use Groundhogg\Pii;
 use function Groundhogg\get_db;
 
 class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
