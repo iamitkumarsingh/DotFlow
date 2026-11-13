@@ -49,7 +49,7 @@ class Activate_License extends Ability {
 		$result = License_Manager::activate_license( $license_key );
 
 		if ( is_wp_error( $result ) ) {
-			return $result;
+			return new WP_Error( 'groundhogg_license_activation_failed', __( 'License activation failed. Review the licensing status in the WordPress admin.', 'groundhogg' ) );
 		}
 
 		Audit::record( 'license.activated', 'license', 0, [
