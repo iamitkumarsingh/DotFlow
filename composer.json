@@ -1,12 +1,16 @@
 {
-  "name": "groundhogg/groundhogg",
-  "description": "simplify consolidate and automate your sales and marketing.",
+  "name": "dotflow/dotflow",
+  "description": "AI-powered CRM, email marketing and automation for WordPress, derived from Groundhogg under GPLv3.",
   "minimum-stability": "stable",
-  "license": "GPLv3",
+  "license": "GPL-3.0-or-later",
   "authors": [
     {
+      "name": "DotFlow contributors"
+    },
+    {
       "name": "Groundhogg Inc.",
-      "email": "info@groundhogg.io"
+      "email": "info@groundhogg.io",
+      "role": "Original authors of the GPLv3-derived foundation"
     }
   ],
   "require": {
