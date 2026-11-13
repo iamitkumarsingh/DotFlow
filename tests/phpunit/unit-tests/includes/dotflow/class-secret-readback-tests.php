@@ -64,6 +64,7 @@ class DotFlow_Secret_Readback_Tests extends GH_UnitTestCase {
 			$this->assertTrue( $matches[0]['sensitive'] );
 			$this->assertNotSame( 'stored-secret-value', $matches[0]['value'] );
 			$this->assertNotSame( 'default-secret-value', $matches[0]['default'] );
+			$this->assertStringNotContainsString( 'reveal', strtolower( $matches[0]['description'] ) );
 			$this->assertStringNotContainsString( 'stored-secret-value', wp_json_encode( $matches[0] ) );
 			$this->assertStringNotContainsString( 'default-secret-value', wp_json_encode( $matches[0] ) );
 		} );
