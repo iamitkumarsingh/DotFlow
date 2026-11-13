@@ -123,6 +123,15 @@ class Update_Contact extends Ability {
 		// at all; this is the same per-object check create-contact's upsert path and
 		// the REST API's update_single() both use - a sales rep with edit_contacts
 		// isn't necessarily allowed to edit every contact (team scoping).
+
+		if ( ! current_user_can( 'edit_contact', $contact ) ) {
+			return new WP_Error(
+				'groundhogg_cannot_edit_contact',
+				__( 'You do not have permission to edit this contact.', 'groundhogg' )
+			);
+		}
+
+
 		if ( Pii::is_restricted() ) {
 
 			foreach ( [ 'email', 'first_name', 'last_name' ] as $pii_field ) {
@@ -139,14 +148,6 @@ class Update_Contact extends Ability {
 				}
 			}
 		}
-
-		if ( ! current_user_can( 'edit_contact', $contact ) ) {
-			return new WP_Error(
-				'groundhogg_cannot_edit_contact',
-				__( 'You do not have permission to edit this contact.', 'groundhogg' )
-			);
-		}
-
 		$has_changes = array_key_exists( 'email', $input )
 			|| array_key_exists( 'first_name', $input )
 			|| array_key_exists( 'last_name', $input )
