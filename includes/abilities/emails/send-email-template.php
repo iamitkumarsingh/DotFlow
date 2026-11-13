@@ -254,7 +254,6 @@ class Send_Email_Template extends Ability {
 
 		Audit::record( 'email_template.send_requested', 'email', $email->get_id(), [
 			'scheduled' => (bool) $future,
-			'scheduled_for' => $future ? gmdate( 'Y-m-d\\TH:i:s\\Z', $when_ts ) : null,
 			'recipient_status_counts' => $status_counts,
 		] );
 
@@ -263,7 +262,6 @@ class Send_Email_Template extends Ability {
 			'email_title'   => $email->get_title(),
 			'preview_url'   => $email->get_preview_url(),
 			'scheduled'     => (bool) $future,
-			'scheduled_for' => $future ? gmdate( 'Y-m-d\TH:i:s\Z', $when_ts ) : null,
 			'recipients'    => $recipients,
 		];
 	}
