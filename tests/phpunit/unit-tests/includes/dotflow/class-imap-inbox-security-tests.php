@@ -11,8 +11,8 @@ class DotFlow_Imap_Inbox_Security_Tests extends GH_UnitTestCase {
 		update_option( 'gh_imap_inbox_port', $port );
 
 		try {
-			$inbox = new \\Groundhogg\\Imap_Inbox();
-			$method = new ReflectionMethod( \\Groundhogg\\Imap_Inbox::class, 'mailbox_path' );
+			$inbox = new \Groundhogg\\Imap_Inbox();
+			$method = new ReflectionMethod( \Groundhogg\\Imap_Inbox::class, 'mailbox_path' );
 			$method->setAccessible( true );
 
 			return $callback( $method->invoke( $inbox ) );
