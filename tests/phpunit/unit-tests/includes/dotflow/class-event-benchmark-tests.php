@@ -12,6 +12,7 @@ use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 use Groundhogg\Abilities\Schemas\Step_Type_Schema;
 use Groundhogg\Abilities\Funnels\Step_Tree_Builder;
 use Groundhogg\Abilities\Funnels\List_Step_Types;
+use Groundhogg\Abilities\Funnels\Simulate_Flow;
 
 class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 
@@ -156,6 +157,20 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		$event_id = 'dotflow-event-benchmark-integration-001';
 
 		try {
+			$simulation_reflection = new ReflectionClass( Simulate_Flow::class );
+			$simulation_ability = $simulation_reflection->newInstanceWithoutConstructor();
+			$simulation = $simulation_ability->__invoke( [
+				'funnel_id'  => $funnel->get_id(),
+				'contact_id' => $contact_id,
+				'step_id'    => $step->get_id(),
+				'view'       => 'live',
+				'event_args' => [ 'event_name' => 'email.inbound.received', 'event_source' => 'email' ],
+			] );
+			$this->assertNotWPError( $simulation );
+			$this->assertSame( $step->get_id(), $simulation['trace'][0]['step_id'] );
+			$this->assertSame( 'benchmark', $simulation['trace'][0]['type'] );
+			$this->assertEmpty( $step->get_waiting_events(), 'Dry-run simulation must not enqueue a real event.' );
+
 			$event = new Event( 'email.inbound.received', [
 				'contact_id' => $contact_id,
 				'object_type' => 'contact',
