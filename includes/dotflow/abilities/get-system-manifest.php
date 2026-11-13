@@ -87,7 +87,7 @@ class Get_System_Manifest extends Ability {
 				'available' => (bool) $elementor_available,
 				'version'   => (string) $elementor_version,
 				'editing'   => 'Elementor documents are edited through Elementor document APIs; DotFlow records are managed through scoped WordPress Abilities and REST endpoints.',
-				'form_widget' => class_exists( \Groundhogg\DotFlow\Elementor\Widgets\Form_Widget::class ),
+				'form_widget' => $elementor_available && class_exists( \Groundhogg\DotFlow\Elementor\Widgets\Form_Widget::class ),
 			],
 			'modules'        => [
 				[
