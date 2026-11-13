@@ -10,7 +10,7 @@ use function Groundhogg\get_contactdata;
 use function Groundhogg\get_db;
 
 /**
- * Lists the notes on a contact.
+ * Lists the notes on a contact. PII-restricted accounts cannot read free-form note content.
  *
  * Two layers of permission: base CAPABILITY = 'view_notes' (matches
  * Notes_Api::read_permissions_callback()) gates the ability generally - this matters
