@@ -96,9 +96,9 @@ class Get_System_Manifest extends Ability {
 				[
 					'id'          => 'crm',
 					'label'       => 'Contacts and CRM',
-					'status'      => 'inherited',
-					'description' => 'Groundhogg contact records, custom fields, tags, notes, search and contact permissions.',
-					'abilities'   => [ 'groundhogg/search-contacts', 'groundhogg/get-contact', 'groundhogg/create-contact', 'groundhogg/update-contact', 'groundhogg/list-custom-fields', 'groundhogg/add-custom-field', 'groundhogg/update-custom-field', 'groundhogg/add-contact-note', 'groundhogg/list-contact-notes', 'groundhogg/list-tags', 'groundhogg/create-tag', 'groundhogg/describe-table', 'groundhogg/query-table' ],
+					'status'      => 'implemented',
+					'description' => 'Groundhogg contact records, custom fields, tags, notes, search and contact permissions, with a DotFlow composite profile ability.',
+					'abilities'   => [ 'dotflow/get-contact-profile', 'groundhogg/search-contacts', 'groundhogg/get-contact', 'groundhogg/create-contact', 'groundhogg/update-contact', 'groundhogg/list-custom-fields', 'groundhogg/add-custom-field', 'groundhogg/update-custom-field', 'groundhogg/add-contact-note', 'groundhogg/list-contact-notes', 'groundhogg/list-tags', 'groundhogg/create-tag', 'groundhogg/describe-table', 'groundhogg/query-table' ],
 				],
 				[
 					'id'          => 'campaigns',
@@ -133,13 +133,13 @@ class Get_System_Manifest extends Ability {
 					'label'       => 'DotFlow domain events',
 					'status'      => 'implemented',
 					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction and administrator-only event history discovery.',
-					'abilities'   => [ 'dotflow/get-contact-profile', 'dotflow/list-events', 'dotflow/list-contact-events' ],
+					'abilities'   => [ 'dotflow/list-events', 'dotflow/list-contact-events' ],
 				],
 				[
 					'id'          => 'conversations',
 					'label'       => 'Conversation history',
 					'status'      => 'implemented',
-					'description' => 'Composite contact profile with optional permission-scoped notes and payload-free activity, plus inbound/outbound message history and read-state updates.',
+					'description' => 'Inbound/outbound message history with contact-level permissions and an authorised read/unread mutation. Raw message data is subject to the contact PII policy.',
 					'abilities'   => [ 'dotflow/list-messages', 'dotflow/set-message-read-state' ],
 				],
 				[
