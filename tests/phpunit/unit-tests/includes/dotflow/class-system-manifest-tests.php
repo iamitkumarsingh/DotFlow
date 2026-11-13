@@ -17,6 +17,8 @@ class DotFlow_System_Manifest_Tests extends GH_UnitTestCase {
 		$this->assertTrue( $manifest['data_policy']['sensitive_values_always_redacted'] );
 		$this->assertTrue( $manifest['data_policy']['pii_restrictions_enforced'] );
 		$this->assertTrue( $manifest['data_policy']['high_impact_mutations_marked_destructive'] );
+		$this->assertTrue( $manifest['data_policy']['ai_mutations_audited'] );
+		$this->assertFalse( $manifest['data_policy']['mutations_audited'] );
 		$this->assertTrue( $manifest['data_policy']['private_data_requires_capability'] );
 
 		$module_ids = array_column( $manifest['modules'], 'id' );
