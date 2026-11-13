@@ -84,5 +84,10 @@ class DotFlow_List_Event_Types_Tests extends GH_UnitTestCase {
 		$this->assertNotWPError( $result );
 		$this->assertSame( 1, $result['total'] );
 		$this->assertSame( 'email.inbound.received', $result['event_types'][0]['event_name'] );
+
+		$limited = $ability( [ 'limit' => 1 ] );
+		$this->assertNotWPError( $limited );
+		$this->assertCount( 1, $limited['event_types'] );
+		$this->assertSame( 2, $limited['total'] );
 	}
 }
