@@ -74,7 +74,7 @@ Elementor MCP edits page layouts and widget settings. WordPress Abilities/MCP ed
 - WordPress/MariaDB PHPUnit integration suite covering event storage, PII boundaries, audit coverage, permissions, REST contracts, inbound mail and security policies.
 - GitHub Actions matrix for PHP syntax and integration tests on PHP 8.0, 8.2 and 8.3.
 
-CI has passed on PHP 8.0, 8.2 and 8.3 on a recent commit (44 tests, 314 assertions per runtime). The latest branch includes additional test hardening and read-only table-query boundary tests, which must pass their own CI run. Elementor editor/runtime tests and live provider delivery validation remain outstanding before a stable release.
+CI has passed on the current development commit on PHP 8.0, 8.2 and 8.3 (54 tests, 364 assertions per runtime). The suite includes end-to-end inbound email and event-trigger workflow tests. Elementor editor/runtime tests and live provider delivery validation remain outstanding before a stable release. Elementor editor/runtime tests and live provider delivery validation remain outstanding before a stable release.
 
 ## Development
 
