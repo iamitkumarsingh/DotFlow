@@ -15,7 +15,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 	protected $https_value;
 	protected $server_port_value;
 
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		foreach ( [
