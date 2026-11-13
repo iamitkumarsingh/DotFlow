@@ -38,21 +38,42 @@ DotFlow-specific abilities are registered under the dotflow-platform category. E
 
 Namespace: dotflow/v1
 
-Implemented read-only endpoints:
+Implemented endpoints:
 - GET /manifest — machine-readable product/module manifest.
 - GET /schema — supported object families, management abilities and write-safety policy.
-- GET /events — paginated, filterable event history; administrator-only.
+- GET /events — paginated, filterable event history; administrator-only and subject to PII restrictions.
+- POST /inbound/email — token-authenticated, provider-neutral inbound email ingestion over HTTPS; no generic record CRUD.
 
 Planned endpoints:
-- GET /manifest — versioned machine-readable product/module manifest.
-- GET /schema — discover supported object types, fields, relationships and writable fields.
-- GET /events — paginated, filterable DotFlow event history.
-- POST /events — validated event ingestion with source authentication and idempotency.
+- POST /events — general-purpose validated event ingestion with source authentication and idempotency.
+- Provider-specific inbound payload adapters (the current webhook accepts a normalized provider-neutral envelope).
 - GET /integrations — provider names, connection state and supported capabilities; never return secrets.
 - POST /integrations/{provider}/test — test a provider connection without exposing credentials.
 - Provider-specific webhook endpoints — signature verification, replay protection and idempotent ingestion.
 
 The REST API is not a generic database proxy. No arbitrary SQL, arbitrary option writes or unrestricted object mutation endpoints are exposed.
+
+
+### Independent inbound email configuration
+
+The inbound webhook is an optional provider transport. It does not call `Inbox_Client`, provision a Groundhogg relay inbox, or require a Groundhogg relay license. It reuses Groundhogg's transport-neutral `Message::ingest()` path for contact matching, signed reply-token verification, duplicate detection, threading, automatic-reply filtering and message persistence.
+
+For independent mode, define these constants in `wp-config.php`:
+
+```php
+define( 'DOTFLOW_INBOUND_EMAIL_ADDRESS', 'inbound-secret@yourdomain.example' );
+define( 'DOTFLOW_REPLY_EMAIL_ADDRESS', 'reply@yourdomain.example' );
+define( 'DOTFLOW_INBOUND_WEBHOOK_TOKEN', 'replace-with-a-random-secret-of-at-least-32-characters' );
+```
+
+- The inbound address should be a long, hard-to-guess address used for forwarding or BCC.
+- The reply address is public. DotFlow adds a local HMAC token to each reply address, so a reply is tied to the message it answers.
+- Configure the provider to POST a normalized JSON envelope to `/wp-json/dotflow/v1/inbound/email`.
+- Authenticate with `Authorization: Bearer <token>` or `X-DotFlow-Token: <token>`. The token is read from wp-config.php and is never stored in the options table or returned to AI clients.
+- HTTPS is mandatory. The webhook requires `from`, `envelope_to`, and either an RFC `message_id` or a stable `provider_event_id` for idempotency.
+- The current normalized contract supports sender/recipient addresses, subject, text or HTML body, date, message threading headers and automatic-reply headers. Attachments are rejected rather than silently discarded.
+- The custom addresses are only activated when a Groundhogg relay inbox is not provisioned; DotFlow will not overwrite an existing relay's addresses or license state.
+- Successful inbound messages emit `email.inbound.received` events containing message/contact IDs, thread ID and provider name only. Message bodies, sender addresses and headers are not copied into the event payload.
 
 ## 4. AI data contract
 
@@ -101,6 +122,7 @@ Widgets must register only when Elementor is active, expose native controls and 
 - Native inherited Groundhogg MCP abilities: available from the foundation.
 - Durable DotFlow event storage with source-scoped idempotency, recursive secret-key redaction and administrator-only event-query ability: initial implementation.
 - DotFlow Form Elementor widget with active-form selection, server-side form-type/status revalidation and CRM shortcode rendering: initial implementation; runtime validation still required.
+- Independent inbound email webhook with HTTPS/token authentication, strict payload bounds, Message-ID/provider-event idempotency, custom inbox/reply addresses and privacy-minimised inbound events: initial implementation; provider-specific adapters and live mail-provider tests remain required.
 - DotFlow-specific CTA/dynamic tags: planned.
 - WordPress Abilities category and MCP abilities for the system manifest, published form discovery and event history: initial implementation.
 - Read-only `dotflow/v1` REST discovery routes for manifest, schema and administrator-only event history: implemented; runtime route and permission tests still required.
