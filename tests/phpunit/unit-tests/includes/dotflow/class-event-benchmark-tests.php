@@ -10,6 +10,7 @@ use function Groundhogg\get_db;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 use Groundhogg\Abilities\Schemas\Step_Type_Schema;
 use Groundhogg\Abilities\Funnels\Step_Tree_Builder;
+use Groundhogg\Abilities\Funnels\List_Step_Types;
 
 class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 
@@ -54,6 +55,13 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'string', $schema['properties']['event_name']['type'] );
 		$this->assertSame( 'string', $schema['properties']['source']['type'] );
 		$this->assertSame( 64, $schema['properties']['source']['maxLength'] );
+
+		$list_reflection = new ReflectionClass( List_Step_Types::class );
+		$list_ability = $list_reflection->newInstanceWithoutConstructor();
+		$listed = $list_ability->__invoke( [ 'types' => [ 'dotflow_event' ], 'expand' => [ 'settings_schema' ] ] );
+		$this->assertCount( 1, $listed['step_types'] );
+		$this->assertTrue( $listed['step_types'][0]['buildable'] );
+		$this->assertArrayHasKey( 'event_name', $listed['step_types'][0]['settings_schema']['properties'] );
 
 		$resolved = Step_Type_Schema::resolve_settings( 'dotflow_event', [
 			'event_name' => 'email.inbound.received',
