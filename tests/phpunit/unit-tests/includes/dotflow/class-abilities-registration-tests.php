@@ -18,6 +18,7 @@ class DotFlow_Abilities_Registration_Tests extends GH_UnitTestCase {
 			'dotflow/get-system-manifest',
 			'dotflow/list-published-forms',
 			'dotflow/list-events',
+			'dotflow/list-contact-events',
 			'dotflow/list-messages',
 			'dotflow/set-message-read-state',
 		] as $ability_name ) {
