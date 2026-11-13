@@ -174,6 +174,12 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 
 		$this->assertSame( 200, $duplicate->get_status() );
 		$this->assertTrue( $duplicate->get_data()['duplicate'] );
+		$event_count = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$event_db->get_table_name()} WHERE event_name = %s AND contact_id = %d",
+			'email.inbound.received',
+			$contact_id
+		) );
+		$this->assertSame( 1, $event_count );
 
 		$message_db->delete( absint( $row->ID ) );
 		$wpdb->delete( $event_db->get_table_name(), [
