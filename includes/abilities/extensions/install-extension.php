@@ -83,7 +83,7 @@ class Install_Extension extends Ability {
 		$result = Extension_Upgrader::remote_install( $item_id, $license_key );
 
 		if ( is_wp_error( $result ) ) {
-			return $result;
+			return new WP_Error( 'groundhogg_extension_install_failed', __( 'The extension could not be installed. Check the license status and WordPress plugin administration screen for details.', 'groundhogg' ) );
 		}
 
 		Audit::record( 'extension.install_completed', 'extension', $item_id, [
