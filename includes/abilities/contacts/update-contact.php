@@ -236,6 +236,23 @@ class Update_Contact extends Ability {
 
 		$submission->add_posted_data( sanitize_payload( $posted_data ) );
 
+		// Keep the audit record data-minimised: record changed field names and
+		// tag operation counts, never email/name/custom-field values.
+		$audit_fields = array_values( array_intersect( [ 'email', 'first_name', 'last_name', 'optin_status', 'owner' ], array_keys( $data ) ) );
+		$audit_meta_fields = ! empty( $meta ) ? array_map( 'sanitize_key', array_keys( $meta ) ) : [];
+
+		Audit::record(
+			'contact.updated',
+			'contact',
+			$contact->get_id(),
+			[
+				'fields'               => $audit_fields,
+				'tags_added_count'     => empty( $input['tags_add'] ) ? 0 : count( (array) $input['tags_add'] ),
+				'tags_removed_count'   => empty( $input['tags_remove'] ) ? 0 : count( (array) $input['tags_remove'] ),
+				'custom_field_keys'    => $audit_meta_fields,
+			]
+		);
+
 		$expand = $input['expand'] ?? [ 'tags' ];
 
 		return [
