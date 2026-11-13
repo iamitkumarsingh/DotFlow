@@ -59,6 +59,7 @@ class List_Published_Forms extends Ability {
 								'status'    => [ 'type' => 'string' ],
 								'shortcode' => [ 'type' => 'string' ],
 								'elementor_widget' => [ 'type' => 'string' ],
+								'edit_ability' => [ 'type' => 'string' ],
 							],
 						],
 					],
@@ -118,6 +119,7 @@ class List_Published_Forms extends Ability {
 				'status'           => sanitize_key( $row->step_status ),
 				'shortcode'        => sprintf( '[gh_form id="%d"]', $id ),
 				'elementor_widget' => 'dotflow-form',
+				'edit_ability'    => 'groundhogg/edit-flow',
 			];
 		}
 
