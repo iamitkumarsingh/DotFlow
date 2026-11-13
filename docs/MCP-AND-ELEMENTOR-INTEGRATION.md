@@ -27,7 +27,7 @@ Existing Groundhogg abilities are reused for inherited data:
 - Contacts: search, get, create, update, custom fields, notes and tags.
 - Campaigns and email: list/create campaigns, list/create/update templates and broadcasts.
 - CRM profile and activity: a composite contact profile with optional tags/custom fields, separately permission-gated notes, and payload-free contact activity metadata. Individual contact event listing remains available for filtered/paginated timelines.
-- Conversations: contact-scoped message history, optional message-body expansion and read/unread updates through DotFlow abilities.
+- Conversations: contact-scoped message history, optional message-body expansion and read/unread updates through DotFlow abilities. Raw message reads and administrator-wide event payload reads also enforce Groundhogg's `view_contact_pii` policy; a user restricted from PII cannot use these payload-bearing surfaces.
 - Automation: list/get/create/edit/simulate/publish/activate/deactivate flows.
 - Reporting: discover report types and retrieve reports.
 - Settings: only registered settings with their own capability checks.
@@ -106,7 +106,7 @@ Widgets must register only when Elementor is active, expose native controls and 
 - Read-only `dotflow/v1` REST discovery routes for manifest, schema and administrator-only event history: implemented; runtime route and permission tests still required.
 - Mutation audit helper: implemented for message read-state; contact create/upsert/update; tag create/update; custom-field-definition create/update; campaign create/upsert and association; and flow create/edit/activate/deactivate/publish/discard Abilities. Audit payloads record the acting WordPress user ID, operation metadata, field names and IDs rather than contact values or message content. Broadcast schedule/cancel, email-template create/update, and changed settings are also audited. Settings values, email content and other sensitive values are not copied into audit payloads. Contact-note creation, workflow enrolment, composed/template/test email sends, media uploads, extension installation and license activation are also audited; message bodies, recipients, note content and license keys are excluded. Deletion and remaining mutation paths still need coverage.
 - CRM profile MCP access: `dotflow/get-contact-profile` returns the shared contact schema and only expands notes/activity when explicitly requested. It checks `view_contact`, separately requires `view_notes` for notes, relies on Groundhogg's note-author scoping, and never returns event payloads. `dotflow/list-contact-events` exposes filtered, paginated event metadata for one authorised contact.
-- Conversation MCP access: contact-scoped read/list and read-state mutation abilities are implemented against the inherited message store; runtime privacy tests remain pending.
+- Conversation MCP access: contact-scoped read/list and read-state mutation abilities are implemented against the inherited message store. Raw conversation reads are blocked for users restricted from PII; metadata-only contact activity remains available with contact permissions. Runtime privacy tests are being added.
 
 ## 8. Compatibility and validation
 
