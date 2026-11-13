@@ -13,8 +13,8 @@ class DotFlow_Abilities_Registration_Tests extends GH_UnitTestCase {
 	public function test_dotflow_category_and_ai_abilities_are_discoverable() {
 
 		$this->assertTrue( wp_has_ability_category( 'dotflow-platform' ) );
-		$this->assertTrue( class_exists( \\Groundhogg\\DotFlow\\Database\\Events::class ) );
-		$this->assertTrue( class_exists( \\Groundhogg\\DotFlow\\Events\\Store::class ) );
+		$this->assertTrue( class_exists( \Groundhogg\DotFlow\Database\Events::class ) );
+		$this->assertTrue( class_exists( \Groundhogg\DotFlow\Events\Store::class ) );
 
 		foreach ( [
 			'dotflow/get-system-manifest',
