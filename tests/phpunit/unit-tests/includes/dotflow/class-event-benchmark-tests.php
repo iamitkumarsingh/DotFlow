@@ -9,6 +9,7 @@ use Groundhogg\Plugin;
 use function Groundhogg\get_db;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 use Groundhogg\Abilities\Schemas\Step_Type_Schema;
+use Groundhogg\Abilities\Funnels\Step_Tree_Builder;
 
 class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 
@@ -72,6 +73,47 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		$long_source = Step_Type_Schema::resolve_settings( 'dotflow_event', [ 'event_name' => 'email.inbound.received', 'source' => str_repeat( 'a', 80 ) ], [] );
 		$this->assertWPError( $long_source );
 		$this->assertSame( 'dotflow_event_source_too_long', $long_source->get_error_code() );
+	}
+
+	public function test_typed_flow_builder_creates_dotflow_event_and_rejects_reserved_settings() {
+
+		Bootstrap::register_step_type_schema();
+
+		$funnel = new Funnel( [
+			'title'  => 'DotFlow Typed Builder Test',
+			'status' => 'inactive',
+		] );
+
+		try {
+			$builder = new Step_Tree_Builder( $funnel );
+			$built = $builder->build( [
+				[
+					'id'       => 'inbound_reply',
+					'type'     => 'dotflow_event',
+					'settings' => [
+						'event_name' => 'email.inbound.received',
+						'source'     => 'Email',
+					],
+				],
+			] );
+
+			$this->assertNotWPError( $built );
+			$this->assertSame( 'dotflow_event', $built[0]['type'] );
+			$this->assertSame( 'email.inbound.received', $built[0]['settings']['event_name'] );
+
+			$invalid_builder = new Step_Tree_Builder( $funnel );
+			$invalid = $invalid_builder->build( [
+				[
+					'type'     => 'dotflow_event',
+					'settings' => [ 'event_name' => 'ai.mutation.completed' ],
+				],
+			] );
+
+			$this->assertWPError( $invalid );
+			$this->assertSame( 'dotflow_event_name_invalid', $invalid->get_error_code() );
+		} finally {
+			$funnel->delete();
+		}
 	}
 
 	public function test_matching_contact_event_enqueues_once_without_forwarding_payload() {
