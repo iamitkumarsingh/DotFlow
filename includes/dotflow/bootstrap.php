@@ -47,14 +47,14 @@ final class Bootstrap {
 	 */
 	public static function autoload( $class ) {
 
-		$prefix = __NAMESPACE__ . '\\\\';
+		$prefix = __NAMESPACE__ . '\\';
 
 		if ( 0 !== strpos( $class, $prefix ) ) {
 			return;
 		}
 
 		$relative = substr( $class, strlen( $prefix ) );
-		$relative = strtolower( str_replace( [ '\\\\', '_' ], [ '/', '-' ], $relative ) );
+		$relative = strtolower( str_replace( [ '\\', '_' ], [ '/', '-' ], $relative ) );
 		$file     = GROUNDHOGG_PATH . 'includes/dotflow/' . $relative . '.php';
 
 		if ( is_readable( $file ) ) {
