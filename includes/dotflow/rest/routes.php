@@ -10,7 +10,7 @@ use WP_REST_Request;
 use WP_REST_Server;
 
 /**
- * Read-only, versioned REST discovery surface for DotFlow.
+ * Versioned REST discovery and narrowly scoped provider ingress for DotFlow.
  *
  * Mutations remain on purpose-built WordPress Abilities until their REST
  * contracts, audit guarantees and approval requirements are implemented.
@@ -143,14 +143,15 @@ final class Routes {
 					'read_abilities'  => [ 'dotflow/list-messages' ],
 					'write_abilities' => [ 'dotflow/set-message-read-state' ],
 					'permissions'     => [ 'view_contact', 'manage_options' ],
+					'ingest_endpoint' => '/wp-json/dotflow/v1/inbound/email',
 				],
 			],
 			'write_policy' => [
-				'rest_mutations'       => 'Not exposed in this initial API version.',
+				'rest_mutations'       => 'No generic REST CRUD. Only the token-authenticated provider-neutral inbound email endpoint is writable.'
 				'preferred_interface' => 'Purpose-built WordPress Abilities with strict schemas and capability checks.',
 				'arbitrary_sql'        => false,
 				'credential_readback'  => false,
-				'high_impact_approval' => 'Campaign sends, workflow activation and destructive operations require separate explicit approval controls.',
+				'high_impact_approval' => 'Campaign sends, workflow activation/deactivation, platform settings and other destructive operations are marked for confirmation by compatible AI hosts.',
 			],
 		];
 	}
