@@ -19,7 +19,7 @@ class List_Event_Types extends Ability {
 	protected const READONLY   = true;
 	protected const IDEMPOTENT = true;
 
-	protected function get_args() {
+	protected function get_args(): array {
 
 		return [
 			'label'       => __( 'List DotFlow Event Types', 'groundhogg' ),
