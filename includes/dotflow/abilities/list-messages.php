@@ -91,6 +91,12 @@ class List_Messages extends Ability {
 
 		global $wpdb;
 
+		// Conversation headers and bodies can contain personal data even when the
+		// caller can view the contact record itself.
+		if ( Pii::is_restricted() ) {
+			return Pii::restricted_error( __( 'Conversation messages are not available to accounts restricted from personal information.', 'groundhogg' ) );
+		}
+
 		$contact_id = ! empty( $input['contact_id'] ) ? absint( $input['contact_id'] ) : 0;
 
 		if ( $contact_id ) {
