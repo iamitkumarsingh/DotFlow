@@ -71,7 +71,7 @@ class Check_License extends Ability {
 				return [
 					'license_key' => License_Schema::REDACTED,
 					'valid'       => false,
-					'error'       => $result->get_error_message(),
+					'error'       => __( 'License status could not be checked. Review the licensing status in the WordPress admin.', 'groundhogg' ),
 				];
 			}
 
