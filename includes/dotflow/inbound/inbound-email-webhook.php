@@ -176,13 +176,9 @@ final class Inbound_Email_Webhook {
 
 		$from = $input['from'] ?? '';
 
-		if ( ( ! is_string( $from ) && ! is_array( $from ) ) || strlen( (string) wp_json_encode( $from ) ) > 512 ) {
+		if ( ! is_string( $from ) || strlen( $from ) > 512 ) {
 			return self::invalid_payload( 'A sender address is required.' );
 		}
-		if ( is_array( $from ) && ( ! isset( $from['email'] ) || ! is_string( $from['email'] ) ) ) {
-			return self::invalid_payload( 'A sender address must include a string email field.' );
-		}
-
 		[ $sender ] = Message::parse_address( $from );
 
 		if ( ! is_email( $sender ) ) {
@@ -191,7 +187,7 @@ final class Inbound_Email_Webhook {
 
 		$envelope_to = $input['envelope_to'] ?? '';
 
-		if ( ! is_string( $envelope_to ) && ! is_array( $envelope_to ) ) {
+		if ( ! self::is_address_list( $envelope_to ) ) {
 			return self::invalid_payload( 'The SMTP envelope recipient is required.' );
 		}
 
@@ -204,7 +200,7 @@ final class Inbound_Email_Webhook {
 		foreach ( [ 'to', 'cc' ] as $field ) {
 			$value = $input[ $field ] ?? '';
 
-			if ( ( ! is_string( $value ) && ! is_array( $value ) ) || strlen( wp_json_encode( $value ) ) > 4096 ) {
+			if ( ! self::is_address_list( $value ) || strlen( (string) wp_json_encode( $value ) ) > 4096 ) {
 				return self::invalid_payload( 'Recipient fields must be strings or address lists.' );
 			}
 		}
@@ -294,6 +290,31 @@ final class Inbound_Email_Webhook {
 			'headers'       => $headers,
 			'dotflow_source' => $provider,
 		];
+	}
+
+	/**
+	 * Validate a single address string or a list of address strings.
+	 *
+	 * @param mixed $value Address input.
+	 * @return bool
+	 */
+	private static function is_address_list( $value ): bool {
+
+		if ( is_string( $value ) ) {
+			return strlen( $value ) <= 4096;
+		}
+
+		if ( ! is_array( $value ) || count( $value ) > 50 ) {
+			return false;
+		}
+
+		foreach ( $value as $address ) {
+			if ( ! is_string( $address ) || strlen( $address ) > 512 ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
