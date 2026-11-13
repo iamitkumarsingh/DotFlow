@@ -29,6 +29,25 @@ class DotFlow_Event_Tests extends GH_UnitTestCase {
 		new Event( 'Contact Created' );
 	}
 
+
+	public function test_event_rejects_oversized_identifiers() {
+
+		$this->expectException( InvalidArgumentException::class );
+		new Event( 'contact.created', [], 'unit-test', str_repeat( 'x', 121 ) );
+	}
+
+	public function test_event_rejects_oversized_sources() {
+
+		$this->expectException( InvalidArgumentException::class );
+		new Event( 'contact.created', [], str_repeat( 'x', 65 ) );
+	}
+
+	public function test_event_rejects_oversized_names() {
+
+		$this->expectException( InvalidArgumentException::class );
+		new Event( str_repeat( 'a', 192 ) );
+	}
+
 	public function test_dispatcher_fires_generic_and_specific_hooks() {
 
 		$event = new Event( 'test.dispatched', [], 'unit-test', 'event-dispatch-1' );
