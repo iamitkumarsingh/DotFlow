@@ -6,6 +6,7 @@ use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Broadcast_Schema;
 use Groundhogg\Abilities\Schemas\Segment_Schema;
 use Groundhogg\Broadcast;
+use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\DraftException;
 use Groundhogg\Email;
 use Groundhogg\NoContactsException;
@@ -258,6 +259,17 @@ class Send_Email_Broadcast extends Ability {
 		} catch ( Throwable $e ) {
 			return new WP_Error( 'groundhogg_broadcast_not_scheduled', $e->getMessage() );
 		}
+
+		Audit::record( 'broadcast.scheduled', 'broadcast', $broadcast->get_id(), [
+			'email_id' => $email->get_id(),
+			'send_now' => $send_now,
+			'send_time' => Broadcast_Schema::datetime( $broadcast->get_send_time() ),
+			'segment_type' => $args['segment_type'],
+			'estimated_recipients' => $broadcast->is_scheduled()
+				? $broadcast->get_num_queued()
+				: absint( $broadcast->get_meta( 'total_contacts' ) ),
+			'batching_enabled' => (bool) $batching,
+		] );
 
 		return [
 			'broadcast_id'         => $broadcast->get_id(),
