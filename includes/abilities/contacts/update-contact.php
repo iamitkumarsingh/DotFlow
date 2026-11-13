@@ -131,7 +131,6 @@ class Update_Contact extends Ability {
 			);
 		}
 
-
 		if ( Pii::is_restricted() ) {
 
 			foreach ( [ 'email', 'first_name', 'last_name' ] as $pii_field ) {
@@ -148,6 +147,7 @@ class Update_Contact extends Ability {
 				}
 			}
 		}
+
 		$has_changes = array_key_exists( 'email', $input )
 			|| array_key_exists( 'first_name', $input )
 			|| array_key_exists( 'last_name', $input )
