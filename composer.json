@@ -13,8 +13,7 @@
     "ext-json": "*",
     "ext-mysqli": "*",
     "ext-imap": "*",
-    "ext-openssl": "*",
-    "webklex/php-imap": "2.7.2"
+    "ext-openssl": "*"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.9",
