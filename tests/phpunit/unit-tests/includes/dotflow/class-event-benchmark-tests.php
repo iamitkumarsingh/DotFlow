@@ -7,6 +7,8 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 
 	public function test_dotflow_event_benchmark_is_registered_with_the_step_manager() {
 
+		$this->assertNotFalse( has_action( 'groundhogg/steps/init', [ Bootstrap::class, 'register_steps' ] ) );
+
 		$manager = new class {
 			public $steps = [];
 
