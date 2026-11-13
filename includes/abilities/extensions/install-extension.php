@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Extensions;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Extension;
 use Groundhogg\Extension_Upgrader;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -83,6 +84,10 @@ class Install_Extension extends Ability {
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
+
+		Audit::record( 'extension.installed', 'extension', $item_id, [
+			'installed' => (bool) Extension::installed( $item_id ),
+		] );
 
 		return [
 			'item_id'   => $item_id,
