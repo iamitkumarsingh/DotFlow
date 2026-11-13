@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Contacts;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Note_Schema;
 use Groundhogg\Classes\Note;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 use function Groundhogg\get_contactdata;
 
@@ -97,6 +98,11 @@ class Add_Contact_Note extends Ability {
 		if ( ! $note->exists() ) {
 			return new WP_Error( 'groundhogg_note_not_created', __( 'Unable to create the note.', 'groundhogg' ) );
 		}
+
+		Audit::record( 'contact_note.created', 'contact', $contact->get_id(), [
+			'note_id' => $note->get_id(),
+			'has_summary' => ! empty( $input['summary'] ),
+		] );
 
 		return [
 			'note' => Note_Schema::transform( $note ),
