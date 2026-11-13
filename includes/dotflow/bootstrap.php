@@ -100,7 +100,7 @@ final class Bootstrap {
 	public static function register_abilities() {
 		Abilities::add_ability( Get_System_Manifest::class );
 		Abilities::add_ability( List_Published_Forms::class );
-		Abilities::add_ability( List_Events::class );
+		Abilities::add_ability( List_Events::class );\n\t\tAbilities::add_ability( List_Messages::class );\n\t\tAbilities::add_ability( Set_Message_Read_State::class );
 	}
 
 	/**
