@@ -4,8 +4,11 @@ namespace Groundhogg\DotFlow;
 
 use Groundhogg\Abilities\Abilities;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
+use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
+use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
 use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
+use Groundhogg\DotFlow\Events\Store;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -27,7 +30,7 @@ final class Bootstrap {
 	}
 
 	/**
-	 * Initialise the DotFlow domain layer and MCP abilities.
+	 * Initialise the DotFlow domain layer, database and MCP abilities.
 	 *
 	 * @return void
 	 */
@@ -40,6 +43,10 @@ final class Bootstrap {
 		if ( ! defined( 'DOTFLOW_API_VERSION' ) ) {
 			define( 'DOTFLOW_API_VERSION', 'v1' );
 		}
+
+		// Groundhogg's database manager exposes this hook before install/update.
+		add_action( 'groundhogg/db/manager/init', [ __CLASS__, 'register_database' ], 10, 1 );
+		add_action( 'init', [ Store::class, 'maybe_install' ], 2 );
 
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
@@ -62,6 +69,18 @@ final class Bootstrap {
 	}
 
 	/**
+	 * Register DotFlow's table with Groundhogg's database manager.
+	 *
+	 * @param object $manager Groundhogg DB manager.
+	 * @return void
+	 */
+	public static function register_database( $manager ) {
+		if ( ! $manager->dotflow_events ) {
+			$manager->dotflow_events = new DotFlow_Events_DB();
+		}
+	}
+
+	/**
 	 * Register the DotFlow category for WordPress Abilities / MCP clients.
 	 *
 	 * @return void
@@ -81,6 +100,7 @@ final class Bootstrap {
 	public static function register_abilities() {
 		Abilities::add_ability( Get_System_Manifest::class );
 		Abilities::add_ability( List_Published_Forms::class );
+		Abilities::add_ability( List_Events::class );
 	}
 
 	/**
