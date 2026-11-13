@@ -4,6 +4,7 @@ namespace Groundhogg\DotFlow;
 
 use Groundhogg\Abilities\Abilities;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
+use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -78,7 +79,8 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function register_abilities() {
-		Abilities::add_ability( Get_System_Manifest::class );\n\t\tAbilities::add_ability( List_Published_Forms::class );
+		Abilities::add_ability( Get_System_Manifest::class );
+		Abilities::add_ability( List_Published_Forms::class );
 	}
 
 	/**
