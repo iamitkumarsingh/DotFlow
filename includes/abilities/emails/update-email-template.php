@@ -6,6 +6,7 @@ use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Email_Schema;
 use Groundhogg\Campaign;
 use Groundhogg\Email;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 use function Groundhogg\email_kses;
 use function Groundhogg\get_object_ids;
@@ -283,6 +284,13 @@ class Update_Email_Template extends Ability {
 				$email->delete_relationship( new Campaign( $campaign_id ) );
 			}
 		}
+
+		Audit::record( 'email_template.updated', 'email', $email->get_id(), [
+			'fields' => array_values( array_diff( array_keys( $data ), [ 'last_updated', 'content', 'plain_text' ] ) ),
+			'content_updated' => isset( $input['content'] ),
+			'meta_fields' => array_values( array_keys( $meta_updates ) ),
+			'campaigns_updated' => isset( $input['campaigns'] ),
+		] );
 
 		// Mirrors Emails_Api::do_object_updated_action() so anything hooked to
 		// the REST update path also fires here.
