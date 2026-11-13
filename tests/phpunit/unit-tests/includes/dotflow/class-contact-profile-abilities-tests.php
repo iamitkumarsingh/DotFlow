@@ -56,7 +56,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$this->admin_user();
 
 		$contact_id = self::factory()->contacts->create();
-		$note_ability_reflection = new ReflectionClass( \\Groundhogg\\Abilities\\Contacts\\Add_Contact_Note::class );
+		$note_ability_reflection = new ReflectionClass( \Groundhogg\Abilities\Contacts\Add_Contact_Note::class );
 		$note_ability = $note_ability_reflection->newInstanceWithoutConstructor();
 		$created = $note_ability->__invoke( [
 			'contact_id' => $contact_id,
