@@ -66,7 +66,7 @@ All returned records should use JSON with:
 - Provenance for externally synchronised data (source, external_id, last_synced_at).
 - Machine-readable error code and actionable message.
 
-Private fields are minimised. Credentials, API keys, SMTP passwords, IMAP passwords and webhook signing secrets are never returned to AI clients. PII access follows the same WordPress capabilities and per-contact ownership rules as the admin UI.
+Private fields are minimised. Credentials, API keys, SMTP passwords, IMAP passwords and webhook signing secrets are never returned to AI clients. PII access follows the same WordPress capabilities and per-contact ownership rules as the admin UI. Users without `view_contact_pii` cannot read raw message/event payloads or change contact identity fields and PII/unclassified custom-field values; safe CRM metadata remains manageable.
 
 ## 5. Write safety model
 
