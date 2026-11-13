@@ -59,4 +59,20 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 			}
 		}
 	}
+	public function test_restricted_admin_cannot_read_conversation_messages() {
+
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$user    = get_userdata( $user_id );
+		$user->add_cap( Pii::CAP, false );
+		wp_set_current_user( $user_id );
+
+		$reflection = new ReflectionClass( List_Messages::class );
+		$ability    = $reflection->newInstanceWithoutConstructor();
+		$result     = $ability( [ 'contact_id' => 1 ] );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'groundhogg_pii_restricted', $result->get_error_code() );
+	}
+
+
 }
