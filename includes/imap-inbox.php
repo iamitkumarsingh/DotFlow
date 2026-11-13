@@ -2,26 +2,29 @@
 
 namespace Groundhogg;
 
-use Webklex\PHPIMAP\ClientManager;
-use Webklex\PHPIMAP\Query\Query;
-use Webklex\PHPIMAP\Query\WhereQuery;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Reads messages from the site's configured IMAP inbox.
+ *
+ * Uses PHP's IMAP extension directly. This avoids loading an obsolete third-party
+ * IMAP client and always validates the remote TLS certificate.
+ */
 class Imap_Inbox {
+
 	/**
-	 * The inbox in which bounces are located
+	 * The inbox username.
 	 *
-	 * @var mixed|void
+	 * @var string|false
 	 */
 	protected $inbox;
 
 	/**
-	 * The inbox password
+	 * The inbox password.
 	 *
-	 * @var mixed|void
+	 * @var string|false
 	 */
 	protected $password;
 
@@ -41,7 +44,6 @@ class Imap_Inbox {
 			   class="button-secondary"><?php echo esc_html_x( 'Test IMAP Connection', 'action', 'groundhogg' ) ?></a>
 			<?php
 		}
-
 	}
 
 	/**
@@ -73,7 +75,9 @@ class Imap_Inbox {
 	}
 
 	/**
-	 * Setup the bounce checker
+	 * Load the configured inbox credentials.
+	 *
+	 * @return void
 	 */
 	private function setup() {
 		$this->inbox    = $this->get_username();
@@ -81,7 +85,40 @@ class Imap_Inbox {
 	}
 
 	/**
-	 * Test the bounce inbox connection
+	 * Build a validated SSL mailbox path.
+	 *
+	 * The host and port are configuration values, not trusted IMAP flags. Validate
+	 * them before interpolating either into the mailbox path.
+	 *
+	 * @return string|\\WP_Error
+	 */
+	protected function mailbox_path() {
+
+		$host = trim( (string) $this->get_mail_server() );
+		$port = absint( $this->get_port() );
+
+		$is_ipv4 = filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+		$is_ipv6 = filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
+
+		if ( $is_ipv6 ) {
+			$host = '[' . $host . ']';
+		} elseif ( ! $is_ipv4 && ! preg_match( '/\\A(?=.{1,253}\\z)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\\z/i', $host ) ) {
+			return new \\WP_Error( 'imap_invalid_host', __( 'The configured IMAP server host is invalid.', 'groundhogg' ) );
+		}
+
+		if ( $port < 1 || $port > 65535 ) {
+			return new \\WP_Error( 'imap_invalid_port', __( 'The configured IMAP server port is invalid.', 'groundhogg' ) );
+		}
+
+		// Deliberately omit /novalidate-cert: certificate and hostname verification
+		// must remain enabled for the TLS connection.
+		return sprintf( '{%s:%d/imap/ssl}INBOX', $host, $port );
+	}
+
+	/**
+	 * Test the bounce inbox connection.
+	 *
+	 * @return bool|\\WP_Error
 	 */
 	public function do_test_connection() {
 		if ( ! is_admin() || ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( get_request_var( '_wpnonce' ) ) ) {
@@ -97,13 +134,12 @@ class Imap_Inbox {
 		}
 
 		Plugin::$instance->notices->add( 'imap_success', esc_html_x( 'Successful IMAP connection established.', 'notice', 'groundhogg' ) );
-
 	}
 
 	/**
-	 * Test the bounce inbox connection
+	 * Test the bounce inbox connection using validated TLS.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool|\\WP_Error
 	 */
 	public function test_connection() {
 
@@ -113,131 +149,122 @@ class Imap_Inbox {
 			return false;
 		}
 
-		$domain = explode( '@', $this->inbox );
-
-		if ( ! empty( $domain ) ) {
-			$domain = $domain[1];
-		}
-
-		$domain = $this->get_mail_server();
-		$port   = $this->get_port();
-
-		$hostname = sprintf( '{%s:%d/imap/ssl/novalidate-cert}INBOX', $domain, $port );
-
 		if ( ! function_exists( 'imap_open' ) ) {
-			return new \WP_Error( 'PHP IMAP library is not installed and is required to use this function.' );
+			return new \\WP_Error( 'imap_extension_missing', __( 'The PHP IMAP extension is required to test this connection.', 'groundhogg' ) );
 		}
 
-		/* try to connect */
+		$mailbox = $this->mailbox_path();
+
+		if ( is_wp_error( $mailbox ) ) {
+			return $mailbox;
+		}
+
 		try {
-			$inbox = @\imap_open( $hostname, $this->inbox, $this->password, OP_READONLY );
+			$connection = @imap_open( $mailbox, (string) $this->inbox, (string) $this->password, OP_READONLY );
 
-			if ( $inbox ) {
-				\imap_close( $inbox );
+			if ( ! $connection ) {
+				return new \\WP_Error( 'imap_connection_failed', __( 'A secure connection to the configured IMAP server could not be established. Check the host, port, credentials and TLS certificate.', 'groundhogg' ) );
 			}
-		} catch ( \Exception $e ) {
-			$inbox = new \WP_Error( $e->getCode(), $e->getMessage() );
+
+			imap_close( $connection );
+
+			return true;
+		} catch ( \\Throwable $error ) {
+			return new \\WP_Error( 'imap_connection_failed', __( 'A secure connection to the configured IMAP server could not be established.', 'groundhogg' ) );
 		}
-
-		if ( is_wp_error( $inbox ) ) {
-			return $inbox;
-		}
-
-		if ( ! $inbox ) {
-			return new \WP_Error( 'imap_failed', sprintf( "Failed to connect. Error: %s", imap_last_error() ) );
-		}
-
-		return true;
-	}
-
-	public function use_php_imap( $contact ) {
-
-		$cm = new ClientManager();
-
-		$client = $cm->make( [
-			'host'          => $this->get_mail_server(),
-			'port'          => $this->get_port(),
-			'encryption'    => 'ssl',
-			'validate_cert' => false,
-			'username'      => $this->get_username(),
-			'password'      => $this->get_inbox_pw(),
-			'protocol'      => 'imap'
-		] );
-
-		$client->connect();
-
-		$inbox = $client->getFolder('INBOX');
-
-		$msgs = $inbox->query()->where([
-			'TO' => $contact->email,
-			'FROM' => $contact->email,
-		])->get();
-
-		$client->disconnect();
-
-		$msgs = array_map( function ( $msg ) {
-			return [
-				'subject' => ''
-			];
-		}, $msgs );
-
-		return $msgs;
-
 	}
 
 	/**
-	 * Get emails associated with the contact record
+	 * Get messages associated with a contact using the native IMAP extension.
 	 *
-	 * @param $contact Contact
+	 * Only message metadata is returned. Message bodies and attachments are not
+	 * downloaded. Failures return an empty list, preserving the existing caller
+	 * contract and avoiding disclosure of mailbox/server details.
 	 *
+	 * @param Contact $contact Contact to search for.
 	 * @return array
 	 */
-	public function fetch( $contact ) {
-
-		return $this->use_php_imap( $contact );
+	public function use_php_imap( $contact ) {
 
 		$this->setup();
 
-		if ( ! function_exists( 'imap_open' ) ) {
+		if ( ! function_exists( 'imap_open' ) || empty( $this->password ) || empty( $this->inbox ) ) {
 			return [];
 		}
 
-		if ( empty( $this->password ) || empty( $this->inbox ) ) {
+		if ( ! is_object( $contact ) || ! method_exists( $contact, 'get_email' ) ) {
 			return [];
 		}
 
-		$domain = $this->get_mail_server();
+		$email = sanitize_email( $contact->get_email() );
 
-		$port     = $this->get_port();
-		$hostname = sprintf( '{%s:%d/imap/ssl/novalidate-cert}INBOX', $domain, $port );
-
-		if ( ! function_exists( 'imap_open' ) ) {
+		if ( ! is_email( $email ) ) {
 			return [];
 		}
 
-		/* try to connect */
+		$mailbox = $this->mailbox_path();
+
+		if ( is_wp_error( $mailbox ) ) {
+			return [];
+		}
+
+		$connection = false;
+
 		try {
-			$inbox = @\imap_open( $hostname, $this->inbox, $this->password, OP_READONLY );
-		} catch ( \Exception $e ) {
+			$connection = @imap_open( $mailbox, (string) $this->inbox, (string) $this->password, OP_READONLY );
+
+			if ( ! $connection ) {
+				return [];
+			}
+
+			// Contact email is validated first; additionally escape IMAP quoted-string
+			// delimiters before placing it into the search expression.
+			$search_email = str_replace( [ '\\\\', '"' ], [ '\\\\\\\\', '\\\\"' ], $email );
+			$criteria     = sprintf( 'OR FROM "%s" TO "%s"', $search_email, $search_email );
+			$uids         = @imap_search( $connection, $criteria, SE_UID );
+
+			if ( ! is_array( $uids ) || empty( $uids ) ) {
+				return [];
+			}
+
+			$uid_list = implode( ',', array_map( 'absint', $uids ) );
+			$overview = @imap_fetch_overview( $connection, $uid_list, FT_UID );
+
+			if ( ! is_array( $overview ) ) {
+				return [];
+			}
+
+			$messages = [];
+
+			foreach ( $overview as $message ) {
+				$messages[] = [
+					'uid'        => isset( $message->uid ) ? absint( $message->uid ) : 0,
+					'subject'    => isset( $message->subject ) ? sanitize_text_field( imap_utf8( (string) $message->subject ) ) : '',
+					'from'       => isset( $message->from ) ? sanitize_text_field( (string) $message->from ) : '',
+					'to'         => isset( $message->to ) ? sanitize_text_field( (string) $message->to ) : '',
+					'date'       => isset( $message->date ) ? sanitize_text_field( (string) $message->date ) : '',
+					'message_id' => isset( $message->message_id ) ? sanitize_text_field( (string) $message->message_id ) : '',
+					'seen'       => ! empty( $message->seen ),
+				];
+			}
+
+			return $messages;
+		} catch ( \\Throwable $error ) {
 			return [];
+		} finally {
+			if ( $connection ) {
+				@imap_close( $connection );
+			}
 		}
-
-		if ( ! $inbox ) {
-			return [];
-		}
-
-		$emails = array_values( array_unique( array_merge(
-			@\imap_search( $inbox, sprintf( 'FROM "%s"', $contact->get_email() ) ) ?: [],
-			@\imap_search( $inbox, sprintf( 'TO "%s"', $contact->get_email() ) ) ?: []
-		) ) );
-
-//		$emails = imap_fetch_overview( $hostname, implode( ',', $emails ), 0 );
-
-//		var_dump( $emails );
-
-		@\imap_close( $inbox );
-
-		return $emails;
 	}
 
+	/**
+	 * Get emails associated with the contact record.
+	 *
+	 * @param Contact $contact Contact.
+	 * @return array
+	 */
+	public function fetch( $contact ) {
+		return $this->use_php_imap( $contact );
+	}
 }
