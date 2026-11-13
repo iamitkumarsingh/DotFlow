@@ -81,7 +81,7 @@ Write operations:
 - Record actor, timestamp, object, operation and outcome in an audit trail.
 - Return the changed record and a revision/version identifier.
 
-High-impact actions (send a campaign, enrol contacts into a live workflow, activate a workflow, publish workflow changes, install/activate extensions or licenses, delete/erase records, change provider credentials) are marked destructive so compatible AI hosts can require explicit confirmation or an approval mechanism. AI must never receive secret values back after writing them.
+High-impact actions (send a campaign, enrol contacts into a live workflow, activate/deactivate a workflow, publish workflow changes, update platform settings, install/activate extensions or licenses, delete/erase records, change provider credentials) are marked destructive so compatible AI hosts can require explicit confirmation or an approval mechanism. AI must never receive secret values back after writing them.
 
 ## 6. Elementor widgets and dynamic data
 
