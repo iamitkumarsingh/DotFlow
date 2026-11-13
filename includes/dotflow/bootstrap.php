@@ -103,6 +103,7 @@ final class Bootstrap {
 	 */
 	public static function register_abilities() {
 		Abilities::add_ability( Get_System_Manifest::class );
+		Abilities::add_ability( Get_Contact_Profile::class );
 		Abilities::add_ability( List_Published_Forms::class );
 		Abilities::add_ability( List_Events::class );
 		Abilities::add_ability( List_Contact_Events::class );
