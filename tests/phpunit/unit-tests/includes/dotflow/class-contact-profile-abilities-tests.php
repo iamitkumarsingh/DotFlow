@@ -2,6 +2,7 @@
 
 use Groundhogg\DotFlow\Abilities\Get_Contact_Profile;
 use Groundhogg\DotFlow\Events\Audit;
+use Groundhogg\Pii;
 use function Groundhogg\get_contactdata;
 use function Groundhogg\get_db;
 
@@ -122,6 +123,33 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 
 		$this->assertWPError( $notes_forbidden );
 		$this->assertSame( 'dotflow_contact_notes_forbidden', $notes_forbidden->get_error_code() );
+	}
+
+	public function test_profile_redacts_contact_pii_for_restricted_users() {
+
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$user    = get_userdata( $user_id );
+		$user->add_cap( Pii::CAP, false );
+		wp_set_current_user( $user_id );
+
+		$contact_id = self::factory()->contacts->create( [
+			'email'      => 'private-profile@example.test',
+			'first_name' => 'Private',
+			'last_name'  => 'Patient',
+		] );
+		$this->event_contact_ids[] = $contact_id;
+
+		$result = $this->ability()->__invoke( [
+			'contact_id' => $contact_id,
+			'expand'     => [ 'meta' ],
+		] );
+
+		$this->assertNotWPError( $result );
+		$this->assertTrue( Pii::is_restricted() );
+		$this->assertSame( Pii::REDACTED, $result['contact']['email'] );
+		$this->assertSame( Pii::REDACTED, $result['contact']['first_name'] );
+		$this->assertSame( Pii::REDACTED, $result['contact']['last_name'] );
+		$this->assertStringNotContainsString( 'private-profile@example.test', wp_json_encode( $result ) );
 	}
 
 	public function test_profile_rejects_a_missing_contact() {
