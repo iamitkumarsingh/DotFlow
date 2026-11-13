@@ -1,11 +1,11 @@
 <?php
 /*
- * Plugin Name: Groundhogg
- * Plugin URI: https://groundhogg.io/?utm_source=wp-plugins&utm_campaign=plugin-uri&utm_medium=wp-dash
- * Description: CRM and marketing automation for WordPress
- * Version: 4.11
- * Author: Groundhogg Inc.
- * Author URI: https://groundhogg.io/?utm_source=wp-plugins&utm_campaign=author-uri&utm_medium=wp-dash
+ * Plugin Name: DotFlow
+ * Plugin URI: https://github.com/iamitkumarsingh/DotFlow
+ * Description: AI-powered CRM, email marketing and marketing automation for WordPress
+ * Version: 0.1.0-dev
+ * Author: DotFlow contributors (based on Groundhogg)
+ * Author URI: https://github.com/iamitkumarsingh/DotFlow
  * Text Domain: groundhogg
  * Domain Path: /languages
  * Requires at least: 6.9
