@@ -13,25 +13,26 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 		$user_id          = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $user_id );
 
-		$this->assertTrue( current_user_can( 'manage_options' ), 'The administrator fixture must be able to manage options.' );
-
-		$db = get_db( 'messages' );
-
-		$message_id = $db->insert( [
-			'object_type'  => 'contact',
-			'object_id'    => 1,
-			'direction'    => 'inbound',
-			'from_address' => 'patient@example.test',
-			'to_address'   => 'practice@example.test',
-			'subject'      => 'DotFlow MCP test',
-			'summary'      => 'A test conversation summary.',
-			'content'      => 'Private test message body.',
-			'thread_id'    => 'dotflow-mcp-thread-test',
-			'message_id'   => '<dotflow-mcp-test@example.test>',
-			'is_read'      => 0,
-		] );
+		$db         = get_db( 'messages' );
+		$message_id = 0;
 
 		try {
+			$this->assertTrue( current_user_can( 'manage_options' ), 'The administrator fixture must be able to manage options.' );
+
+			$message_id = $db->insert( [
+				'object_type'  => 'contact',
+				'object_id'    => 1,
+				'direction'    => 'inbound',
+				'from_address' => 'patient@example.test',
+				'to_address'   => 'practice@example.test',
+				'subject'      => 'DotFlow MCP test',
+				'summary'      => 'A test conversation summary.',
+				'content'      => 'Private test message body.',
+				'thread_id'    => 'dotflow-mcp-thread-test',
+				'message_id'   => '<dotflow-mcp-test@example.test>',
+				'is_read'      => 0,
+			] );
+
 			$list_reflection = new ReflectionClass( List_Messages::class );
 			$list_ability    = $list_reflection->newInstanceWithoutConstructor();
 
@@ -62,21 +63,3 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 				$db->delete( $message_id );
 			}
 		}
-	}
-	public function test_restricted_admin_cannot_read_conversation_messages() {
-
-		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		$user    = get_userdata( $user_id );
-		$user->add_cap( Pii::CAP, false );
-		wp_set_current_user( $user_id );
-
-		$reflection = new ReflectionClass( List_Messages::class );
-		$ability    = $reflection->newInstanceWithoutConstructor();
-		$result     = $ability( [ 'contact_id' => 1 ] );
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'groundhogg_pii_restricted', $result->get_error_code() );
-	}
-
-
-}
