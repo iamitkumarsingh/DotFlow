@@ -23,7 +23,7 @@ final class Audit {
 	public static function record( $action, $object_type, $object_id, array $changes = [], $source = 'mcp' ) {
 
 		$event = new Event( 'ai.mutation.completed', [
-			'action'      => sanitize_key( $action ),
+			'action'      => preg_replace( '/[^a-z0-9._-]/', '', strtolower( sanitize_text_field( $action ) ) ),
 			'object_type' => sanitize_key( $object_type ),
 			'object_id'   => absint( $object_id ),
 			'changes'     => $changes,
