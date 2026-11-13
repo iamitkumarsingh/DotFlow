@@ -3,6 +3,7 @@
 namespace Groundhogg\Abilities\Utils;
 
 use Groundhogg\Abilities\Ability;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -174,6 +175,12 @@ class Upload_Media extends Ability {
 		if ( isset( $input['alt_text'] ) ) {
 			update_post_meta( $attachment_id, '_wp_attachment_image_alt', sanitize_text_field( $input['alt_text'] ) );
 		}
+
+		Audit::record( 'media.uploaded', 'attachment', $attachment_id, [
+			'mime_type' => $upload['type'],
+			'filesize' => strlen( $decoded ),
+			'has_alt_text' => isset( $input['alt_text'] ),
+		] );
 
 		return [
 			'id'            => $attachment_id,
