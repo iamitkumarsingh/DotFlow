@@ -37,6 +37,11 @@ DotFlow-specific abilities are registered under the dotflow-platform category. E
 
 Namespace: dotflow/v1
 
+Implemented read-only endpoints:
+- GET /manifest — machine-readable product/module manifest.
+- GET /schema — supported object families, management abilities and write-safety policy.
+- GET /events — paginated, filterable event history; administrator-only.
+
 Planned endpoints:
 - GET /manifest — versioned machine-readable product/module manifest.
 - GET /schema — discover supported object types, fields, relationships and writable fields.
@@ -97,6 +102,7 @@ Widgets must register only when Elementor is active, expose native controls and 
 - DotFlow Form Elementor widget with active-form selection, server-side form-type/status revalidation and CRM shortcode rendering: initial implementation; runtime validation still required.
 - DotFlow-specific CTA/dynamic tags: planned.
 - WordPress Abilities category and MCP abilities for the system manifest, published form discovery and event history: initial implementation.
+- Read-only `dotflow/v1` REST discovery routes for manifest, schema and administrator-only event history: implemented; runtime route and permission tests still required.
 - Mutation audit helper: implemented for DotFlow's message read-state MCP mutation; broader coverage across all AI-writable records is still required.
 - Conversation MCP access: initial read/list and read-state mutation abilities are implemented against the inherited message store; runtime privacy tests remain pending.
 
