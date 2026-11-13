@@ -17,6 +17,72 @@ class DotFlow_Secret_Readback_Tests extends GH_UnitTestCase {
 		return $method->invoke( $ability );
 	}
 
+
+	protected function with_sensitive_test_setting( callable $callback ) {
+
+		$settings       = Plugin::$instance->settings;
+		$registry       = new ReflectionProperty( Settings::class, 'registered_settings' );
+		$registry->setAccessible( true );
+		$before         = $registry->getValue( $settings );
+		$old_value      = get_option( 'gh_dotflow_test_secret', null );
+
+		$settings->add_setting( 'dotflow_test_secret', [
+			'type'        => 'string',
+			'description' => 'Test secret setting.',
+			'default'     => 'default-secret-value',
+			'sensitive'   => true,
+		] );
+		update_option( 'gh_dotflow_test_secret', 'stored-secret-value' );
+
+		try {
+			$callback();
+		} finally {
+			$registry->setValue( $settings, $before );
+
+			if ( null === $old_value ) {
+				delete_option( 'gh_dotflow_test_secret' );
+			} else {
+				update_option( 'gh_dotflow_test_secret', $old_value );
+			}
+		}
+	}
+
+	public function test_list_settings_redacts_sensitive_current_and_default_values() {
+
+		$this->with_sensitive_test_setting( function () {
+			$reflection = new ReflectionClass( List_Settings::class );
+			$ability    = $reflection->newInstanceWithoutConstructor();
+			$result     = $ability->__invoke( [] );
+
+			$matches = array_values( array_filter( $result['settings'], function ( $setting ) {
+				return 'dotflow_test_secret' === $setting['id'];
+			} ) );
+
+			$this->assertCount( 1, $matches );
+			$this->assertTrue( $matches[0]['sensitive'] );
+			$this->assertNotSame( 'stored-secret-value', $matches[0]['value'] );
+			$this->assertNotSame( 'default-secret-value', $matches[0]['default'] );
+			$this->assertStringNotContainsString( 'stored-secret-value', wp_json_encode( $matches[0] ) );
+			$this->assertStringNotContainsString( 'default-secret-value', wp_json_encode( $matches[0] ) );
+		} );
+	}
+
+	public function test_update_settings_redacts_sensitive_values_in_its_response() {
+
+		$this->with_sensitive_test_setting( function () {
+			$reflection = new ReflectionClass( Update_Settings::class );
+			$ability    = $reflection->newInstanceWithoutConstructor();
+			$result     = $ability->__invoke( [
+				'settings' => [ 'gh_dotflow_test_secret' => 'new-secret-value' ],
+			] );
+
+			$this->assertNotWPError( $result );
+			$this->assertCount( 1, $result['updated'] );
+			$this->assertNotSame( 'new-secret-value', $result['updated'][0]['value'] );
+			$this->assertStringNotContainsString( 'new-secret-value', wp_json_encode( $result ) );
+		} );
+	}
+
 	public function test_license_schema_never_returns_the_raw_license_key() {
 
 		$license = new License( [
