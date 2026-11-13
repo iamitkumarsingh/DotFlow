@@ -26,6 +26,7 @@ DotFlow exposes machine-readable WordPress Abilities for AI clients that support
 Existing Groundhogg abilities are reused for inherited data:
 - Contacts: search, get, create, update, custom fields, notes and tags.
 - Campaigns and email: list/create campaigns, list/create/update templates and broadcasts.
+- Conversations: contact-scoped message history, optional message-body expansion and read/unread updates through DotFlow abilities.
 - Automation: list/get/create/edit/simulate/publish/activate/deactivate flows.
 - Reporting: discover report types and retrieve reports.
 - Settings: only registered settings with their own capability checks.
@@ -97,6 +98,7 @@ Widgets must register only when Elementor is active, expose native controls and 
 - DotFlow-specific CTA/dynamic tags: planned.
 - WordPress Abilities category and MCP abilities for the system manifest, published form discovery and event history: initial implementation.
 - Provider-specific integrations and mutation audit trail: planned.
+- Conversation MCP access: initial read/list and read-state mutation abilities are implemented against the inherited message store; runtime privacy tests remain pending.
 
 ## 8. Compatibility and validation
 
