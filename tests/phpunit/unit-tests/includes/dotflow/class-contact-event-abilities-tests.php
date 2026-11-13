@@ -7,6 +7,21 @@ use function Groundhogg\get_db;
 
 class DotFlow_Contact_Event_Abilities_Tests extends GH_UnitTestCase {
 
+	protected $event_contact_ids = [];
+
+	public function tearDown(): void {
+
+		$db = get_db( 'dotflow_events' );
+
+		if ( $db ) {
+			foreach ( $this->event_contact_ids as $contact_id ) {
+				$db->delete_by( 'contact_id', $contact_id );
+			}
+		}
+
+		parent::tearDown();
+	}
+
 	protected function ability() {
 		$reflection = new ReflectionClass( List_Contact_Events::class );
 
@@ -28,6 +43,7 @@ class DotFlow_Contact_Event_Abilities_Tests extends GH_UnitTestCase {
 		$contact_id = self::factory()->contacts->create( [
 			'email' => 'dotflow.timeline@example.test',
 		] );
+		$this->event_contact_ids[] = $contact_id;
 
 		Audit::record( 'contact.updated', 'contact', $contact_id, [
 			'fields' => [ 'first_name' ],
@@ -72,6 +88,7 @@ class DotFlow_Contact_Event_Abilities_Tests extends GH_UnitTestCase {
 		$owner_id = self::factory()->user->create( [ 'role' => 'sales_rep' ] );
 		$other_id = self::factory()->user->create( [ 'role' => 'sales_rep' ] );
 		$contact_id = self::factory()->contacts->create( [ 'owner_id' => $owner_id ] );
+		$this->event_contact_ids[] = $contact_id;
 
 		wp_set_current_user( $owner_id );
 		Audit::record( 'contact.updated', 'contact', $contact_id, [ 'fields' => [ 'first_name' ] ] );
@@ -109,6 +126,7 @@ class DotFlow_Contact_Event_Abilities_Tests extends GH_UnitTestCase {
 		Store::maybe_install();
 
 		$contact_id = self::factory()->contacts->create();
+		$this->event_contact_ids[] = $contact_id;
 		Audit::record( 'contact.updated', 'contact', $contact_id, [ 'fields' => [ 'last_name' ] ] );
 
 		$db = get_db( 'dotflow_events' );
