@@ -13,9 +13,7 @@ class DotFlow_List_Published_Forms_Tests extends GH_UnitTestCase {
 		$user->add_cap( 'view_funnels' );
 		wp_set_current_user( $user_id );
 
-		if ( ! current_user_can( 'view_funnels' ) ) {
-			$this->markTestSkipped( 'The test user cannot view flows.' );
-		}
+		$this->assertTrue( current_user_can( 'view_funnels' ), 'The capability fixture must allow viewing flows.' );
 
 		$db = get_db( 'steps' );
 
