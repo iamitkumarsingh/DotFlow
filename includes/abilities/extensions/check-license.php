@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Extensions;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\License_Schema;
 use Groundhogg\License_Manager;
+use Groundhogg\DotFlow\Events\Audit;
 
 /**
  * Checks the status of one or all registered Groundhogg licenses against groundhogg.io's
@@ -74,6 +75,11 @@ class Check_License extends Ability {
 					'error'       => __( 'License status could not be checked. Review the licensing status in the WordPress admin.', 'groundhogg' ),
 				];
 			}
+
+			Audit::record( 'license.status_checked', 'license', absint( $result->item_id ), [
+				'status' => sanitize_key( $result->license ),
+				'valid'  => $result->is_valid(),
+			] );
 
 			return License_Schema::transform( $license_key, $result );
 		}, $keys );
