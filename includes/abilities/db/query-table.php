@@ -312,7 +312,7 @@ class Query_Table extends Ability {
 			$results = $db->query( $query_vars );
 			$total   = $db->found_rows();
 		} catch ( Throwable $e ) {
-			return new WP_Error( 'groundhogg_invalid_query', $e->getMessage() );
+			return new WP_Error( 'groundhogg_invalid_query', __( 'The requested table query could not be completed. Check the table, filters and column definitions.', 'groundhogg' ) );
 		}
 
 		$items = array_map( static function ( $row ) {
