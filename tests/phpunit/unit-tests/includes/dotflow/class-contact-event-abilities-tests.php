@@ -11,11 +11,12 @@ class DotFlow_Contact_Event_Abilities_Tests extends GH_UnitTestCase {
 
 	public function tearDown(): void {
 
+		global $wpdb;
 		$db = get_db( 'dotflow_events' );
 
 		if ( $db ) {
 			foreach ( $this->event_contact_ids as $contact_id ) {
-				$db->delete_by( 'contact_id', $contact_id );
+				$wpdb->delete( $db->get_table_name(), [ 'contact_id' => $contact_id ], [ '%d' ] );
 			}
 		}
 
