@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Funnels;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\Step;
 use Throwable;
 use WP_Error;
@@ -250,6 +251,13 @@ class Edit_Flow extends Ability {
 			if ( $dry_run ) {
 				$funnel->rollback( $backup );
 			} else {
+				Audit::record( 'flow.edited', 'flow', $funnel->get_id(), [
+					'operations_count' => count( (array) $input['operations'] ),
+					'added_step_groups_count' => count( $result ),
+					'deleted_steps_count' => count( $operations->get_deleted() ),
+					'dry_run' => false,
+				] );
+
 				do_action( 'groundhogg/api/funnel/updated', $funnel );
 			}
 
