@@ -9,7 +9,7 @@
  * Text Domain: groundhogg
  * Domain Path: /languages
  * Requires at least: 6.9
- * Requires PHP: 7.4
+ * Requires PHP: 8.0
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.md
  *
@@ -41,7 +41,7 @@ define( 'GROUNDHOGG_ASSETS_URL', GROUNDHOGG_URL . 'assets/' );
 add_action( 'plugins_loaded', 'groundhogg_load_plugin_textdomain', -1 );
 
 define( 'GROUNDHOGG_TEXT_DOMAIN', 'groundhogg' );
-define( 'GROUNDHOGG_MINIMUM_PHP_VERSION', '7.4' );
+define( 'GROUNDHOGG_MINIMUM_PHP_VERSION', '8.0' );
 define( 'GROUNDHOGG_MINIMUM_WORDPRESS_VERSION', '6.9' );
 
 if ( ! version_compare( PHP_VERSION, GROUNDHOGG_MINIMUM_PHP_VERSION, '>=' ) ) {
