@@ -69,7 +69,7 @@ Scope:
 - Typed workflow editing, validation, simulation, publishing and enrolment.
 - Campaign/broadcast scheduling, cancellation, approval annotations and delivery outcomes.
 - Durable event dispatch: listeners run only after a new event row is committed; duplicate source/event IDs are acknowledged without re-firing listeners.
-- A native `dotflow_event` benchmark matches a configured event name and optional source, requires a linked contact, and passes only event name/source/ID into workflow args. Arbitrary event payloads and AI mutation audit events are excluded.
+- A native `dotflow_event` benchmark is discoverable and buildable through typed AI step schemas. It matches a configured event name and optional source, requires a linked contact, and passes only event name/source/ID into workflow args. The resolver rejects unknown settings, invalid names, overlong sources and AI mutation audit events; arbitrary event payloads are excluded.
 
 Exit gates:
 - Duplicate and out-of-order event tests.
