@@ -75,6 +75,18 @@ class List_Messages extends Ability {
 		];
 	}
 
+	/**
+	 * Format a stored UTC datetime as an ISO 8601 UTC timestamp.
+	 *
+	 * @param string $value Stored MySQL datetime.
+	 * @return string
+	 */
+	private static function format_utc( $value ) {
+		$timestamp = strtotime( $value );
+
+		return false === $timestamp ? '' : gmdate( 'c', $timestamp );
+	}
+
 	public function __invoke( $input ) {
 
 		global $wpdb;
@@ -170,7 +182,7 @@ class List_Messages extends Ability {
 				'in_reply_to'  => (string) $row->in_reply_to,
 				'status'       => (string) $row->status,
 				'is_read'      => (bool) $row->is_read,
-				'date_created' => get_date_from_gmt( $row->date_created, 'c' ),
+				'date_created' => self::format_utc( $row->date_created ),
 			];
 
 			if ( isset( $row->content ) ) {
