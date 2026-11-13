@@ -6,6 +6,7 @@ use Groundhogg\Abilities\Ability;
 use Groundhogg\Classes\Inbox;
 use Groundhogg\Classes\Message;
 use Groundhogg\Email_Logger;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 use function Groundhogg\do_replacements;
 use function Groundhogg\email_kses;
@@ -309,6 +310,13 @@ class Send_Composed_Email extends Ability {
 				'references'   => $extra_headers['References'] ?? '',
 			] );
 		}
+
+		Audit::record( 'email.composed_sent', 'email_message', absint( $log_id ), [
+			'recipient_count' => count( $all_recipients ),
+			'has_cc' => ! empty( $cc ),
+			'has_bcc' => ! empty( $bcc ),
+			'email_log_id' => absint( $log_id ),
+		] );
 
 		$response = [
 			'sent'       => true,
