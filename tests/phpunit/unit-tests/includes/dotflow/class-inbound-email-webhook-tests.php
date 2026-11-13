@@ -98,7 +98,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'reply@example.com', apply_filters( 'dotflow/inbound/reply_address', '' ) );
 		$this->assertSame( 'test-webhook-token-0123456789-abcdef', Inbox_Addresses::webhook_token() );
 		$this->assertTrue( Inbox::site_matches() );
-		$this->assertTrue( is_email( 'private-inbox@example.com' ) );
+		$this->assertNotFalse( is_email( 'private-inbox@example.com' ) );
 		$this->assertTrue( Inbox_Addresses::is_enabled() );
 		$this->assertTrue( Inbound_Email_Webhook::authorize( $request ) );
 
