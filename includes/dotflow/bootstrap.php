@@ -157,143 +157,50 @@ final class Bootstrap {
 					'type'        => 'string',
 					'minLength'   => 1,
 					'maxLength'   => 191,
-					'pattern'     => '^[a-z0-9][a-z0-9._-]{0,190}
-	 *
-	 * @return void
-	 */
-	public static function register_ability_category() {
-		Abilities::add_category( 'dotflow-platform', [
-			'label'       => __( 'DotFlow Platform', 'groundhogg' ),
-			'description' => __( 'Discover DotFlow capabilities, integrations and platform-level management tools.', 'groundhogg' ),
-		] );
-	}
-
-	/**
-	 * Register DotFlow-specific abilities.
-	 *
-	 * @return void
-	 */
-	public static function register_abilities() {
-		Abilities::add_ability( Get_System_Manifest::class );
-		Abilities::add_ability( Get_Contact_Profile::class );
-		Abilities::add_ability( List_Published_Forms::class );
-		Abilities::add_ability( List_Events::class );
-		Abilities::add_ability( List_Contact_Events::class );
-		Abilities::add_ability( List_Messages::class );
-		Abilities::add_ability( Set_Message_Read_State::class );
-	}
-
-	/**
-	 * Register Elementor hooks once Elementor's public API is available.
-	 *
-	 * @return void
-	 */
-	public static function register_elementor_hooks() {
-		add_action( 'elementor/elements/categories_registered', [ __CLASS__, 'register_elementor_category' ] );
-		add_action( 'elementor/widgets/register', [ __CLASS__, 'register_elementor_widgets' ] );
-	}
-
-	/**
-	 * Add the DotFlow category to Elementor's widget panel.
-	 *
-	 * @param object $elements_manager Elementor elements manager.
-	 * @return void
-	 */
-	public static function register_elementor_category( $elements_manager ) {
-		$elements_manager->add_category( 'dotflow', [
-			'title' => __( 'DotFlow', 'groundhogg' ),
-			'icon'  => 'fa fa-plug',
-		] );
-	}
-
-	/**
-	 * Register DotFlow's native Elementor widgets.
-	 *
-	 * @param object $widgets_manager Elementor widgets manager.
-	 * @return void
-	 */
-	public static function register_elementor_widgets( $widgets_manager ) {
-		if ( class_exists( Form_Widget::class ) ) {
-			$widgets_manager->register( new Form_Widget() );
-		}
-	}
-}
-
-Bootstrap::register();
-,
+					'pattern'     => '^[a-z0-9][a-z0-9._-]{0,190}$',
 					'description' => __( 'Exact DotFlow event name, such as email.inbound.received. AI mutation audit events are not triggerable.', 'groundhogg' ),
 				],
 				'source' => [
 					'type'        => 'string',
 					'maxLength'   => 64,
-					'pattern'     => '^[a-z0-9_-]*
-	 *
-	 * @return void
-	 */
-	public static function register_ability_category() {
-		Abilities::add_category( 'dotflow-platform', [
-			'label'       => __( 'DotFlow Platform', 'groundhogg' ),
-			'description' => __( 'Discover DotFlow capabilities, integrations and platform-level management tools.', 'groundhogg' ),
-		] );
-	}
-
-	/**
-	 * Register DotFlow-specific abilities.
-	 *
-	 * @return void
-	 */
-	public static function register_abilities() {
-		Abilities::add_ability( Get_System_Manifest::class );
-		Abilities::add_ability( Get_Contact_Profile::class );
-		Abilities::add_ability( List_Published_Forms::class );
-		Abilities::add_ability( List_Events::class );
-		Abilities::add_ability( List_Contact_Events::class );
-		Abilities::add_ability( List_Messages::class );
-		Abilities::add_ability( Set_Message_Read_State::class );
-	}
-
-	/**
-	 * Register Elementor hooks once Elementor's public API is available.
-	 *
-	 * @return void
-	 */
-	public static function register_elementor_hooks() {
-		add_action( 'elementor/elements/categories_registered', [ __CLASS__, 'register_elementor_category' ] );
-		add_action( 'elementor/widgets/register', [ __CLASS__, 'register_elementor_widgets' ] );
-	}
-
-	/**
-	 * Add the DotFlow category to Elementor's widget panel.
-	 *
-	 * @param object $elements_manager Elementor elements manager.
-	 * @return void
-	 */
-	public static function register_elementor_category( $elements_manager ) {
-		$elements_manager->add_category( 'dotflow', [
-			'title' => __( 'DotFlow', 'groundhogg' ),
-			'icon'  => 'fa fa-plug',
-		] );
-	}
-
-	/**
-	 * Register DotFlow's native Elementor widgets.
-	 *
-	 * @param object $widgets_manager Elementor widgets manager.
-	 * @return void
-	 */
-	public static function register_elementor_widgets( $widgets_manager ) {
-		if ( class_exists( Form_Widget::class ) ) {
-			$widgets_manager->register( new Form_Widget() );
-		}
-	}
-}
-
-Bootstrap::register();
-,
+					'pattern'     => '^[a-z0-9_-]*$',
 					'description' => __( 'Optional exact event source, such as email. Omit to match any source.', 'groundhogg' ),
 				],
 			],
-		] );
+		], [], function ( array $settings ) {
+
+			$unknown = array_diff( array_keys( $settings ), [ 'event_name', 'source' ] );
+			if ( ! empty( $unknown ) ) {
+				return new \WP_Error( 'dotflow_event_unknown_setting', __( 'DotFlow Event only accepts event_name and source settings.', 'groundhogg' ) );
+			}
+
+			if ( ! isset( $settings['event_name'] ) || ! is_string( $settings['event_name'] ) ) {
+				return new \WP_Error( 'dotflow_event_name_required', __( 'A valid DotFlow event_name is required.', 'groundhogg' ) );
+			}
+
+			$event_name = sanitize_text_field( $settings['event_name'] );
+			if ( ! preg_match( '/^[a-z0-9][a-z0-9._-]{0,190}$/', $event_name ) || $event_name === 'ai.mutation.completed' ) {
+				return new \WP_Error( 'dotflow_event_name_invalid', __( 'The DotFlow event name is invalid or reserved for audit records.', 'groundhogg' ) );
+			}
+
+			$source = '';
+			if ( isset( $settings['source'] ) ) {
+				if ( ! is_string( $settings['source'] ) ) {
+					return new \WP_Error( 'dotflow_event_source_invalid', __( 'The DotFlow event source must be a string.', 'groundhogg' ) );
+				}
+				$source = sanitize_key( $settings['source'] );
+				if ( strlen( $source ) > 64 ) {
+					return new \WP_Error( 'dotflow_event_source_too_long', __( 'The DotFlow event source cannot exceed 64 characters.', 'groundhogg' ) );
+				}
+			}
+
+			return [
+				'settings' => [
+					'event_name' => $event_name,
+					'source'     => $source,
+				],
+			];
+		} );
 	}
 
 	/**
