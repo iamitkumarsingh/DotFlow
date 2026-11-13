@@ -132,7 +132,7 @@ final class Routes {
 				'event' => [
 					'storage'         => 'DotFlow durable domain event store',
 					'read_abilities'  => [ 'dotflow/list-events' ],
-					'write_abilities' => [ 'dotflow/event/recorded' ],
+					'write_abilities' => [],
 					'permissions'     => [ 'manage_options' ],
 				],
 				'conversation_message' => [
