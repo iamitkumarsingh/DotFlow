@@ -1,5 +1,6 @@
 <?php
 
+use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\DotFlow\Events\Event;
 use Groundhogg\DotFlow\Events\Store;
@@ -55,6 +56,7 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 			}
 		}
 	}
+
 	public function test_ai_mutation_audit_records_changed_fields_without_message_content() {
 
 		Store::maybe_install();
@@ -78,7 +80,7 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 		try {
 			$this->assertGreaterThan( 0, $record_id );
 
-			$reflection = new ReflectionClass( \\Groundhogg\\DotFlow\\Abilities\\List_Events::class );
+			$reflection = new ReflectionClass( List_Events::class );
 			$ability    = $reflection->newInstanceWithoutConstructor();
 			$result     = $ability( [
 				'event_name' => 'ai.mutation.completed',
@@ -95,7 +97,7 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 			$this->assertSame( 'message.read_state.updated', $logged['payload']['action'] );
 			$this->assertSame( false, $logged['payload']['changes']['is_read']['before'] );
 			$this->assertSame( true, $logged['payload']['changes']['is_read']['after'] );
-			$this->assertArrayNotHasKey( 'content', $logged['payload']);
+			$this->assertArrayNotHasKey( 'content', $logged['payload'] );
 		} finally {
 			if ( $record_id ) {
 				$db->delete( $record_id );
