@@ -8,6 +8,7 @@ use Groundhogg\Funnel;
 use Groundhogg\Plugin;
 use function Groundhogg\get_db;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
+use Groundhogg\Abilities\Schemas\Step_Type_Schema;
 
 class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 
@@ -35,6 +36,22 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		remove_filter( 'groundhogg/steps/benchmarks', [ $benchmark, 'register' ] );
 		remove_action( 'wp_enqueue_scripts', [ $benchmark, 'frontend_scripts' ] );
 		remove_action( 'admin_enqueue_scripts', [ $benchmark, 'admin_scripts' ] );
+	}
+
+	public function test_dotflow_event_step_is_discoverable_and_buildable_by_typed_ai_abilities() {
+
+		$this->assertNotFalse( has_action( 'groundhogg/abilities/register_step_types', [ Bootstrap::class, 'register_step_type_schema' ] ) );
+
+		Bootstrap::register_step_type_schema();
+
+		$this->assertContains( 'dotflow_event', Step_Type_Schema::supported_types() );
+
+		$schema = Step_Type_Schema::settings_schema( 'dotflow_event' );
+
+		$this->assertSame( [ 'event_name' ], $schema['required'] );
+		$this->assertSame( 'string', $schema['properties']['event_name']['type'] );
+		$this->assertSame( 'string', $schema['properties']['source']['type'] );
+		$this->assertSame( 64, $schema['properties']['source']['maxLength'] );
 	}
 
 	public function test_matching_contact_event_enqueues_once_without_forwarding_payload() {
