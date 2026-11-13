@@ -239,6 +239,17 @@ class Update_Custom_Field extends Ability {
 
 		self::save_properties( $all );
 
+		Audit::record(
+			'custom_field.updated',
+			'custom_field',
+			0,
+			[
+				'field_id'   => $field['id'],
+				'fields'     => array_values( array_intersect( [ 'label', 'name', 'type', 'group', 'options', 'multiple', 'decimals', 'pii', 'order', 'width' ], array_keys( $input ) ) ),
+				'pii'        => ! empty( $field['pii'] ),
+			]
+		);
+
 		return [
 			'field' => Property_Field_Schema::transform( $field ),
 		];
