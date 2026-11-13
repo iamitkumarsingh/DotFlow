@@ -13,25 +13,27 @@ class DotFlow_List_Published_Forms_Tests extends GH_UnitTestCase {
 		$user->add_cap( 'view_funnels' );
 		wp_set_current_user( $user_id );
 
-		$this->assertTrue( current_user_can( 'view_funnels' ), 'The capability fixture must allow viewing flows.' );
-
-		$db = get_db( 'steps' );
-
-		$active_id = $db->add( [
-			'funnel_id'   => 0,
-			'step_title'  => 'DotFlow MCP Test Form',
-			'step_type'   => 'web_form',
-			'step_status' => 'active',
-		] );
-
-		$inactive_id = $db->add( [
-			'funnel_id'   => 0,
-			'step_title'  => 'DotFlow MCP Inactive Form',
-			'step_type'   => 'web_form',
-			'step_status' => 'inactive',
-		] );
+		$db          = get_db( 'steps' );
+		$active_id   = 0;
+		$inactive_id = 0;
 
 		try {
+			$this->assertTrue( current_user_can( 'view_funnels' ), 'The capability fixture must allow viewing flows.' );
+
+			$active_id = $db->add( [
+				'funnel_id'   => 0,
+				'step_title'  => 'DotFlow MCP Test Form',
+				'step_type'   => 'web_form',
+				'step_status' => 'active',
+			] );
+
+			$inactive_id = $db->add( [
+				'funnel_id'   => 0,
+				'step_title'  => 'DotFlow MCP Inactive Form',
+				'step_type'   => 'web_form',
+				'step_status' => 'inactive',
+			] );
+
 			$reflection = new ReflectionClass( List_Published_Forms::class );
 			$ability    = $reflection->newInstanceWithoutConstructor();
 			$result     = $ability( [ 'search' => 'DotFlow MCP' ] );
