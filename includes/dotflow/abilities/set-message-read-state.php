@@ -75,10 +75,20 @@ class Set_Message_Read_State extends Ability {
 			}
 		}
 
-		$updated = $db->update( $message_id, [ 'is_read' => $is_read ? 1 : 0 ] );
+		$previous_state = (bool) $message->is_read;
+		$updated        = $db->update( $message_id, [ 'is_read' => $is_read ? 1 : 0 ] );
 
 		if ( false === $updated ) {
 			return new WP_Error( 'dotflow_message_update_failed', __( 'The message read state could not be updated.', 'groundhogg' ) );
+		}
+
+		if ( $previous_state !== $is_read ) {
+			Audit::record( 'message.read_state.updated', 'message', $message_id, [
+				'is_read' => [
+					'before' => $previous_state,
+					'after'  => $is_read,
+				],
+			] );
 		}
 
 		return [
