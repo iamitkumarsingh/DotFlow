@@ -24,14 +24,23 @@ final class Dispatcher {
 			throw new InvalidArgumentException( 'Only DotFlow Event instances can be dispatched.' );
 		}
 
-		$record_id = Store::record( $event );
+		$stored = Store::record_with_status( $event );
 
-		if ( $record_id ) {
-			do_action( 'dotflow/event/recorded', $record_id, $event );
-		} else {
+		if ( ! $stored ) {
 			do_action( 'dotflow/event/persistence_failed', $event );
+
+			return $event;
 		}
 
+		$record_id = $stored['id'];
+
+		if ( ! $stored['inserted'] ) {
+			do_action( 'dotflow/event/duplicate', $record_id, $event );
+
+			return $event;
+		}
+
+		do_action( 'dotflow/event/recorded', $record_id, $event );
 		do_action( 'dotflow/event', $event );
 		do_action( 'dotflow/event/' . $event->get_name(), $event );
 
