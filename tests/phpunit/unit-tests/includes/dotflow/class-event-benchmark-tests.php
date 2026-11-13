@@ -52,6 +52,25 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'string', $schema['properties']['event_name']['type'] );
 		$this->assertSame( 'string', $schema['properties']['source']['type'] );
 		$this->assertSame( 64, $schema['properties']['source']['maxLength'] );
+
+		$resolved = Step_Type_Schema::resolve_settings( 'dotflow_event', [
+			'event_name' => 'email.inbound.received',
+			'source'     => 'Email',
+		], [] );
+		$this->assertNotWPError( $resolved );
+		$this->assertSame( [ 'event_name' => 'email.inbound.received', 'source' => 'email' ], $resolved['settings'] );
+
+		$reserved = Step_Type_Schema::resolve_settings( 'dotflow_event', [ 'event_name' => 'ai.mutation.completed' ], [] );
+		$this->assertWPError( $reserved );
+		$this->assertSame( 'dotflow_event_name_invalid', $reserved->get_error_code() );
+
+		$unknown = Step_Type_Schema::resolve_settings( 'dotflow_event', [ 'event_name' => 'email.inbound.received', 'payload' => [ 'secret' => 'value' ] ], [] );
+		$this->assertWPError( $unknown );
+		$this->assertSame( 'dotflow_event_unknown_setting', $unknown->get_error_code() );
+
+		$long_source = Step_Type_Schema::resolve_settings( 'dotflow_event', [ 'event_name' => 'email.inbound.received', 'source' => str_repeat( 'a', 80 ) ], [] );
+		$this->assertWPError( $long_source );
+		$this->assertSame( 'dotflow_event_source_too_long', $long_source->get_error_code() );
 	}
 
 	public function test_matching_contact_event_enqueues_once_without_forwarding_payload() {
