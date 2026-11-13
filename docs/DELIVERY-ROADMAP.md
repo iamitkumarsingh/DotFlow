@@ -62,7 +62,7 @@ Exit gates:
 
 ## Phase 4 — Campaigns, workflows and event automation
 
-**Status: inherited CRM automation abilities and the DotFlow Event workflow benchmark are implemented; end-to-end enqueue, retry and simulation validation continues.**
+**Status: inherited CRM automation abilities and the DotFlow Event workflow benchmark are implemented; end-to-end queue-enqueue and duplicate-delivery tests pass. Workflow simulation and operational retry validation remain.**
 
 Scope:
 - Connect consent-aware form, page, CTA and CRM events to workflow triggers.
