@@ -16,6 +16,7 @@ class DotFlow_Abilities_Registration_Tests extends GH_UnitTestCase {
 
 		foreach ( [
 			'dotflow/get-system-manifest',
+			'dotflow/get-contact-profile',
 			'dotflow/list-published-forms',
 			'dotflow/list-events',
 			'dotflow/list-contact-events',
