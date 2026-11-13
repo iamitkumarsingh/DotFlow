@@ -3,6 +3,7 @@
 use Groundhogg\Abilities\Contacts\Update_Contact;
 use Groundhogg\Pii;
 use function Groundhogg\get_contactdata;
+use function Groundhogg\get_db;
 
 class DotFlow_Update_Contact_Pii_Tests extends GH_UnitTestCase {
 
