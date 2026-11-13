@@ -51,6 +51,31 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$this->assertArrayNotHasKey( 'payload', $expanded['activity'][0] );
 	}
 
+	public function test_profile_can_include_notes_for_an_authorised_notes_user() {
+
+		$this->admin_user();
+
+		$contact_id = self::factory()->contacts->create();
+		$note_ability_reflection = new ReflectionClass( \\Groundhogg\\Abilities\\Contacts\\Add_Contact_Note::class );
+		$note_ability = $note_ability_reflection->newInstanceWithoutConstructor();
+		$created = $note_ability->__invoke( [
+			'contact_id' => $contact_id,
+			'content'    => 'A private CRM note for the profile test.',
+		] );
+
+		$this->assertNotWPError( $created );
+
+		$profile = $this->ability()->__invoke( [
+			'contact_id'    => $contact_id,
+			'include_notes' => true,
+			'notes_limit'   => 1,
+		] );
+
+		$this->assertNotWPError( $profile );
+		$this->assertCount( 1, $profile['notes'] );
+		$this->assertSame( 'A private CRM note for the profile test.', $profile['notes'][0]['content'] );
+	}
+
 	public function test_profile_requires_contact_permission_and_separate_note_permission() {
 
 		$owner_id = self::factory()->user->create( [ 'role' => 'sales_rep' ] );
