@@ -84,7 +84,7 @@ class Get_System_Manifest extends Ability {
 			'api_version'    => defined( 'DOTFLOW_API_VERSION' ) ? DOTFLOW_API_VERSION : 'v1',
 			'foundation'     => 'Groundhogg GPLv3-derived WordPress plugin',
 			'api_base'       => untrailingslashit( rest_url() ),
-			'rest_namespace' => 'dotflow/v1 (planned; not yet registered)',
+			'rest_namespace' => 'dotflow/v1',
 			'elementor'      => [
 				'available' => (bool) $elementor_available,
 				'version'   => (string) $elementor_version,
@@ -166,7 +166,7 @@ class Get_System_Manifest extends Ability {
 			'data_policy'    => [
 				'private_data_requires_capability' => true,
 				'credentials_exposed_to_ai'        => false,
-				'mutations_audited'                => false,
+				'mutations_audited'                => 'Partial: DotFlow message read-state MCP changes are audited; other inherited mutations are not yet covered by the DotFlow audit log.',
 			],
 		];
 	}
