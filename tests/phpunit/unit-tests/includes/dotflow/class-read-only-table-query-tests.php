@@ -33,6 +33,31 @@ class DotFlow_Read_Only_Table_Query_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'groundhogg_table_not_allowed', $result->get_error_code() );
 	}
 
+	public function test_table_query_errors_do_not_disclose_database_exception_details() {
+
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
+		$result = $this->ability()->__invoke( [
+			'table' => 'tags',
+			'where' => [
+				[
+					'column'  => 'tag_name',
+					'compare' => 'DOTFLOW_INVALID_OPERATOR',
+					'value'   => 'test',
+				],
+			],
+		] );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'groundhogg_invalid_query', $result->get_error_code() );
+		$this->assertStringNotContainsString( 'DOTFLOW_INVALID_OPERATOR', $result->get_error_message() );
+		$this->assertSame(
+			'The requested table query could not be completed. Check the table, filters and column definitions.',
+			$result->get_error_message()
+		);
+	}
+
 	public function test_raw_table_query_is_blocked_for_users_restricted_from_pii() {
 
 		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
