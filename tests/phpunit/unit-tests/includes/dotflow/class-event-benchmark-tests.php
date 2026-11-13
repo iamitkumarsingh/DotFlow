@@ -5,6 +5,7 @@ use Groundhogg\DotFlow\Bootstrap;
 use Groundhogg\DotFlow\Events\Dispatcher;
 use Groundhogg\DotFlow\Events\Event;
 use Groundhogg\Funnel;
+use Groundhogg\Step;
 use Groundhogg\Plugin;
 use function Groundhogg\get_db;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
@@ -108,6 +109,8 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 			$this->assertNotWPError( $built );
 			$this->assertSame( 'dotflow_event', $built[0]['type'] );
 			$this->assertSame( 'email.inbound.received', $built[0]['settings']['event_name'] );
+		$created_step = new Step( $built[0]['id'] );
+		$this->assertSame( 'email', $created_step->get_setting( 'source' ) );
 
 			$invalid_builder = new Step_Tree_Builder( $funnel );
 			$invalid = $invalid_builder->build( [
