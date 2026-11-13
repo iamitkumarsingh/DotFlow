@@ -66,6 +66,7 @@ class Get_System_Manifest extends Ability {
 							'private_data_requires_capability' => [ 'type' => 'boolean' ],
 							'credentials_exposed_to_ai'        => [ 'type' => 'boolean' ],
 							'mutations_audited'                => [ 'type' => 'boolean' ],
+							'audit_coverage'                   => [ 'type' => 'string' ],
 						],
 					],
 				],
@@ -166,7 +167,8 @@ class Get_System_Manifest extends Ability {
 			'data_policy'    => [
 				'private_data_requires_capability' => true,
 				'credentials_exposed_to_ai'        => false,
-				'mutations_audited'                => 'Partial: DotFlow message read-state MCP changes are audited; other inherited mutations are not yet covered by the DotFlow audit log.',
+				'mutations_audited'                => false,
+				'audit_coverage'                   => 'Partial: DotFlow message read-state MCP changes are audited; other inherited mutations are not yet covered by the DotFlow audit log.',
 			],
 		];
 	}
