@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Extensions;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\License_Schema;
 use Groundhogg\License_Manager;
+use Groundhogg\DotFlow\Events\Audit;
 
 /**
  * Activates a Groundhogg license key against groundhogg.io's licensing API
@@ -50,6 +51,11 @@ class Activate_License extends Ability {
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
+
+		Audit::record( 'license.activated', 'license', 0, [
+			'activated' => true,
+			'license_key_recorded' => false,
+		] );
 
 		return License_Schema::transform( $license_key, $result );
 	}
