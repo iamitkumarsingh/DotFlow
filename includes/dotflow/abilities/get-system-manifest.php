@@ -128,6 +128,13 @@ class Get_System_Manifest extends Ability {
 					'abilities'   => [ 'dotflow/list-events' ],
 				],
 				[
+					'id'          => 'conversations',
+					'label'       => 'Conversation history',
+					'status'      => 'implemented',
+					'description' => 'AI-readable inbound/outbound message history with contact-level permission checks and an authorised read/unread mutation.',
+					'abilities'   => [ 'dotflow/list-messages', 'dotflow/set-message-read-state' ],
+				],
+				[
 					'id'          => 'messaging',
 					'label'       => 'Provider-independent messaging and conversations',
 					'status'      => 'planned',
