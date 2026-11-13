@@ -125,7 +125,7 @@ final class Store {
 		foreach ( $data as $key => $value ) {
 			$key_string = (string) $key;
 
-			if ( preg_match( '/password|secret|token|api[_-]?key|authorization|cookie/i', $key_string ) ) {
+			if ( preg_match( '/password|secret|token|api[_-]?key|license[_-]?key|private[_-]?key|client[_-]?secret|access[_-]?key|authorization|cookie/i', $key_string ) ) {
 				$redacted[ $key ] = '[REDACTED]';
 				continue;
 			}
