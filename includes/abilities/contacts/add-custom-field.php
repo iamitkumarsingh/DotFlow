@@ -3,6 +3,7 @@
 namespace Groundhogg\Abilities\Contacts;
 
 use Groundhogg\Abilities\Ability;
+use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\Abilities\Schemas\Property_Field_Schema;
 use Groundhogg\Abilities\Traits\Has_Custom_Field_Validation;
 use Groundhogg\Properties;
