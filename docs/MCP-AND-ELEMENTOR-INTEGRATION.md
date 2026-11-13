@@ -66,7 +66,7 @@ All returned records should use JSON with:
 - Provenance for externally synchronised data (source, external_id, last_synced_at).
 - Machine-readable error code and actionable message.
 
-Private fields are minimised. Credentials, API keys, SMTP passwords, IMAP passwords and webhook signing secrets are never returned to AI clients. PII access follows the same WordPress capabilities and per-contact ownership rules as the admin UI. Users without `view_contact_pii` cannot read raw message/event payloads or change contact identity fields and PII/unclassified custom-field values; safe CRM metadata remains manageable.
+Private fields are minimised. Credentials, API keys, SMTP passwords, IMAP passwords, webhook signing secrets and license keys are never returned to AI clients. Sensitive settings are always redacted in list/update responses; AI cannot request a reveal override. PII access follows the same WordPress capabilities and per-contact ownership rules as the admin UI. Users without `view_contact_pii` cannot read raw message/event payloads or change contact identity fields and PII/unclassified custom-field values; safe CRM metadata remains manageable.
 
 ## 5. Write safety model
 
@@ -81,7 +81,7 @@ Write operations:
 - Record actor, timestamp, object, operation and outcome in an audit trail.
 - Return the changed record and a revision/version identifier.
 
-High-impact actions (send a campaign, publish a workflow, delete/erase records, change provider credentials) require explicit confirmation or an approval mechanism. AI must never receive secret values back after writing them.
+High-impact actions (send a campaign, enrol contacts into a live workflow, activate a workflow, publish workflow changes, install/activate extensions or licenses, delete/erase records, change provider credentials) are marked destructive so compatible AI hosts can require explicit confirmation or an approval mechanism. AI must never receive secret values back after writing them.
 
 ## 6. Elementor widgets and dynamic data
 
