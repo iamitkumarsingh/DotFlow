@@ -30,7 +30,7 @@ class DotFlow_List_Published_Forms_Tests extends GH_UnitTestCase {
 		try {
 			$reflection = new ReflectionClass( List_Published_Forms::class );
 			$ability    = $reflection->newInstanceWithoutConstructor();
-			$result     = $ability( [ 'search' => 'DotFlow MCP Test Form' ] );
+			$result     = $ability( [ 'search' => 'DotFlow MCP' ] );
 
 			$this->assertSame( 1, $result['total_items'] );
 			$this->assertCount( 1, $result['forms'] );
