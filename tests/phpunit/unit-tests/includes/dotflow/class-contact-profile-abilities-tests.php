@@ -6,6 +6,22 @@ use function Groundhogg\get_contactdata;
 
 class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 
+	protected $event_contact_ids = [];
+
+	public function tearDown(): void {
+
+		global $wpdb;
+		$db = get_db( 'dotflow_events' );
+
+		if ( $db ) {
+			foreach ( $this->event_contact_ids as $contact_id ) {
+				$wpdb->delete( $db->get_table_name(), [ 'contact_id' => $contact_id ], [ '%d' ] );
+			}
+		}
+
+		parent::tearDown();
+	}
+
 	protected function ability() {
 		$reflection = new ReflectionClass( Get_Contact_Profile::class );
 
@@ -27,6 +43,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 			'email'      => 'profile@example.test',
 			'first_name' => 'Profile',
 		] );
+		$this->event_contact_ids[] = $contact_id;
 
 		Audit::record( 'contact.updated', 'contact', $contact_id, [
 			'fields' => [ 'first_name' ],
@@ -56,6 +73,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$this->admin_user();
 
 		$contact_id = self::factory()->contacts->create();
+		$this->event_contact_ids[] = $contact_id;
 		$note_ability_reflection = new ReflectionClass( \Groundhogg\Abilities\Contacts\Add_Contact_Note::class );
 		$note_ability = $note_ability_reflection->newInstanceWithoutConstructor();
 		$created = $note_ability->__invoke( [
@@ -81,6 +99,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$owner_id = self::factory()->user->create( [ 'role' => 'sales_rep' ] );
 		$other_id = self::factory()->user->create( [ 'role' => 'sales_rep' ] );
 		$contact_id = self::factory()->contacts->create( [ 'owner_id' => $owner_id ] );
+		$this->event_contact_ids[] = $contact_id;
 
 		wp_set_current_user( $other_id );
 		$forbidden = $this->ability()->__invoke( [ 'contact_id' => $contact_id ] );
