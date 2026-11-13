@@ -9,6 +9,10 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 
 	public function test_message_content_is_opt_in_and_read_state_is_editable() {
 
+		$previous_user_id = get_current_user_id();
+		$user_id          = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
 		if ( ! current_user_can( 'manage_options' ) ) {
 			$this->markTestSkipped( 'The test user cannot list all conversation records.' );
 		}
@@ -55,6 +59,7 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 			$this->assertTrue( $state_result['updated'] );
 			$this->assertTrue( $state_result['is_read'] );
 		} finally {
+			wp_set_current_user( $previous_user_id );
 			if ( $message_id ) {
 				$db->delete( $message_id );
 			}
