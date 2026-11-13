@@ -92,9 +92,10 @@ Widgets must register only when Elementor is active, expose native controls and 
 - DotFlow event dispatcher: implemented.
 - Machine-readable system manifest ability: initial implementation.
 - Native inherited Groundhogg MCP abilities: available from the foundation.
-- Durable DotFlow event storage and event-query ability: not yet implemented.
-- DotFlow Form Elementor widget: initial implementation; runtime validation still required.
+- Durable DotFlow event storage with source-scoped idempotency, recursive secret-key redaction and administrator-only event-query ability: initial implementation.
+- DotFlow Form Elementor widget with active-form selection, server-side form-type/status revalidation and CRM shortcode rendering: initial implementation; runtime validation still required.
 - DotFlow-specific CTA/dynamic tags: planned.
+- WordPress Abilities category and MCP abilities for the system manifest, published form discovery and event history: initial implementation.
 - Provider-specific integrations and mutation audit trail: planned.
 
 ## 8. Compatibility and validation
