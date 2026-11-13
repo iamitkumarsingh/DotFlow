@@ -1,6 +1,12 @@
 <?php
 
+use Groundhogg\Contact;
 use Groundhogg\DotFlow\Bootstrap;
+use Groundhogg\DotFlow\Events\Dispatcher;
+use Groundhogg\DotFlow\Events\Event;
+use Groundhogg\Funnel;
+use Groundhogg\Plugin;
+use function Groundhogg\get_db;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 
 class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
@@ -29,6 +35,68 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 		remove_filter( 'groundhogg/steps/benchmarks', [ $benchmark, 'register' ] );
 		remove_action( 'wp_enqueue_scripts', [ $benchmark, 'frontend_scripts' ] );
 		remove_action( 'admin_enqueue_scripts', [ $benchmark, 'admin_scripts' ] );
+	}
+
+	public function test_matching_contact_event_enqueues_once_without_forwarding_payload() {
+
+		global $wpdb;
+
+		$this->assertTrue( Plugin::instance()->step_manager->type_is_registered( 'dotflow_event' ) );
+
+		$funnel = new Funnel( [
+			'title'  => 'DotFlow Event Benchmark Test',
+			'status' => 'active',
+		] );
+
+		$step = $funnel->add_step( [
+			'step_title'  => 'Inbound email received',
+			'step_type'   => 'dotflow_event',
+			'step_group'  => 'benchmark',
+			'step_status' => 'active',
+			'meta'        => [
+				'event_name' => 'email.inbound.received',
+				'source'     => 'email',
+			],
+		] );
+		$step->commit();
+
+		$contact_id = self::factory()->contacts->create( [
+			'email' => 'event-trigger@example.test',
+		] );
+		$event_id = 'dotflow-event-benchmark-integration-001';
+
+		try {
+			$event = new Event( 'email.inbound.received', [
+				'contact_id' => $contact_id,
+				'object_type' => 'contact',
+				'object_id' => $contact_id,
+				'content' => 'Private message body must not be forwarded.',
+				'api_key' => 'never-forward-this-secret',
+			], 'email', $event_id );
+
+			Dispatcher::dispatch( $event );
+			Dispatcher::dispatch( $event );
+
+			$waiting = $step->get_waiting_events();
+
+			$this->assertCount( 1, $waiting );
+			$this->assertSame( $contact_id, $waiting[0]->get_contact_id() );
+			$this->assertSame( 'email.inbound.received', $waiting[0]->args['event_name'] );
+			$this->assertSame( 'email', $waiting[0]->args['event_source'] );
+			$this->assertSame( $event_id, $waiting[0]->args['event_id'] );
+			$this->assertArrayNotHasKey( 'content', $waiting[0]->args );
+			$this->assertArrayNotHasKey( 'api_key', $waiting[0]->args );
+		} finally {
+			$funnel->delete();
+			$contact = new Contact( $contact_id );
+			if ( $contact->exists() ) {
+				$contact->delete();
+			}
+			$events_db = get_db( 'dotflow_events' );
+			if ( $events_db ) {
+				$wpdb->delete( $events_db->get_table_name(), [ 'event_id' => $event_id ], [ '%s' ] );
+			}
+		}
 	}
 
 	public function test_event_matching_is_exact_source_filterable_and_excludes_audit_events() {
