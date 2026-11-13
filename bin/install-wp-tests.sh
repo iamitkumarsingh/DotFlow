@@ -152,4 +152,11 @@ install_db() {
 
 install_wp
 install_test_suite
+
+# The WordPress test suite resolves its core bootstrap from WP_TESTS_DIR/src.
+# Keep that path explicit across changes to the upstream config sample.
+if [ ! -e "$WP_TESTS_DIR/src" ]; then
+	ln -s "$WP_CORE_DIR" "$WP_TESTS_DIR/src"
+fi
+
 install_db
