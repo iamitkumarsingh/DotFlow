@@ -37,13 +37,7 @@ class List_Settings extends Ability {
 						'type'        => 'string',
 						'enum'        => array_keys( Plugin::$instance->settings->get_groups() ),
 						'description' => __( 'Only include settings registered under this group.', 'groundhogg' ),
-					],
-					'reveal' => [
-						'type'        => 'array',
-						'items'       => [ 'type' => 'string' ],
-						'default'     => [],
-						'description' => __( 'Ids of sensitive settings to return unredacted - see the sensitive flag on each item. Only named ids are ever exposed, and only if WP_DEBUG is on or the groundhogg/settings/expose_sensitive_values filter allows it; otherwise they stay redacted regardless.', 'groundhogg' ),
-					],
+					],,
 				],
 			],
 
@@ -80,7 +74,7 @@ class List_Settings extends Ability {
 								],
 								'sensitive' => [
 									'type'        => 'boolean',
-									'description' => __( 'True if this is a secret (license key, API key, token, etc). Its value is redacted unless WP_DEBUG is on or the groundhogg/settings/expose_sensitive_values filter allows it.', 'groundhogg' ),
+									'description' => __( 'True if this is a secret (license key, API key, token, etc). Its value is always redacted in AI responses.', 'groundhogg' ),
 								],
 								'value' => [
 									'type'        => [ 'string', 'number', 'boolean', 'array', 'object', 'null' ],
@@ -100,9 +94,6 @@ class List_Settings extends Ability {
 
 		$group = ! empty( $input['group'] ) ? sanitize_key( $input['group'] ) : null;
 
-		$reveal = array_map( function ( $id ) {
-			return preg_replace( '/^gh_/', '', (string) $id );
-		}, (array) ( $input['reveal'] ?? [] ) );
 
 		$settings = $settings_registry->get_settings( $group );
 
@@ -113,8 +104,7 @@ class List_Settings extends Ability {
 			$schema = $settings_registry->get_setting_schema( $id );
 
 			$short_id  = preg_replace( '/^gh_/', '', $id );
-			$requested = in_array( $short_id, $reveal, true );
-			$value     = $settings_registry->get_redacted_value( $id, $settings_registry->get_option( $id ), $requested );
+			$value     = $settings_registry->get_redacted_value( $id, $settings_registry->get_option( $id ), false );
 
 			$list[] = array_merge( $schema, [
 				'id'        => $short_id,
