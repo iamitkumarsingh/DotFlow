@@ -43,6 +43,7 @@ class Get_System_Manifest extends Ability {
 							'available' => [ 'type' => 'boolean' ],
 							'version'   => [ 'type' => 'string' ],
 							'editing'   => [ 'type' => 'string' ],
+							'form_widget' => [ 'type' => 'boolean' ],
 						],
 					],
 					'modules'        => [
@@ -86,6 +87,7 @@ class Get_System_Manifest extends Ability {
 				'available' => (bool) $elementor_available,
 				'version'   => (string) $elementor_version,
 				'editing'   => 'Elementor documents are edited through Elementor document APIs; DotFlow records are managed through scoped WordPress Abilities and REST endpoints.',
+				'form_widget' => class_exists( \\Groundhogg\\DotFlow\\Elementor\\Widgets\\Form_Widget::class ),
 			],
 			'modules'        => [
 				[
@@ -121,7 +123,7 @@ class Get_System_Manifest extends Ability {
 					'label'       => 'DotFlow domain events',
 					'status'      => 'foundation',
 					'description' => 'Typed in-process event envelopes and generic/event-specific WordPress hooks. Durable event storage and event-query abilities are not yet implemented.',
-					'abilities'   => [],
+					'abilities'   => [ 'dotflow/list-published-forms' ],
 				],
 				[
 					'id'          => 'messaging',
