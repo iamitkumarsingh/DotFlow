@@ -11,6 +11,7 @@ use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
 use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
 use Groundhogg\DotFlow\Events\Store;
+use Groundhogg\DotFlow\REST\Routes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
