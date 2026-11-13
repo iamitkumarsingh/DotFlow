@@ -176,7 +176,7 @@ final class Inbound_Email_Webhook {
 
 		$from = $input['from'] ?? '';
 
-		if ( ! is_string( $from ) && ! is_array( $from ) ) {
+		if ( ( ! is_string( $from ) && ! is_array( $from ) ) || strlen( wp_json_encode( $from ) ) > 512 ) {
 			return self::invalid_payload( 'A sender address is required.' );
 		}
 
@@ -201,7 +201,7 @@ final class Inbound_Email_Webhook {
 		foreach ( [ 'to', 'cc' ] as $field ) {
 			$value = $input[ $field ] ?? '';
 
-			if ( ! is_string( $value ) && ! is_array( $value ) ) {
+			if ( ( ! is_string( $value ) && ! is_array( $value ) ) || strlen( wp_json_encode( $value ) ) > 4096 ) {
 				return self::invalid_payload( 'Recipient fields must be strings or address lists.' );
 			}
 		}
@@ -217,11 +217,22 @@ final class Inbound_Email_Webhook {
 			return self::invalid_payload( 'Attachments are not supported by this inbound webhook version.' );
 		}
 
-		$provider = sanitize_key( $input['source'] ?? 'provider' );
-		$provider = substr( $provider ?: 'provider', 0, 64 );
+		$source_input = $input['source'] ?? 'provider';
+		if ( ! is_string( $source_input ) ) {
+			return self::invalid_payload( 'The provider source must be a string.' );
+		}
+		$provider = substr( sanitize_key( $source_input ) ?: 'provider', 0, 64 );
 
-		$provider_event_id = isset( $input['provider_event_id'] ) ? sanitize_text_field( (string) $input['provider_event_id'] ) : '';
-		$message_id        = isset( $input['message_id'] ) ? trim( (string) $input['message_id'] ) : '';
+		$provider_event_id = $input['provider_event_id'] ?? '';
+		$message_id        = $input['message_id'] ?? '';
+		if ( ( ! is_string( $provider_event_id ) && ! is_numeric( $provider_event_id ) ) || ( ! is_string( $message_id ) && ! is_numeric( $message_id ) ) ) {
+			return self::invalid_payload( 'Message and provider event identifiers must be strings.' );
+		}
+		$provider_event_id = substr( sanitize_text_field( (string) $provider_event_id ), 0, 512 );
+		$message_id        = trim( (string) $message_id );
+		if ( strlen( $message_id ) > 998 ) {
+			return self::invalid_payload( 'The Message-ID exceeds the accepted length.' );
+		}
 
 		// A stable provider event ID supplies a deterministic Message-ID when the
 		// transport does not preserve the original RFC Message-ID header.
@@ -241,9 +252,19 @@ final class Inbound_Email_Webhook {
 			return $headers;
 		}
 
+		foreach ( [ 'in_reply_to', 'references' ] as $field ) {
+			$value = $input[ $field ] ?? '';
+			if ( ! is_string( $value ) && ! is_array( $value ) ) {
+				return self::invalid_payload( 'Reply reference fields must be strings or lists.' );
+			}
+			if ( strlen( wp_json_encode( $value ) ) > 5000 ) {
+				return self::invalid_payload( 'Reply reference fields exceed the accepted length.' );
+			}
+		}
+
 		$date = $input['date'] ?? '';
 
-		if ( ! is_string( $date ) && ! is_numeric( $date ) ) {
+		if ( ( ! is_string( $date ) && ! is_numeric( $date ) ) || strlen( (string) $date ) > 128 ) {
 			return self::invalid_payload( 'The message date must be a string or timestamp.' );
 		}
 
@@ -252,7 +273,7 @@ final class Inbound_Email_Webhook {
 			'to'            => $input['to'] ?? '',
 			'cc'            => $input['cc'] ?? '',
 			'envelope_to'   => $envelope_addresses,
-			'subject'       => sanitize_text_field( (string) ( $input['subject'] ?? '' ) ),
+			'subject'       => substr( sanitize_text_field( (string) ( $input['subject'] ?? '' ) ), 0, 998 ),
 			'html'          => $html,
 			'text'          => $text,
 			'message_id'    => $message_ids[0],
@@ -272,8 +293,8 @@ final class Inbound_Email_Webhook {
 	 */
 	private static function normalize_headers( $headers ) {
 
-		if ( ! is_array( $headers ) ) {
-			return self::invalid_payload( 'Message headers must be an object.' );
+		if ( ! is_array( $headers ) || count( $headers ) > 100 ) {
+			return self::invalid_payload( 'Message headers must be a bounded object.' );
 		}
 
 		$allowed = [ 'auto-submitted', 'precedence', 'x-autoreply', 'x-autorespond' ];
@@ -287,7 +308,7 @@ final class Inbound_Email_Webhook {
 			}
 
 			if ( is_array( $value ) ) {
-				$value = implode( ', ', array_map( 'sanitize_text_field', array_map( 'strval', $value ) ) );
+				$value = implode( ', ', array_map( 'sanitize_text_field', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) ) );
 			} elseif ( is_scalar( $value ) ) {
 				$value = sanitize_text_field( (string) $value );
 			} else {
