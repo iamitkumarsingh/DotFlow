@@ -12,8 +12,8 @@ use WP_REST_Server;
 /**
  * Versioned REST discovery and narrowly scoped provider ingress for DotFlow.
  *
- * Mutations remain on purpose-built WordPress Abilities until their REST
- * contracts, audit guarantees and approval requirements are implemented.
+ * CRM and automation mutations remain on purpose-built WordPress Abilities. The
+ * only writable REST route is the separately authenticated inbound email webhook.
  */
 final class Routes {
 
