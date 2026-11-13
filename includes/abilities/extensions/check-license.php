@@ -69,6 +69,11 @@ class Check_License extends Ability {
 			$result = License_Manager::check_license( $license_key );
 
 			if ( is_wp_error( $result ) ) {
+				$license = License_Manager::get_licenses()[ $license_key ] ?? null;
+				Audit::record( 'license.status_check_failed', 'license', $license ? absint( $license->item_id ) : 0, [
+					'error_code' => sanitize_key( $result->get_error_code() ),
+				] );
+
 				return [
 					'license_key' => License_Schema::REDACTED,
 					'valid'       => false,
