@@ -146,6 +146,19 @@ final class Routes {
 					'ingest_endpoint' => '/wp-json/dotflow/v1/inbound/email',
 				],
 			],
+			'webhooks' => [
+				[
+					'id'                 => 'inbound-email',
+					'method'             => 'POST',
+					'path'               => '/wp-json/dotflow/v1/inbound/email',
+					'authentication'    => 'HTTPS plus Authorization: Bearer or X-DotFlow-Token; token is configured server-side and never returned.',
+					'required_fields'    => [ 'from', 'envelope_to', 'message_id or provider_event_id', 'text or html' ],
+					'optional_fields'    => [ 'source', 'to', 'cc', 'subject', 'date', 'in_reply_to', 'references', 'headers' ],
+					'attachments'        => false,
+					'idempotency'        => 'RFC Message-ID or deterministic Message-ID derived from provider_event_id.',
+					'groundhogg_ingest'  => 'Message::ingest handles contact matching, signed reply-token validation, threading, duplicate detection and storage.',
+				],
+			],
 			'write_policy' => [
 				'rest_mutations'       => 'No generic REST CRUD. Only the token-authenticated provider-neutral inbound email endpoint is writable.',
 				'preferred_interface' => 'Purpose-built WordPress Abilities with strict schemas and capability checks.',
