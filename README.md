@@ -4,7 +4,7 @@ DotFlow is a self-hosted WordPress CRM, email marketing and automation platform 
 
 **Product direction:** manage contacts, conversations, campaigns, automations, events and integrations in WordPress — with structured, permission-aware tools that AI agents can read and update.
 
-> **Development status:** early development. This branch is not a production release and must not be installed on a live site. CI runs PHP syntax checks and WordPress/MariaDB integration tests on PHP 7.4, 8.2 and 8.3.
+> **Development status:** early development. This branch is not a production release and must not be installed on a live site. CI runs PHP syntax checks and WordPress/MariaDB integration tests on PHP 8.0, 8.2 and 8.3.
 
 ## What DotFlow is building
 
