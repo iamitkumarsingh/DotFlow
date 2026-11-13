@@ -99,6 +99,18 @@ class List_Events extends Ability {
 		];
 	}
 
+	/**
+	 * Format a stored UTC datetime as an ISO 8601 UTC timestamp.
+	 *
+	 * @param string $value Stored MySQL datetime.
+	 * @return string
+	 */
+	private static function format_utc( $value ) {
+		$timestamp = strtotime( $value );
+
+		return false === $timestamp ? '' : gmdate( 'c', $timestamp );
+	}
+
 	public function __invoke( $input ) {
 
 		global $wpdb;
@@ -189,8 +201,8 @@ class List_Events extends Ability {
 				'object_id'     => absint( $row->object_id ),
 				'contact_id'    => absint( $row->contact_id ),
 				'payload'       => is_array( $payload ) ? $payload : [],
-				'occurred_at'   => get_date_from_gmt( $row->occurred_at, 'c' ),
-				'created_at'    => get_date_from_gmt( $row->created_at, 'c' ),
+				'occurred_at'   => self::format_utc( $row->occurred_at ),
+				'created_at'    => self::format_utc( $row->created_at ),
 				'actor_user_id' => absint( $row->actor_user_id ),
 			];
 		}
