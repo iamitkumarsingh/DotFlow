@@ -6,6 +6,7 @@ use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Segment_Schema;
 use Groundhogg\Background_Tasks;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\Step;
 use WP_Error;
 use function Groundhogg\get_contactdata;
@@ -157,6 +158,12 @@ class Add_To_Flow extends Ability {
 
 			$step->enqueue( $contact, true, $event_args );
 
+			Audit::record( 'flow.contact_enqueued', 'flow', $funnel->get_id(), [
+				'mode' => 'contact',
+				'step_id' => $step->get_id(),
+				'added_count' => 1,
+			] );
+
 			return [
 				'flow_id'    => $funnel->get_id(),
 				'flow_title' => $funnel->get_title(),
@@ -200,6 +207,13 @@ class Add_To_Flow extends Ability {
 		if ( is_wp_error( $scheduled ) ) {
 			return $scheduled;
 		}
+
+		Audit::record( 'flow.contacts_scheduled', 'flow', $funnel->get_id(), [
+			'mode' => 'segment',
+			'step_id' => $step->get_id(),
+			'estimated_contacts' => $estimated,
+			'scheduled' => (bool) $scheduled,
+		] );
 
 		return [
 			'flow_id'            => $funnel->get_id(),
