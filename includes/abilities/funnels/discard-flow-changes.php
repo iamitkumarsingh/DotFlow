@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Funnels;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -79,6 +80,10 @@ class Discard_Flow_Changes extends Ability {
 
 		if ( $had_changes ) {
 			$funnel->uncommit();
+
+			Audit::record( 'flow.changes_discarded', 'flow', $funnel->get_id(), [
+				'has_changes' => true,
+			] );
 
 			do_action( 'groundhogg/api/funnel/updated', $funnel );
 		}
