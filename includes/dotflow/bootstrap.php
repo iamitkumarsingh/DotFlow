@@ -31,7 +31,35 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function register() {
+		spl_autoload_register( [ __CLASS__, 'autoload' ], true, true );
 		add_action( 'groundhogg/init/v2', [ __CLASS__, 'init' ], 10 );
+	}
+
+	/**
+	 * Autoload DotFlow classes from the lowercase includes/dotflow directory.
+	 *
+	 * Groundhogg's legacy loader converts namespace segments to kebab-case
+	 * directories (dot-flow), while this product module intentionally lives in
+	 * includes/dotflow. Keep the namespace mapping explicit and isolated.
+	 *
+	 * @param string $class Fully qualified class name.
+	 * @return void
+	 */
+	public static function autoload( $class ) {
+
+		$prefix = __NAMESPACE__ . '\\\\';
+
+		if ( 0 !== strpos( $class, $prefix ) ) {
+			return;
+		}
+
+		$relative = substr( $class, strlen( $prefix ) );
+		$relative = strtolower( str_replace( [ '\\\\', '_' ], [ '/', '-' ], $relative ) );
+		$file     = GROUNDHOGG_PATH . 'includes/dotflow/' . $relative . '.php';
+
+		if ( is_readable( $file ) ) {
+			require_once $file;
+		}
 	}
 
 	/**
