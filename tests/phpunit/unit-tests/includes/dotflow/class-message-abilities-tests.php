@@ -13,9 +13,7 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 		$user_id          = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $user_id );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			$this->markTestSkipped( 'The test user cannot list all conversation records.' );
-		}
+		$this->assertTrue( current_user_can( 'manage_options' ), 'The administrator fixture must be able to manage options.' );
 
 		$db = get_db( 'messages' );
 
