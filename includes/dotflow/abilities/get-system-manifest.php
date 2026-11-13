@@ -149,8 +149,8 @@ class Get_System_Manifest extends Ability {
 				[
 					'id'          => 'messaging',
 					'label'       => 'Provider-independent messaging and conversations',
-					'status'      => 'planned',
-					'description' => 'Independent outbound provider adapters, inbound webhook/IMAP ingestion and conversation management.',
+					'status'      => 'foundation',
+					'description' => 'Authenticated provider-neutral inbound email webhook, independent inbox/reply address routing and privacy-minimised message events are implemented. Provider-specific adapters, outbound provider integrations and attachment ingestion remain planned.',
 					'abilities'   => [],
 				],
 				[
