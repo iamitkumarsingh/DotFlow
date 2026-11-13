@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Emails;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Email;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 use function Groundhogg\get_contactdata;
 use function Groundhogg\process_events;
@@ -242,6 +243,20 @@ class Send_Email_Template extends Ability {
 				'error'      => $error,
 			];
 		}
+
+		$status_counts = [ 'sent' => 0, 'scheduled' => 0, 'failed' => 0, 'skipped' => 0, 'forbidden' => 0 ];
+		foreach ( $recipients as $recipient_result ) {
+			$status = $recipient_result['status'];
+			if ( isset( $status_counts[ $status ] ) ) {
+				$status_counts[ $status ]++;
+			}
+		}
+
+		Audit::record( 'email_template.send_requested', 'email', $email->get_id(), [
+			'scheduled' => (bool) $future,
+			'scheduled_for' => $future ? gmdate( 'Y-m-d\\TH:i:s\\Z', $when_ts ) : null,
+			'recipient_status_counts' => $status_counts,
+		] );
 
 		return [
 			'email_id'      => $email->get_id(),
