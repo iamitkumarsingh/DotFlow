@@ -137,6 +137,7 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 
 			$this->assertSame( [ 'email', 'first_name', 'owner_id' ], $payload['changes']['fields'] );
 			$this->assertSame( [ 'telephone' ], $payload['changes']['custom_field_keys'] );
+			$this->assertSame( 456, $payload['contact_id'] );
 			$this->assertStringNotContainsString( 'person@example.test', $row->payload );
 		} finally {
 			if ( $record_id ) {
