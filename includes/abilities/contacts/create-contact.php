@@ -3,6 +3,7 @@
 namespace Groundhogg\Abilities\Contacts;
 
 use Groundhogg\Abilities\Ability;
+use Groundhogg\DotFlow\Events\Audit;
 use Groundhogg\Abilities\Schemas\Contact_Schema;
 use Groundhogg\Abilities\Traits\Has_Optin_Status;
 use Groundhogg\Abilities\Traits\Has_Owner_Validation;
