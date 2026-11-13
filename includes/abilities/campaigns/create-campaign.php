@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Campaigns;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Campaign_Schema;
 use Groundhogg\Campaign;
+use Groundhogg\DotFlow\Events\Audit;
 use function Groundhogg\get_db;
 
 /**
@@ -90,6 +91,16 @@ class Create_Campaign extends Ability {
 				$campaign->update( $data );
 			}
 		}
+
+		Audit::record(
+			$existed ? 'campaign.updated' : 'campaign.created',
+			'campaign',
+			$campaign->get_id(),
+			[
+				'fields' => array_values( array_keys( $data ) ),
+				'created' => ! $existed,
+			]
+		);
 
 		return array_merge( Campaign_Schema::transform( $campaign ), [
 			'created' => ! $existed,
