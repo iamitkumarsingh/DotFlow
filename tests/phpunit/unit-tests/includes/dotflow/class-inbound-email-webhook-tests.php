@@ -200,7 +200,8 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'reply@example.com', Inbox::reply_address() );
 		$this->assertSame( 'inbox', Inbox::route( [ 'private-inbox@example.com' ] ) );
 		$this->assertNotSame( '', $reply_to );
-		$this->assertStringContainsString( 'reply@example.com', $reply_to );
+		$this->assertStringStartsWith( 'reply+', $reply_to );
+		$this->assertStringEndsWith( '@example.com', $reply_to );
 		$this->assertSame( 'reply', Inbox::route( [ $reply_to ] ) );
 		$this->assertSame( substr( $message_id, 1, 16 ), Inbox::verify_reply( [ $reply_to ] ) );
 	}
