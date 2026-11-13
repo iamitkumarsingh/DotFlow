@@ -8,6 +8,7 @@ use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
 use Groundhogg\DotFlow\Abilities\Get_Contact_Profile;
 use Groundhogg\DotFlow\Abilities\List_Contact_Events;
 use Groundhogg\DotFlow\Abilities\List_Events;
+use Groundhogg\DotFlow\Abilities\List_Event_Types;
 use Groundhogg\DotFlow\Abilities\List_Messages;
 use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
@@ -225,6 +226,7 @@ final class Bootstrap {
 		Abilities::add_ability( Get_Contact_Profile::class );
 		Abilities::add_ability( List_Published_Forms::class );
 		Abilities::add_ability( List_Events::class );
+		Abilities::add_ability( List_Event_Types::class );
 		Abilities::add_ability( List_Contact_Events::class );
 		Abilities::add_ability( List_Messages::class );
 		Abilities::add_ability( Set_Message_Read_State::class );
