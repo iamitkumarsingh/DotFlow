@@ -9,11 +9,19 @@ use function Groundhogg\get_db;
 class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 
 	protected $event_contact_ids = [];
+	protected $note_ids = [];
 
 	public function tearDown(): void {
 
 		global $wpdb;
 		$db = get_db( 'dotflow_events' );
+		$notes_db = get_db( 'notes' );
+
+		if ( $notes_db ) {
+			foreach ( $this->note_ids as $note_id ) {
+				$notes_db->delete( $note_id );
+			}
+		}
 
 		if ( $db ) {
 			foreach ( $this->event_contact_ids as $contact_id ) {
@@ -84,6 +92,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		] );
 
 		$this->assertNotWPError( $created );
+		$this->note_ids[] = $created['note']['id'];
 
 		$profile = $this->ability()->__invoke( [
 			'contact_id'    => $contact_id,
@@ -165,6 +174,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 			'content'    => 'Confidential patient details in a free-form note.',
 		] );
 		$this->assertNotWPError( $created );
+		$this->note_ids[] = $created['note']['id'];
 
 		$user = get_userdata( $user_id );
 		$user->add_cap( Pii::CAP, false );
