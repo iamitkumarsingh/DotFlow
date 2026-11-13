@@ -37,7 +37,7 @@ class List_Settings extends Ability {
 						'type'        => 'string',
 						'enum'        => array_keys( Plugin::$instance->settings->get_groups() ),
 						'description' => __( 'Only include settings registered under this group.', 'groundhogg' ),
-					],,
+					],
 				],
 			],
 
