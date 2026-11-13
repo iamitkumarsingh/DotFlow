@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Broadcasts;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Broadcast;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -109,6 +110,11 @@ class Cancel_Broadcast extends Ability {
 		if ( ! $broadcast->cancel() ) {
 			return new WP_Error( 'groundhogg_broadcast_not_cancelled', __( 'The broadcast could not be cancelled.', 'groundhogg' ) );
 		}
+
+		Audit::record( 'broadcast.cancelled', 'broadcast', $broadcast->get_id(), [
+			'status' => [ 'before' => 'pending_or_sending', 'after' => 'cancelled' ],
+			'events_cancelled' => $pending,
+		] );
 
 		return [
 			'broadcast_id'      => $broadcast->get_id(),
