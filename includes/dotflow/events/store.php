@@ -54,7 +54,7 @@ final class Store {
 
 		global $wpdb;
 
-		$db = \\Groundhogg\\get_db( 'dotflow_events' );
+		$db = \Groundhogg\get_db( 'dotflow_events' );
 
 		if ( ! $db ) {
 			return false;
