@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Funnels;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Funnel;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 
 /**
@@ -98,6 +99,10 @@ class Publish_Flow_Changes extends Ability {
 
 		if ( $had_changes ) {
 			Flow_Changes::publish( $funnel, $choices );
+
+			Audit::record( 'flow.changes_published', 'flow', $funnel->get_id(), [
+				'deleted_steps_count' => count( $outcomes ),
+			] );
 
 			do_action( 'groundhogg/api/funnel/updated', $funnel );
 		}
