@@ -73,7 +73,9 @@ final class Inbox_Addresses {
 
 		$token = defined( 'DOTFLOW_INBOUND_WEBHOOK_TOKEN' ) ? (string) DOTFLOW_INBOUND_WEBHOOK_TOKEN : '';
 
-		return trim( (string) apply_filters( 'dotflow/inbound/webhook_token', $token ) );
+		$token = apply_filters( 'dotflow/inbound/webhook_token', $token );
+
+		return is_string( $token ) ? trim( $token ) : '';
 	}
 
 	/**
@@ -82,7 +84,10 @@ final class Inbox_Addresses {
 	private static function configured_address( string $constant, string $filter ): string {
 
 		$value = defined( $constant ) ? (string) constant( $constant ) : '';
-		$value = (string) apply_filters( 'dotflow/inbound/' . $filter, $value );
+		$value = apply_filters( 'dotflow/inbound/' . $filter, $value );
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
 		$value = strtolower( trim( $value ) );
 
 		return is_email( $value ) ? $value : '';
