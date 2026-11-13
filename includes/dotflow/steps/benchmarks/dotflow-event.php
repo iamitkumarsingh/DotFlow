@@ -80,6 +80,20 @@ class DotFlow_Event extends Benchmark {
 		$expected_name   = (string) $this->get_setting( 'event_name' );
 		$expected_source = (string) $this->get_setting( 'source' );
 
+		return self::matches_event( $event_name, $event_source, $expected_name, $expected_source );
+	}
+
+	/**
+	 * Match a recorded event against a configured workflow trigger.
+	 *
+	 * @param string $event_name     Recorded event name.
+	 * @param string $event_source   Recorded source.
+	 * @param string $expected_name  Configured event name.
+	 * @param string $expected_source Optional configured source.
+	 * @return bool
+	 */
+	public static function matches_event( $event_name, $event_source, $expected_name, $expected_source = '' ): bool {
+
 		// AI mutation audit records are for governance, not customer journey triggers.
 		if ( $event_name === 'ai.mutation.completed' || $event_name === '' || $expected_name === '' ) {
 			return false;
