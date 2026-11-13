@@ -95,6 +95,7 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 			$this->assertNotEmpty( $matching );
 			$logged = reset( $matching );
 			$this->assertSame( 'message.read_state.updated', $logged['payload']['action'] );
+			$this->assertSame( get_current_user_id(), $logged['payload']['actor_user_id'] );
 			$this->assertSame( false, $logged['payload']['changes']['is_read']['before'] );
 			$this->assertSame( true, $logged['payload']['changes']['is_read']['after'] );
 			$this->assertArrayNotHasKey( 'content', $logged['payload'] );
