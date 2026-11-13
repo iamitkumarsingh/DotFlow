@@ -238,7 +238,7 @@ class Update_Contact extends Ability {
 
 		// Keep the audit record data-minimised: record changed field names and
 		// tag operation counts, never email/name/custom-field values.
-		$audit_fields = array_values( array_intersect( [ 'email', 'first_name', 'last_name', 'optin_status', 'owner' ], array_keys( $data ) ) );
+		$audit_fields = array_values( array_intersect( [ 'email', 'first_name', 'last_name', 'optin_status', 'owner_id' ], array_keys( $data ) ) );
 		$audit_meta_fields = ! empty( $meta ) ? array_map( 'sanitize_key', array_keys( $meta ) ) : [];
 
 		Audit::record(
