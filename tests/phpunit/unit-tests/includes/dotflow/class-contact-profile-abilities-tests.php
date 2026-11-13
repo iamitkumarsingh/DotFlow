@@ -158,7 +158,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		wp_set_current_user( $user_id );
 
 		$contact_id = self::factory()->contacts->create();
-		$note_reflection = new ReflectionClass( \\Groundhogg\\Abilities\\Contacts\\Add_Contact_Note::class );
+		$note_reflection = new ReflectionClass( \Groundhogg\Abilities\Contacts\Add_Contact_Note::class );
 		$note_ability = $note_reflection->newInstanceWithoutConstructor();
 		$created = $note_ability->__invoke( [
 			'contact_id' => $contact_id,
@@ -179,7 +179,7 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$this->assertWPError( $profile );
 		$this->assertSame( 'groundhogg_pii_restricted', $profile->get_error_code() );
 
-		$list_reflection = new ReflectionClass( \\Groundhogg\\Abilities\\Contacts\\List_Contact_Notes::class );
+		$list_reflection = new ReflectionClass( \Groundhogg\Abilities\Contacts\List_Contact_Notes::class );
 		$list_ability = $list_reflection->newInstanceWithoutConstructor();
 		$notes = $list_ability->__invoke( [ 'contact_id' => $contact_id ] );
 
