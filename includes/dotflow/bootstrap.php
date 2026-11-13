@@ -49,6 +49,7 @@ final class Bootstrap {
 		// Groundhogg's database manager exposes this hook before install/update.
 		add_action( 'groundhogg/db/manager/init', [ __CLASS__, 'register_database' ], 10, 1 );
 		add_action( 'init', [ Store::class, 'maybe_install' ], 2 );
+		add_action( 'rest_api_init', [ Routes::class, 'register' ] );
 
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
