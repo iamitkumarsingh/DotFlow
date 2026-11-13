@@ -62,8 +62,8 @@ class Form_Fields {
 	 */
 	public static function sanitize_form_and_map( $form_and_map ) {
 
-		$form = $form_and_map[0];
-		$map  = $form_and_map[1];
+		$form = is_array( $form_and_map ) && isset( $form_and_map[0] ) && is_array( $form_and_map[0] ) ? $form_and_map[0] : [];
+		$map  = is_array( $form_and_map ) && isset( $form_and_map[1] ) && is_array( $form_and_map[1] ) ? $form_and_map[1] : [];
 
 		$form = array_map( [ __CLASS__, 'sanitize_field' ], $form );
 
