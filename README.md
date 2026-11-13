@@ -66,12 +66,14 @@ Elementor MCP edits page layouts and widget settings. WordPress Abilities/MCP ed
 - DotFlow bootstrap and typed domain event envelope.
 - Durable event table registered with Groundhogg's database manager.
 - Source-scoped event idempotency and recursive sensitive-key redaction.
-- WordPress Abilities for the system manifest, event history, published forms and conversation access.
-- Native Elementor form widget.
-- Initial PHPUnit coverage for event storage, manifest and MCP-facing message operations.
-- GitHub Actions PHP syntax validation.
+- Permission-scoped WordPress Abilities for contact profiles, event history, published forms and conversation access; inherited typed CRM, campaign, email and workflow abilities remain available.
+- Privacy-minimised audit events for every currently exposed AI mutation ability; platform-wide wp-admin/third-party mutation auditing is not claimed.
+- Native Elementor form widget with active-form revalidation.
+- Independent HTTPS/token-authenticated inbound email webhook using Groundhogg's native routing, signed reply tokens, threading and duplicate detection; provider-specific adapters and attachment ingestion remain outstanding.
+- WordPress/MariaDB PHPUnit integration suite covering event storage, PII boundaries, audit coverage, permissions, REST contracts, inbound mail and security policies.
+- GitHub Actions matrix for PHP syntax and integration tests on PHP 8.0, 8.2 and 8.3.
 
-PHP syntax validation has passed on recent development commits. Full WordPress/Elementor runtime testing and the PHPUnit suite still need to be completed before a release can be considered stable.
+CI has passed on PHP 8.0, 8.2 and 8.3 on a recent commit (44 tests, 314 assertions per runtime). The latest branch includes additional test hardening and read-only table-query boundary tests, which must pass their own CI run. Elementor editor/runtime tests and live provider delivery validation remain outstanding before a stable release.
 
 ## Development
 
