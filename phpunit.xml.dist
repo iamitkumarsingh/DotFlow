@@ -1,29 +1,14 @@
 <?xml version="1.0"?>
 <phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
 	bootstrap="tests/phpunit/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
-	>
+>
 	<testsuites>
-		<testsuite name="Groundhogg Test Suite">
+		<testsuite name="DotFlow Test Suite">
 			<directory suffix=".php">./tests/phpunit/unit-tests</directory>
 		</testsuite>
 	</testsuites>
-	<filter>
-		<whitelist addUncoveredFilesFromWhitelist="true">
-			<directory suffix=".php">.</directory>
-			<exclude>
-				<!-- Third party library exclusions. -->
-				<directory suffix=".php">templates</directory>
-				<directory suffix=".php">vendor</directory>
-				<directory suffix=".php">node_modules</directory>
-
-				<!-- Do not load uninstall file -->
-				<file>uninstall.php</file>
-			</exclude>
-		</whitelist>
-	</filter>
 </phpunit>
