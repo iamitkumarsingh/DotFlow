@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Contacts;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Abilities\Schemas\Note_Schema;
+use Groundhogg\Pii;
 use WP_Error;
 use function Groundhogg\get_contactdata;
 use function Groundhogg\get_db;
@@ -80,6 +81,10 @@ class List_Contact_Notes extends Ability {
 	}
 
 	public function __invoke( $input ) {
+
+		if ( Pii::is_restricted() ) {
+			return Pii::restricted_error( __( 'Contact notes are not available to accounts restricted from personal information.', 'groundhogg' ) );
+		}
 
 		$contact = get_contactdata( $input['contact_id'] );
 
