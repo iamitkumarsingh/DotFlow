@@ -6,6 +6,7 @@ use Groundhogg\DotFlow\Events\Event;
 use Groundhogg\Steps\Benchmarks\Benchmark;
 use Groundhogg\Step;
 use function Groundhogg\get_contactdata;
+use function Groundhogg\html;
 
 /**
  * Starts a Groundhogg workflow when a durable DotFlow event is recorded.
