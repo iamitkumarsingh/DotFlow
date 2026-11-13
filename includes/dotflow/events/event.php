@@ -37,14 +37,25 @@ final class Event {
 
 		$name = (string) $name;
 
-		if ( ! preg_match( '/^[a-z0-9][a-z0-9._-]*$/', $name ) ) {
+		if ( strlen( $name ) > 191 || ! preg_match( '/^[a-z0-9][a-z0-9._-]*$/', $name ) ) {
 			throw new InvalidArgumentException( 'DotFlow event names must be lowercase and use only letters, numbers, dots, underscores or hyphens.' );
 		}
 
-		$this->id          = $id ? (string) $id : wp_generate_uuid4();
+		$id     = $id ? sanitize_text_field( (string) $id ) : wp_generate_uuid4();
+		$source = sanitize_key( (string) $source );
+
+		if ( '' === $id || strlen( $id ) > 120 ) {
+			throw new InvalidArgumentException( 'DotFlow event IDs must contain between 1 and 120 characters.' );
+		}
+
+		if ( '' === $source || strlen( $source ) > 64 ) {
+			throw new InvalidArgumentException( 'DotFlow event sources must contain between 1 and 64 safe characters.' );
+		}
+
+		$this->id          = $id;
 		$this->name        = $name;
 		$this->payload     = $payload;
-		$this->source      = sanitize_text_field( (string) $source );
+		$this->source      = $source;
 		$this->occurred_at = $occurred_at ? (string) $occurred_at : gmdate( 'c' );
 	}
 
