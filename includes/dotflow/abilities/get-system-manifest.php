@@ -115,7 +115,7 @@ class Get_System_Manifest extends Ability {
 					'id'          => 'automation',
 					'label'       => 'Visual automation',
 					'status'      => 'foundation',
-					'description' => 'Groundhogg flows and typed editing/simulation plus the DotFlow Event benchmark, which starts contact workflows from durable, source-filterable DotFlow events. Duplicate event IDs do not re-trigger listeners; AI mutation audit events are excluded as customer journey triggers.',
+					'description' => 'Groundhogg flows and typed editing/simulation plus the AI-discoverable, buildable DotFlow Event benchmark, which starts contact workflows from durable, source-filterable DotFlow events. Duplicate event IDs do not re-trigger listeners; AI mutation audit events are excluded as customer journey triggers.',
 					'abilities'   => [ 'groundhogg/list-flows', 'groundhogg/get-flow', 'groundhogg/create-flow', 'groundhogg/edit-flow', 'groundhogg/simulate-flow', 'groundhogg/publish-flow-changes', 'groundhogg/activate-flow', 'groundhogg/deactivate-flow' ],
 				],
 				[
