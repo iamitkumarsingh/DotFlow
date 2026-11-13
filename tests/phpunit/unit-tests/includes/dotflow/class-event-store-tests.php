@@ -22,7 +22,8 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 			[
 				'contact_id' => 123,
 				'email'      => 'person@example.test',
-				'api_key'    => 'do-not-store-this',
+				'api_key'     => 'do-not-store-this',
+				'license_key' => 'license-secret-value',
 				'provider'   => [
 					'access_token' => 'nested-secret',
 					'campaign_id'  => 88,
@@ -49,6 +50,7 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 			$payload = json_decode( $row->payload, true );
 
 			$this->assertSame( '[REDACTED]', $payload['api_key'] );
+			$this->assertSame( '[REDACTED]', $payload['license_key'] );
 			$this->assertSame( '[REDACTED]', $payload['provider']['access_token'] );
 			$this->assertSame( 88, $payload['provider']['campaign_id'] );
 		} finally {
