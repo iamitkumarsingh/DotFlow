@@ -105,6 +105,7 @@ final class Bootstrap {
 		Abilities::add_ability( Get_System_Manifest::class );
 		Abilities::add_ability( List_Published_Forms::class );
 		Abilities::add_ability( List_Events::class );
+		Abilities::add_ability( List_Contact_Events::class );
 		Abilities::add_ability( List_Messages::class );
 		Abilities::add_ability( Set_Message_Read_State::class );
 	}
