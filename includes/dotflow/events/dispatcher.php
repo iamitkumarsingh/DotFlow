@@ -12,8 +12,9 @@ final class Dispatcher {
 	/**
 	 * Persist and dispatch an event to generic and event-specific listeners.
 	 *
-	 * Persistence failure is observable but does not interrupt the originating
-	 * WordPress request or prevent in-process listeners from receiving the event.
+	 * Events are dispatched to listeners only after durable insertion. Duplicate
+	 * deliveries are acknowledged without re-triggering downstream automations;
+	 * persistence failures remain observable and do not interrupt the originating request.
 	 *
 	 * @param Event $event Domain event.
 	 * @return Event
