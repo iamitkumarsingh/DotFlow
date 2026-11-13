@@ -110,7 +110,7 @@ class DotFlow_Event_Benchmark_Tests extends GH_UnitTestCase {
 			$this->assertSame( 'dotflow_event', $built[0]['type'] );
 			$this->assertSame( 'email.inbound.received', $built[0]['settings']['event_name'] );
 		$created_step = new Step( $built[0]['id'] );
-		$this->assertSame( 'email', $created_step->get_setting( 'source' ) );
+		$this->assertSame( 'email', $created_step->get_meta( 'source' ) );
 
 			$invalid_builder = new Step_Tree_Builder( $funnel );
 			$invalid = $invalid_builder->build( [
