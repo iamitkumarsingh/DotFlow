@@ -3,6 +3,7 @@
 use Groundhogg\DotFlow\Abilities\Get_Contact_Profile;
 use Groundhogg\DotFlow\Events\Audit;
 use function Groundhogg\get_contactdata;
+use function Groundhogg\get_db;
 
 class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 
@@ -108,9 +109,10 @@ class DotFlow_Contact_Profile_Abilities_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'dotflow_contact_profile_forbidden', $forbidden->get_error_code() );
 
 		$user = get_userdata( $owner_id );
-		$user->remove_cap( 'view_notes' );
+		$user->add_cap( 'view_notes', false );
 		wp_set_current_user( $owner_id );
 
+		$this->assertFalse( current_user_can( 'view_notes' ) );
 		$this->assertTrue( current_user_can( 'view_contact', get_contactdata( $contact_id ) ) );
 
 		$notes_forbidden = $this->ability()->__invoke( [
