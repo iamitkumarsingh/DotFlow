@@ -85,7 +85,7 @@ class Install_Extension extends Ability {
 			return $result;
 		}
 
-		Audit::record( 'extension.installed', 'extension', $item_id, [
+		Audit::record( 'extension.install_completed', 'extension', $item_id, [
 			'installed' => (bool) Extension::installed( $item_id ),
 		] );
 
