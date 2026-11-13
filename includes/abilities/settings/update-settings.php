@@ -28,7 +28,7 @@ class Update_Settings extends Ability {
 	protected const CAPABILITY = 'manage_options';
 
 	protected const READONLY    = false;
-	protected const DESTRUCTIVE = false;
+	protected const DESTRUCTIVE = true;
 	protected const IDEMPOTENT  = true;
 
 	protected function get_args(): array {
