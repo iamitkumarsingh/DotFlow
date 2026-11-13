@@ -105,4 +105,43 @@ class DotFlow_Event_Store_Tests extends GH_UnitTestCase {
 		}
 	}
 
+	public function test_contact_audit_payload_contains_field_names_not_personal_values() {
+
+		global $wpdb;
+
+		Store::maybe_install();
+
+		$db = get_db( 'dotflow_events' );
+		$event = Audit::record(
+			'contact.updated',
+			'contact',
+			456,
+			[
+				'fields'            => [ 'email', 'first_name', 'owner_id' ],
+				'custom_field_keys' => [ 'telephone' ],
+			]
+		);
+		$record_id = Store::record( $event );
+
+		try {
+			$this->assertGreaterThan( 0, $record_id );
+
+			$row = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT payload FROM {$db->get_table_name()} WHERE ID = %d",
+					$record_id
+				)
+			);
+			$payload = json_decode( $row->payload, true );
+
+			$this->assertSame( [ 'email', 'first_name', 'owner_id' ], $payload['changes']['fields'] );
+			$this->assertSame( [ 'telephone' ], $payload['changes']['custom_field_keys'] );
+			$this->assertStringNotContainsString( 'person@example.test', $row->payload );
+		} finally {
+			if ( $record_id ) {
+				$db->delete( $record_id );
+			}
+		}
+	}
+
 }
