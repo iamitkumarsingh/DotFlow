@@ -46,11 +46,10 @@ final class Store {
 		$source   = sanitize_key( $event->get_source() );
 		$event_id = sanitize_text_field( $event->get_id() );
 
-		if ( '' === $source || '' === $event_id ) {
+		if ( '' === $source || '' === $event_id || strlen( $source ) > 64 || strlen( $event_id ) > 120 ) {
 			return false;
 		}
 
-		$event_id = substr( $event_id, 0, 120 );
 		$table    = $db->get_table_name();
 
 		$existing_id = $wpdb->get_var(
