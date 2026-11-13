@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Emails;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\Contact;
 use Groundhogg\Email;
+use Groundhogg\DotFlow\Events\Audit;
 use WP_Error;
 use function Groundhogg\get_contactdata;
 use function Groundhogg\is_a_contact;
@@ -168,6 +169,11 @@ class Send_Test_Email extends Ability {
 		if ( ! $sent ) {
 			return new WP_Error( 'groundhogg_test_email_not_sent', __( 'The test email could not be sent.', 'groundhogg' ) );
 		}
+
+		Audit::record( 'email_template.test_sent', 'email', $email->get_id(), [
+			'recipient_count' => count( $to ),
+			'used_contact_context' => ! empty( $input['contact_id'] ),
+		] );
 
 		return [
 			'sent'        => true,
