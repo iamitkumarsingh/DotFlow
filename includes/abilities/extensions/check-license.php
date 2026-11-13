@@ -69,7 +69,7 @@ class Check_License extends Ability {
 
 			if ( is_wp_error( $result ) ) {
 				return [
-					'license_key' => $license_key,
+					'license_key' => License_Schema::REDACTED,
 					'valid'       => false,
 					'error'       => $result->get_error_message(),
 				];
