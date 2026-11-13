@@ -4,6 +4,8 @@ namespace Groundhogg\DotFlow;
 
 use Groundhogg\Abilities\Abilities;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
+use Groundhogg\DotFlow\Abilities\Get_Contact_Profile;
+use Groundhogg\DotFlow\Abilities\List_Contact_Events;
 use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Abilities\List_Messages;
 use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
