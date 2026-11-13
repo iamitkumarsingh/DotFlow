@@ -97,14 +97,14 @@ class Get_System_Manifest extends Ability {
 					'label'       => 'Contacts and CRM',
 					'status'      => 'inherited',
 					'description' => 'Groundhogg contact records, custom fields, tags, notes, search and contact permissions.',
-					'abilities'   => [ 'groundhogg/search-contacts', 'groundhogg/get-contact', 'groundhogg/create-contact', 'groundhogg/update-contact', 'groundhogg/list-tags', 'groundhogg/create-tag', 'groundhogg/describe-table', 'groundhogg/query-table' ],
+					'abilities'   => [ 'groundhogg/search-contacts', 'groundhogg/get-contact', 'groundhogg/create-contact', 'groundhogg/update-contact', 'groundhogg/list-custom-fields', 'groundhogg/add-custom-field', 'groundhogg/update-custom-field', 'groundhogg/add-contact-note', 'groundhogg/list-contact-notes', 'groundhogg/list-tags', 'groundhogg/create-tag', 'groundhogg/describe-table', 'groundhogg/query-table' ],
 				],
 				[
 					'id'          => 'campaigns',
 					'label'       => 'Campaigns and broadcasts',
 					'status'      => 'inherited',
 					'description' => 'Groundhogg campaigns, email templates, broadcasts and their supported management abilities.',
-					'abilities'   => [ 'groundhogg/list-campaigns', 'groundhogg/create-campaign', 'groundhogg/list-email-templates', 'groundhogg/create-email-template', 'groundhogg/update-email-template', 'groundhogg/list-broadcasts', 'groundhogg/get-broadcast' ],
+					'abilities'   => [ 'groundhogg/list-campaigns', 'groundhogg/create-campaign', 'groundhogg/list-email-templates', 'groundhogg/create-email-template', 'groundhogg/update-email-template', 'groundhogg/list-broadcasts', 'groundhogg/get-broadcast', 'groundhogg/send-email-broadcast', 'groundhogg/cancel-broadcast' ],
 				],
 				[
 					'id'          => 'automation',
@@ -119,6 +119,13 @@ class Get_System_Manifest extends Ability {
 					'status'      => 'inherited',
 					'description' => 'Groundhogg report types and date-bounded report data.',
 					'abilities'   => [ 'groundhogg/list-report-types', 'groundhogg/get-reports' ],
+				],
+				[
+					'id'          => 'settings',
+					'label'       => 'Platform settings',
+					'status'      => 'inherited',
+					'description' => 'Read and update only settings registered for authorised Abilities API access.',
+					'abilities'   => [ 'groundhogg/list-settings', 'groundhogg/update-settings' ],
 				],
 				[
 					'id'          => 'domain-events',
