@@ -222,6 +222,14 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		$this->assertWPError( $unsupported );
 		$this->assertSame( 'dotflow_inbound_invalid_payload', $unsupported->get_error_code() );
 
+		$empty = Inbound_Email_Webhook::receive( $this->request( [
+			'from'              => 'sender@example.com',
+			'envelope_to'       => 'private-inbox@example.com',
+			'provider_event_id' => 'empty-message',
+		] ) );
+		$this->assertWPError( $empty );
+		$this->assertSame( 'dotflow_inbound_invalid_payload', $empty->get_error_code() );
+
 		$request = $this->request( [] );
 		$request->set_body( str_repeat( 'x', Inbound_Email_Webhook::MAX_BODY_BYTES + 1 ) );
 		$oversized = Inbound_Email_Webhook::receive( $request );
