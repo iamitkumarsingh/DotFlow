@@ -144,7 +144,7 @@ final class Bootstrap {
 	 */
 	public static function register_step_type_schema() {
 
-		if ( ! \\Groundhogg\\Plugin::instance()->step_manager->type_is_registered( 'dotflow_event' ) || in_array( 'dotflow_event', Step_Type_Schema::supported_types(), true ) ) {
+		if ( ! \Groundhogg\Plugin::instance()->step_manager->type_is_registered( 'dotflow_event' ) || in_array( 'dotflow_event', Step_Type_Schema::supported_types(), true ) ) {
 			return;
 		}
 
