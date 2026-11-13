@@ -51,7 +51,7 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 		\Groundhogg\DotFlow\Events\Store::maybe_install();
 	}
 
-	protected function tearDown(): void {
+	public function tearDown(): void {
 
 		remove_filter( 'dotflow/inbound/inbox_address', $this->inbox_filter );
 		remove_filter( 'dotflow/inbound/reply_address', $this->reply_filter );
