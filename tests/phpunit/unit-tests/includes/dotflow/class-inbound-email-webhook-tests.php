@@ -29,8 +29,6 @@ class DotFlow_Inbound_Email_Webhook_Tests extends GH_UnitTestCase {
 			delete_option( $option );
 		}
 
-		update_option( Inbox::SITE_URL_OPTION, Inbox::normalize_url( home_url() ), false );
-
 		$this->inbox_filter = function ( $value ) {
 			return 'private-inbox@example.com';
 		};
