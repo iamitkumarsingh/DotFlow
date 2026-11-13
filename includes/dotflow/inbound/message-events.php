@@ -36,6 +36,12 @@ final class Message_Events {
 		$provider    = isset( $payload['dotflow_source'] ) ? sanitize_key( $payload['dotflow_source'] ) : 'groundhogg-inbox';
 		$message_id  = absint( $message->get_id() );
 
+		if ( ! $message_id ) {
+			return;
+		}
+
+		$payload = is_array( $payload ) ? $payload : [];
+
 		$event = new Event( 'email.inbound.received', [
 			'object_type'       => $object_type,
 			'object_id'         => $object_id,
