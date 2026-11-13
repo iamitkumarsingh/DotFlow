@@ -84,4 +84,4 @@ jobs:
       - name: Run DotFlow PHPUnit integration tests
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
-        run: phpunit --configuration phpunit.xml.dist --filter 'DotFlow_'
+        run: phpunit --configuration phpunit.xml.dist --filter 'DotFlow_' --display-skipped
