@@ -7,6 +7,12 @@ class DotFlow_List_Published_Forms_Tests extends GH_UnitTestCase {
 
 	public function test_only_active_web_form_steps_are_returned() {
 
+		$previous_user_id = get_current_user_id();
+		$user_id          = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$user             = get_userdata( $user_id );
+		$user->add_cap( 'view_funnels' );
+		wp_set_current_user( $user_id );
+
 		if ( ! current_user_can( 'view_funnels' ) ) {
 			$this->markTestSkipped( 'The test user cannot view flows.' );
 		}
@@ -38,6 +44,7 @@ class DotFlow_List_Published_Forms_Tests extends GH_UnitTestCase {
 			$this->assertSame( 'dotflow-form', $result['forms'][0]['elementor_widget'] );
 			$this->assertSame( 'groundhogg/edit-flow', $result['forms'][0]['edit_ability'] );
 		} finally {
+			wp_set_current_user( $previous_user_id );
 			if ( $active_id ) {
 				$db->delete( $active_id );
 			}
