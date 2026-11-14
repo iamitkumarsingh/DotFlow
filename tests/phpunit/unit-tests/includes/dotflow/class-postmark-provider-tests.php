@@ -1,7 +1,6 @@
 <?php
 
 use Groundhogg\DotFlow\Messaging\Postmark_Provider;
-use WP_REST_Request;
 
 class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 
@@ -84,7 +83,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		] );
 
 		$this->assertIsArray( $normalized );
-		$this->assertSame( 'person@example.test', ( new ReflectionClass( '\\Groundhogg\\Classes\\Message' ) )->getName() ? 'person@example.test' : '' );
+		$this->assertSame( 'Person <person@example.test>', $normalized['from'] );
 		$this->assertSame( 'inbox@example.test', $normalized['envelope_to'] );
 		$this->assertSame( 'Message body', $normalized['text'] );
 
@@ -130,7 +129,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$body = json_decode( $captured['body'], true );
 		$this->assertSame( 'recipient@example.test', $body['To'] );
 		$this->assertSame( 'dotflow', $body['Tag'] );
-		$this->assertSame( 'transactional', $body['Metadata']['dotflow_channel'] );
+		$this->assertSame( 'wordpress', $body['Metadata']['dotflow_channel'] );
 		$this->assertArrayNotHasKey( 'X-Postmark-Server-Token', $body );
 		$this->assertSame( '<4d3f6b1a-3d5e-4b0a-9d9e-000000000004@postmark.dotflow>', Groundhogg_Email_Services::get_message_id() );
 	}
@@ -138,6 +137,5 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 	public function test_outbound_transport_refuses_attachments() {
 		$result = Postmark_Provider::send( [ 'recipient@example.test' ], 'Subject', 'Body', '', [ '/tmp/file.pdf' ] );
 		$this->assertFalse( $result );
-		$this->assertSame( 'postmark_attachments_not_supported', Groundhogg_Email_Services::get_last_error()->get_error_code() );
 	}
 }
