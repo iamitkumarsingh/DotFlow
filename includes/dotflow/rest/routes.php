@@ -5,6 +5,7 @@ namespace Groundhogg\DotFlow\REST;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
 use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Inbound\Inbound_Email_Webhook;
+use Groundhogg\DotFlow\Messaging\Delivery_Webhook;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -25,6 +26,7 @@ final class Routes {
 	public static function register() {
 
 		Inbound_Email_Webhook::register_route();
+		Delivery_Webhook::register_route();
 
 		register_rest_route( 'dotflow/v1', '/manifest', [
 			[
@@ -158,9 +160,20 @@ final class Routes {
 					'idempotency'        => 'RFC Message-ID or deterministic Message-ID derived from provider_event_id.',
 					'groundhogg_ingest'  => 'Message::ingest handles contact matching, signed reply-token validation, threading, duplicate detection and storage.',
 				],
+				[
+					'id'                 => 'outbound-delivery',
+					'method'             => 'POST',
+					'path'               => '/wp-json/dotflow/v1/email/delivery/{provider}',
+					'authentication'    => 'Provider-specific adapter authorization; adapters must verify native signatures, timestamps and replay protection.',
+					'required_fields'    => [ 'event_id', 'message_id', 'status', 'channel' ],
+					'statuses'            => [ 'delivered', 'bounced', 'complained', 'deferred' ],
+					'attachments'        => false,
+					'idempotency'        => 'Provider event ID scoped to the provider source.',
+					'stored_data'        => 'Provider, channel, status, safe error code and one-way Message-ID fingerprint only.',
+				],
 			],
 			'write_policy' => [
-				'rest_mutations'       => 'No generic REST CRUD. Only the token-authenticated provider-neutral inbound email endpoint is writable.',
+				'rest_mutations'       => 'No generic REST CRUD. Inbound email uses its server-side token. Outbound delivery callbacks require a registered provider adapter to authenticate and normalize each webhook.',
 				'preferred_interface' => 'Purpose-built WordPress Abilities with strict schemas and capability checks.',
 				'arbitrary_sql'        => false,
 				'credential_readback'  => false,

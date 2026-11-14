@@ -19,6 +19,7 @@ use Groundhogg\DotFlow\REST\Routes;
 use Groundhogg\DotFlow\Inbound\Inbox_Addresses;
 use Groundhogg\DotFlow\Inbound\Message_Events;
 use Groundhogg\DotFlow\Messaging\Outbound_Delivery_Events;
+use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -94,6 +95,7 @@ final class Bootstrap {
 		Inbox_Addresses::register();
 		Message_Events::register();
 		Outbound_Delivery_Events::register();
+		Provider_Adapter_Registry::register_adapters();
 
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
