@@ -468,10 +468,15 @@ class Groundhogg_Email_Services {
 	 * @return bool Whether the email contents were sent successfully.
 	 */
 	public static function send_type( $type, $to, $subject, $message, $headers = '', $attachments = array() ) {
+		$previous_message_type = self::$current_message_type;
 		self::set_current_message_type( $type );
 		$service = self::get_saved_service( $type );
 
-		return self::send_with_service( $service, $to, $subject, $message, $headers, $attachments );
+		try {
+			return self::send_with_service( $service, $to, $subject, $message, $headers, $attachments );
+		} finally {
+			self::$current_message_type = $previous_message_type;
+		}
 	}
 
 	/**
@@ -487,9 +492,14 @@ class Groundhogg_Email_Services {
 	 * @return bool
 	 */
 	public static function send_with_service( $service, $to, $subject, $message, $headers = '', $attachments = array() ) {
+		$previous_email_service = self::$current_email_service;
 		self::set_current_email_service( $service );
 
-		return self::send( $to, $subject, $message, $headers, $attachments );
+		try {
+			return self::send( $to, $subject, $message, $headers, $attachments );
+		} finally {
+			self::$current_email_service = $previous_email_service;
+		}
 	}
 
 	/**
