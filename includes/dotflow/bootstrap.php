@@ -22,6 +22,7 @@ use Groundhogg\DotFlow\Inbound\Message_Events;
 use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
 use Groundhogg\DotFlow\Messaging\Outbound_Delivery_Events;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
+use Groundhogg\DotFlow\Messaging\Postmark_Provider;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 
 if ( ! defined( 'ABSPATH' ) ) {
