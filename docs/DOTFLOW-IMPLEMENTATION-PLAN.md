@@ -18,8 +18,9 @@ The repository has moved beyond planning. The following is the current, delibera
 - **Conversations:** Inbound/outbound message records, contact-scoped access, threading, duplicate detection, signed reply routing and a provider-neutral authenticated inbound webhook are implemented.
 - **Outbound email:** Existing Groundhogg email-service registration and channel routing are reused. Composed-email handling validates recipients, sender address and delivery channel. The shared transport restores channel/provider/message-ID context, owns its temporary `wp_mail_failed` hook safely, and preserves the outer send's error state during nested sends. It cleans up after provider and pre-send-hook exceptions without removing a hook owned by another integration. Regression coverage exercises nested sends, hook ownership and exception paths.
 - **Email diagnostics:** A read-only ability reports registered delivery services and the selected WordPress, transactional and marketing services. It distinguishes registered providers from callable transports, so a stale or broken callback is not reported as available. It never returns provider credentials.
+- **Outbound transport outcomes:** The existing Groundhogg email-service boundary emits provider-neutral result/exception hooks. DotFlow persists privacy-minimised `email.transport.accepted` and `email.transport.failed` events with provider, channel, a one-way Message-ID fingerprint and a safe error code only. Acceptance means the configured transport returned `true`; it is not a delivery receipt. Provider exception messages, recipient addresses, subjects and message bodies are never stored. Telemetry failures cannot alter the original send result.
 - **Automation:** Existing Groundhogg flows remain the execution engine. DotFlow adds a typed, event-driven benchmark and AI flow configuration support; a separate workflow runtime is not claimed.
-- **Not yet implemented:** Provider-specific outbound API adapters, provider-specific inbound adapters, attachment ingestion, a complete provider-settings UI, the full automation execution/monitoring experience, and the remaining integrations.
+- **Not yet implemented:** Provider-specific outbound API adapters, durable outbound retry orchestration, provider delivery/bounce/complaint webhooks, provider-specific inbound adapters, attachment ingestion, a complete provider-settings UI, the full automation execution/monitoring experience, and the remaining integrations.
 
 Do not interpret inherited Groundhogg capabilities as newly built DotFlow modules. Attachments remain explicitly unsupported by the current inbound webhook until safe storage, malware handling, access control and retention are implemented together.
 
@@ -59,7 +60,7 @@ Avoid duplicating existing infrastructure without a documented reason.
 0. Foundation: audit codebase, dependencies, licences, compatibility and test strategy; establish safe development workflow.
 1. Product foundation: DotFlow identity and controlled compatibility layer, module registration, feature flags and boot smoke tests.
 2. CRM/events: typed event contracts, ingestion, deduplication, contact timeline, consent and suppression invariants.
-3. Messaging: provider contracts, outbound queue adapter, inbound webhook/IMAP, threading and conversation UI.
+3. Messaging: provider contracts, outbound queue adapter, transport outcome events (implemented), bounded retries/backoff, provider delivery/bounce/complaint webhooks, inbound webhook/IMAP, threading and conversation UI.
 4. Automation: versioned workflow schema, validation, triggers, conditions, actions, waits and execution observability.
 5. Tracking/integrations: browser/server events, attribution, Elementor, DotForm, HubSpot, WooCommerce, GA4 and generic webhooks.
 6. Reporting/release: campaign/workflow/provider reports, security and performance hardening, upgrade tests, release package and rollback guide.
