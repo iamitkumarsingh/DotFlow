@@ -37,6 +37,33 @@ class DotFlow_Composed_Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		$this->assertFalse( is_sending() );
 	}
 
+	public function test_invalid_cc_address_rejects_the_entire_send() {
+
+		$result = $this->ability()->__invoke( [
+			'to'      => [ 'valid@example.test' ],
+			'cc'      => [ 'not-an-email' ],
+			'subject' => 'Test',
+			'content' => '<p>Test</p>',
+		] );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'groundhogg_invalid_recipients', $result->get_error_code() );
+		$this->assertFalse( is_sending() );
+	}
+
+	public function test_recipient_fields_must_be_lists() {
+
+		$result = $this->ability()->__invoke( [
+			'to'      => 'valid@example.test',
+			'subject' => 'Test',
+			'content' => '<p>Test</p>',
+		] );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'groundhogg_invalid_recipients', $result->get_error_code() );
+		$this->assertFalse( is_sending() );
+	}
+
 	public function test_invalid_delivery_channel_is_rejected_before_sending() {
 
 		$result = $this->ability()->__invoke( [
