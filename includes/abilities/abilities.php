@@ -44,6 +44,7 @@ use Groundhogg\Abilities\Emails\Get_Email_Template;
 use Groundhogg\Abilities\Emails\List_Email_Templates;
 use Groundhogg\Abilities\Emails\List_Replacement_Codes;
 use Groundhogg\Abilities\Emails\List_Sender_Profiles;
+use Groundhogg\Abilities\Emails\List_Email_Services;
 use Groundhogg\Abilities\Emails\Send_Composed_Email;
 use Groundhogg\Abilities\Emails\Send_Email_Template;
 use Groundhogg\Abilities\Emails\Send_Test_Email;
@@ -408,6 +409,7 @@ class Abilities {
 			List_Email_Templates::class,
 			Get_Email_Template::class,
 			List_Sender_Profiles::class,
+			List_Email_Services::class,
 			Create_Email_Template::class,
 			Update_Email_Template::class,
 			List_Replacement_Codes::class,
