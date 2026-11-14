@@ -14,6 +14,7 @@ use WP_REST_Request;
 final class Postmark_Provider {
 
 	const SERVICE = 'dotflow_postmark';
+	const OPTION = 'dotflow_postmark_settings';
 	const API = 'https://api.postmarkapp.com/email';
 
 	public static function boot() {
@@ -21,6 +22,9 @@ final class Postmark_Provider {
 		add_action( 'dotflow/email/delivery_adapters/register', [ __CLASS__, 'register_delivery' ] );
 		add_action( 'dotflow/email/inbound_adapters/register', [ __CLASS__, 'register_inbound' ] );
 		Postmark_Retry_Queue::register();
+		add_action( 'admin_init', [ __CLASS__, 'register_settings' ], 30 );
+		add_action( 'admin_post_dotflow_postmark_test', [ __CLASS__, 'test_connection' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'admin_notice' ] );
 	}
 
 	public static function register_service() {
@@ -38,6 +42,11 @@ final class Postmark_Provider {
 		];
 		$value = isset( $constants[ $key ] ) && defined( $constants[ $key ] ) ? (string) constant( $constants[ $key ] ) : '';
 		$value = apply_filters( 'dotflow/postmark/' . $key, $value );
+		if ( ! is_string( $value ) || '' === trim( $value ) ) {
+			$options = get_option( self::OPTION, [] );
+			$stored = is_array( $options ) ? ( $options[ $key ] ?? '' ) : '';
+			$value = is_string( $stored ) ? self::decrypt_secret( $stored ) : '';
+		}
 		return is_string( $value ) ? trim( $value ) : '';
 	}
 
@@ -171,6 +180,121 @@ final class Postmark_Provider {
 			return [ 'accepted' => false, 'retryable' => false, 'uncertain' => true, 'error_code' => 'postmark_missing_message_id' ];
 		}
 		return [ 'accepted' => true, 'retryable' => false, 'uncertain' => false, 'provider_id' => $id, 'error_code' => '' ];
+	}
+
+
+	public static function register_settings() {
+		if ( ! current_user_can( 'manage_options' ) ) { return; }
+		register_setting( 'gh_email', self::OPTION, [
+			'type' => 'array',
+			'sanitize_callback' => [ __CLASS__, 'sanitize_settings' ],
+			'default' => [],
+		] );
+		add_settings_section( 'dotflow_postmark', __( 'DotFlow · Postmark', 'groundhogg' ), [ __CLASS__, 'render_settings_intro' ], 'gh_email' );
+		add_settings_field( 'dotflow_postmark_server_token', __( 'Postmark server token', 'groundhogg' ), [ __CLASS__, 'render_server_token' ], 'gh_email', 'dotflow_postmark' );
+		add_settings_field( 'dotflow_postmark_webhook_secret', __( 'Webhook Basic Auth password', 'groundhogg' ), [ __CLASS__, 'render_webhook_secret' ], 'gh_email', 'dotflow_postmark' );
+		add_settings_field( 'dotflow_postmark_transactional_stream', __( 'Transactional Message Stream', 'groundhogg' ), [ __CLASS__, 'render_transactional_stream' ], 'gh_email', 'dotflow_postmark' );
+		add_settings_field( 'dotflow_postmark_marketing_stream', __( 'Marketing Message Stream', 'groundhogg' ), [ __CLASS__, 'render_marketing_stream' ], 'gh_email', 'dotflow_postmark' );
+	}
+
+	public static function sanitize_settings( $input ): array {
+		$input = is_array( $input ) ? $input : [];
+		$old = get_option( self::OPTION, [] );
+		$old = is_array( $old ) ? $old : [];
+		$out = [
+			'server_token' => $old['server_token'] ?? '',
+			'webhook_secret' => $old['webhook_secret'] ?? '',
+			'transactional_stream' => sanitize_key( $input['transactional_stream'] ?? ( $old['transactional_stream'] ?? 'outbound' ) ) ?: 'outbound',
+			'marketing_stream' => sanitize_key( $input['marketing_stream'] ?? ( $old['marketing_stream'] ?? 'broadcasts' ) ) ?: 'broadcasts',
+		];
+		foreach ( [ 'server_token', 'webhook_secret' ] as $key ) {
+			if ( ! empty( $input[ 'clear_' . $key ] ) ) { $out[ $key ] = ''; continue; }
+			$value = isset( $input[ $key ] ) && is_string( $input[ $key ] ) ? trim( wp_unslash( $input[ $key ] ) ) : '';
+			if ( '' !== $value ) {
+				$encrypted = self::encrypt_secret( $value );
+				if ( false !== $encrypted ) { $out[ $key ] = $encrypted; }
+			}
+		}
+		return $out;
+	}
+
+	public static function render_settings_intro() {
+		echo '<p>' . esc_html__( 'Credentials are write-only and encrypted at rest with AES-256-GCM. Select Postmark under Groundhogg Transactional or Marketing email service after saving.', 'groundhogg' ) . '</p>';
+		echo '<p>' . esc_html__( 'Delivery webhook: /wp-json/dotflow/v1/email/delivery/postmark. Inbound webhook: /wp-json/dotflow/v1/inbound/email/postmark. Configure HTTP Basic Authentication using username dotflow and the password below. Inbound also requires independent inbox routing to be enabled.', 'groundhogg' ) . '</p>';
+		$url = wp_nonce_url( admin_url( 'admin-post.php?action=dotflow_postmark_test' ), 'dotflow_postmark_test' );
+		echo '<p><a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Test Postmark connection', 'groundhogg' ) . '</a></p>';
+	}
+
+	public static function render_server_token() { self::render_secret_field( 'server_token', __( 'Saved — enter a new token to replace', 'groundhogg' ) ); }
+	public static function render_webhook_secret() { self::render_secret_field( 'webhook_secret', __( 'Saved — enter a new password to replace', 'groundhogg' ) ); }
+
+	private static function render_secret_field( string $key, string $placeholder ) {
+		$saved = '' !== self::secret( $key );
+		printf( '<input type="password" autocomplete="new-password" class="regular-text" name="%1$s[%2$s]" value="" placeholder="%3$s" />', esc_attr( self::OPTION ), esc_attr( $key ), esc_attr( $saved ? $placeholder : __( 'Enter value', 'groundhogg' ) ) );
+		if ( $saved ) {
+			echo '<label><input type="checkbox" name="' . esc_attr( self::OPTION ) . '[clear_' . esc_attr( $key ) . ']" value="1" /> ' . esc_html__( 'Remove saved value', 'groundhogg' ) . '</label>';
+		}
+	}
+
+	public static function render_transactional_stream() { self::render_stream_field( 'transactional_stream', 'outbound' ); }
+	public static function render_marketing_stream() { self::render_stream_field( 'marketing_stream', 'broadcasts' ); }
+	private static function render_stream_field( string $key, string $default ) {
+		$options = get_option( self::OPTION, [] );
+		$value = is_array( $options ) ? ( $options[ $key ] ?? $default ) : $default;
+		printf( '<input type="text" class="regular-text" name="%1$s[%2$s]" value="%3$s" />', esc_attr( self::OPTION ), esc_attr( $key ), esc_attr( $value ) );
+	}
+
+	public static function test_connection() {
+		if ( ! current_user_can( 'manage_options' ) ) { wp_die( esc_html__( 'You are not allowed to test email providers.', 'groundhogg' ), '', [ 'response' => 403 ] ); }
+		check_admin_referer( 'dotflow_postmark_test' );
+		$token = self::secret( 'server_token' );
+		$result = 'failed';
+		if ( '' !== $token ) {
+			$response = wp_remote_get( 'https://api.postmarkapp.com/server', [
+				'timeout' => 10,
+				'redirection' => 0,
+				'reject_unsafe_urls' => true,
+				'sslverify' => true,
+				'headers' => [ 'Accept' => 'application/json', 'X-Postmark-Server-Token' => $token ],
+			] );
+			if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) { $result = 'success'; }
+		}
+		set_transient( 'dotflow_postmark_test_' . get_current_user_id(), $result, MINUTE_IN_SECONDS );
+		wp_safe_redirect( wp_get_referer() ?: admin_url( 'admin.php?page=gh_settings&tab=email' ) );
+		exit;
+	}
+
+	public static function admin_notice() {
+		$key = 'dotflow_postmark_test_' . get_current_user_id();
+		$result = get_transient( $key );
+		if ( ! $result || ! current_user_can( 'manage_options' ) ) { return; }
+		delete_transient( $key );
+		$class = 'success' === $result ? 'notice notice-success' : 'notice notice-error';
+		$message = 'success' === $result
+			? __( 'Postmark connection succeeded. No email was sent.', 'groundhogg' )
+			: __( 'Postmark connection failed. Check the server token and outbound HTTPS access.', 'groundhogg' );
+		echo '<div class="' . esc_attr( $class ) . '"><p>' . esc_html( $message ) . '</p></div>';
+	}
+
+	private static function encrypt_secret( string $plain ) {
+		try {
+			$iv = random_bytes( 12 );
+			$tag = '';
+			$cipher = openssl_encrypt( $plain, 'aes-256-gcm', self::settings_key(), OPENSSL_RAW_DATA, $iv, $tag );
+			return false === $cipher || 16 !== strlen( $tag ) ? false : 'v1:' . base64_encode( $iv . $tag . $cipher );
+		} catch ( \Throwable $exception ) { return false; }
+	}
+
+	private static function decrypt_secret( string $stored ): string {
+		if ( 0 !== strpos( $stored, 'v1:' ) ) { return ''; }
+		$raw = base64_decode( substr( $stored, 3 ), true );
+		if ( false === $raw || strlen( $raw ) < 29 ) { return ''; }
+		$plain = openssl_decrypt( substr( $raw, 28 ), 'aes-256-gcm', self::settings_key(), OPENSSL_RAW_DATA, substr( $raw, 0, 12 ), substr( $raw, 12, 16 ) );
+		return is_string( $plain ) ? $plain : '';
+	}
+
+	private static function settings_key(): string {
+		return hash( 'sha256', (string) wp_salt( 'auth' ) . '|' . site_url() . '|dotflow-postmark-settings-v1', true );
 	}
 
 	private static function fail( string $code ): bool {
