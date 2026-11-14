@@ -18,6 +18,7 @@ use Groundhogg\DotFlow\Events\Store;
 use Groundhogg\DotFlow\REST\Routes;
 use Groundhogg\DotFlow\Inbound\Inbox_Addresses;
 use Groundhogg\DotFlow\Inbound\Message_Events;
+use Groundhogg\DotFlow\Messaging\Outbound_Delivery_Events;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -92,6 +93,7 @@ final class Bootstrap {
 		// Independent provider inbox mode is opt-in and never replaces a provisioned relay.
 		Inbox_Addresses::register();
 		Message_Events::register();
+		Outbound_Delivery_Events::register();
 
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
