@@ -150,7 +150,7 @@ final class Postmark_Retry_Queue {
 		$delay = min( HOUR_IN_SECONDS, 60 * ( 2 ** max( 0, $attempts ) ) );
 		$available = gmdate( 'Y-m-d H:i:s', time() + $delay );
 
-		return $wpdb->update(
+		$updated = $wpdb->update(
 			$db->get_table_name(),
 			[
 				'status' => 'pending',
@@ -165,6 +165,7 @@ final class Postmark_Retry_Queue {
 			[ '%s', '%d', '%s', '%s', '%s', '%s', '%s' ],
 			[ '%d', '%s', '%s' ]
 		);
+		return false !== $updated && $updated > 0;
 	}
 
 	public static function is_queued( string $message_id ): bool {

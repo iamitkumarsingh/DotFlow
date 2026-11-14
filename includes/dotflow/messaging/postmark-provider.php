@@ -137,8 +137,9 @@ final class Postmark_Provider {
 			return true;
 		}
 		if ( ! empty( $result['retryable'] ) ) {
-			Postmark_Retry_Queue::schedule_retry( $reservation, 0, (string) $result['error_code'] );
-			return true;
+			if ( Postmark_Retry_Queue::schedule_retry( $reservation, 0, (string) $result['error_code'] ) ) { return true; }
+			Postmark_Retry_Queue::complete( $reservation, 'uncertain', 'postmark_retry_schedule_failed' );
+			return self::fail( 'postmark_retry_schedule_failed' );
 		}
 		Postmark_Retry_Queue::complete( $reservation, ! empty( $result['uncertain'] ) ? 'uncertain' : 'failed', (string) $result['error_code'] );
 		return self::fail( (string) $result['error_code'] );
