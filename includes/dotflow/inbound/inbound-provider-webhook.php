@@ -79,6 +79,8 @@ final class Inbound_Provider_Webhook {
 			return new WP_Error( 'dotflow_inbound_provider_invalid_envelope', __( 'The inbound provider adapter returned an invalid message envelope.', 'groundhogg' ), [ 'status' => 400 ] );
 		}
 
-		return Inbound_Email_Webhook::ingest_normalized( $normalized );
+		$response = Inbound_Email_Webhook::ingest_normalized( $normalized );
+		if ( 'postmark' === $provider && $response instanceof \\WP_REST_Response && $response->get_status() < 400 ) { $response->set_status( 200 ); }
+		return $response;
 	}
 }

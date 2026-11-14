@@ -72,3 +72,13 @@ Every feature needs automated normal/invalid/unauthorised/failure tests, PHP and
 
 ## Licence and guardrails
 This is a Groundhogg-derived project. Preserve upstream notices and comply with GPLv3 for derivative distributions. Work only on `dotflow/development` until explicit release approval. Do not alter production WordPress, live provider credentials or mailboxes. Use small, reviewable commits with tests.
+
+
+## Postmark provider checkpoint
+
+- The first concrete provider is Postmark, registered as `dotflow_postmark` through Groundhogg's existing email-service hook.
+- Configure `DOTFLOW_POSTMARK_SERVER_TOKEN` and `DOTFLOW_POSTMARK_WEBHOOK_SECRET` in wp-config.php or through the corresponding server-side filters. Secrets are not stored in the WordPress options table.
+- Outbound sending uses Postmark's HTTPS Email API, separate default transactional (`outbound`) and marketing (`broadcasts`) Message Streams, channel metadata, recipient validation and a deliberate no-attachments policy. Stream IDs can be overridden with `dotflow/postmark/message_stream/{channel}` filters.
+- Postmark delivery, bounce and complaint webhooks use HTTPS and HTTP Basic Authentication with username `dotflow`. Postmark does not currently support HMAC webhook signatures. Successful Postmark callbacks return HTTP 200.
+- Inbound Postmark payloads are normalized through the canonical inbound pipeline. Attachments remain rejected and the independent inbox address configuration in wp-config.php is still required.
+- No Postmark account credentials have been configured and no email has been sent from this development branch.

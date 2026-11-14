@@ -151,7 +151,7 @@ final class Delivery_Webhook {
 		return new WP_REST_Response( [
 			'accepted' => true,
 			'status'   => $validated['status'],
-		], 202 );
+		], 'postmark' === $provider ? 200 : 202 );
 	}
 
 	/**

@@ -98,6 +98,7 @@ final class Bootstrap {
 		Inbound_Provider_Registry::register_adapters();
 		Outbound_Delivery_Events::register();
 		Provider_Adapter_Registry::register_adapters();
+		Postmark_Provider::boot();
 
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
