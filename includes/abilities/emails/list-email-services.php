@@ -25,13 +25,15 @@ class List_Email_Services extends Ability {
 			'properties' => [
 				'service_id'   => [ 'type' => 'string' ],
 				'service_name' => [ 'type' => 'string' ],
+				'registered'   => [ 'type' => 'boolean' ],
+				'callable'     => [ 'type' => 'boolean' ],
 				'available'    => [ 'type' => 'boolean' ],
 			],
 		];
 
 		return [
 			'label'       => __( 'List Email Services', 'groundhogg' ),
-			'description' => __( 'List registered email delivery services and the selected service for WordPress, transactional and marketing email. Reports availability and public service names only; never returns credentials or provider secrets.', 'groundhogg' ),
+			'description' => __( 'List registered email delivery services and the selected service for WordPress, transactional and marketing email. Reports whether each provider is registered and has a callable transport; never returns credentials or provider secrets.', 'groundhogg' ),
 			'input_schema' => [
 				'type'                 => 'object',
 				'additionalProperties' => false,
@@ -46,7 +48,8 @@ class List_Email_Services extends Ability {
 							'type'       => 'object',
 							'properties' => [
 								'id'   => [ 'type' => 'string' ],
-								'name' => [ 'type' => 'string' ],
+								'name'     => [ 'type' => 'string' ],
+								'callable' => [ 'type' => 'boolean' ],
 							],
 						],
 					],
@@ -70,8 +73,9 @@ class List_Email_Services extends Ability {
 
 		foreach ( $registered as $id => $name ) {
 			$services[] = [
-				'id'   => sanitize_key( (string) $id ),
-				'name' => sanitize_text_field( (string) $name ),
+				'id'       => sanitize_key( (string) $id ),
+				'name'     => sanitize_text_field( (string) $name ),
+				'callable' => is_callable( \\Groundhogg_Email_Services::get_service_callback( $id ) ),
 			];
 		}
 
@@ -80,12 +84,15 @@ class List_Email_Services extends Ability {
 		foreach ( [ 'wordpress', 'transactional', 'marketing' ] as $channel ) {
 
 			$service_id = (string) \Groundhogg_Email_Services::get_saved_service( $channel );
-			$available  = array_key_exists( $service_id, $registered );
+			$is_registered = array_key_exists( $service_id, $registered );
+			$is_callable   = $is_registered && is_callable( \\Groundhogg_Email_Services::get_service_callback( $service_id ) );
 
 			$channels[ $channel ] = [
 				'service_id'   => sanitize_key( $service_id ),
-				'service_name' => $available ? sanitize_text_field( (string) $registered[ $service_id ] ) : '',
-				'available'    => $available,
+				'service_name' => $is_registered ? sanitize_text_field( (string) $registered[ $service_id ] ) : '',
+				'registered'   => $is_registered,
+				'callable'     => $is_callable,
+				'available'    => $is_registered && $is_callable,
 			];
 		}
 
