@@ -72,6 +72,13 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		] );
 
 		$this->assertSame( 'bounced', $bounce['status'] );
+		$transient = Postmark_Provider::normalize_delivery( [
+			'MessageID' => '4d3f6b1a-3d5e-4b0a-9d9e-000000000007',
+			'ID' => 458,
+			'Type' => 'Transient',
+			'TypeCode' => 2,
+		] );
+		$this->assertSame( 'deferred', $transient['status'] );
 		$this->assertSame( 'complained', $complaint['status'] );
 	}
 

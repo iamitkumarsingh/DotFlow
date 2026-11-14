@@ -75,7 +75,8 @@ final class Postmark_Provider {
 		} elseif ( false !== strpos( $type, 'spam' ) || false !== strpos( strtolower( (string) ( $data['Name'] ?? '' ) ), 'spam' ) ) {
 			$status = 'complained'; $suffix = (string) ( $data['ID'] ?? $data['BouncedAt'] ?? $type );
 		} elseif ( isset( $data['BouncedAt'] ) || isset( $data['TypeCode'] ) || isset( $data['Type'] ) ) {
-			$status = 'bounced'; $suffix = (string) ( $data['ID'] ?? $data['BouncedAt'] ?? $type );
+			$status = ( false !== strpos( $type, 'transient' ) || 2 === absint( $data['TypeCode'] ?? 0 ) ) ? 'deferred' : 'bounced';
+			$suffix = (string) ( $data['ID'] ?? $data['BouncedAt'] ?? $type );
 		} else { return new WP_Error( 'dotflow_postmark_event_unknown', __( 'Unsupported Postmark event.', 'groundhogg' ), [ 'status' => 400 ] ); }
 		$meta = isset( $data['Metadata'] ) && is_array( $data['Metadata'] ) ? $data['Metadata'] : [];
 		$channel = sanitize_key( (string) ( $meta['dotflow_channel'] ?? '' ) );
