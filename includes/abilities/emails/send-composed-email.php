@@ -140,7 +140,25 @@ class Send_Composed_Email extends Ability {
 
 	public function __invoke( $input ) {
 
+		// Merge-field generation can expose values which are only appropriate while
+		// an email is being sent. Always restore the process-wide flag, including
+		// validation failures and exceptions.
 		is_sending( true );
+
+		try {
+			return $this->send( $input );
+		} finally {
+			is_sending( false );
+		}
+	}
+
+	/**
+	 * Validate and send the composed email while the sending flag is enabled.
+	 *
+	 * @param array $input
+	 * @return array|WP_Error
+	 */
+	private function send( $input ) {
 
 		$to  = array_values( array_filter( array_map( 'sanitize_email', $input['to'] ?? [] ) ) );
 		$cc  = array_values( array_filter( array_map( 'sanitize_email', $input['cc'] ?? [] ) ) );
