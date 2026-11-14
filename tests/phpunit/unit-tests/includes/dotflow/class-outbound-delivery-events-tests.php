@@ -18,10 +18,16 @@ class DotFlow_Outbound_Delivery_Events_Tests extends GH_UnitTestCase {
 		$fingerprint = hash( 'sha256', $message_id );
 
 		return $wpdb->get_row( $wpdb->prepare(
-			"SELECT ID, event_name, payload FROM {$db->get_table_name()} WHERE source = %s AND JSON_EXTRACT(payload, '$.message_fingerprint') = %s ORDER BY ID DESC LIMIT 1",
+			"SELECT ID, event_name, payload FROM {$db->get_table_name()} WHERE source = %s AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.message_fingerprint')) = %s ORDER BY ID DESC LIMIT 1",
 			'email-transport',
 			$fingerprint
 		) );
+	}
+
+	protected function delete_event( $row ) {
+		if ( $row && ! empty( $row->ID ) ) {
+			get_db( 'dotflow_events' )->delete( absint( $row->ID ) );
+		}
 	}
 
 	public function test_transport_success_records_acceptance_without_message_content_or_addresses() {
@@ -54,6 +60,7 @@ class DotFlow_Outbound_Delivery_Events_Tests extends GH_UnitTestCase {
 			$this->assertArrayNotHasKey( 'to', $payload );
 			$this->assertStringNotContainsString( 'private-recipient@example.test', $row->payload );
 			$this->assertStringNotContainsString( 'Private body', $row->payload );
+			$this->delete_event( $row );
 		} finally {
 			Groundhogg_Email_Services::register( 'dotflow_transport_success', 'DotFlow Test Transport', '__return_true' );
 		}
@@ -83,6 +90,7 @@ class DotFlow_Outbound_Delivery_Events_Tests extends GH_UnitTestCase {
 			$this->assertSame( 'provider_rate_limited', $payload['error_code'] );
 			$this->assertStringNotContainsString( 'Sensitive provider response', $row->payload );
 			$this->assertStringNotContainsString( 'recipient@example.test', $row->payload );
+			$this->delete_event( $row );
 		} finally {
 			Groundhogg_Email_Services::register( 'dotflow_transport_failure', 'DotFlow Test Failure', '__return_true' );
 		}
@@ -118,5 +126,6 @@ class DotFlow_Outbound_Delivery_Events_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'provider_exception', $payload['error_code'] );
 		$this->assertStringNotContainsString( 'recipient@example.test', $row->payload );
 		$this->assertStringNotContainsString( 'provider secret', $row->payload );
+		$this->delete_event( $row );
 	}
 }

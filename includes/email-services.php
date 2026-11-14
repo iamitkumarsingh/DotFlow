@@ -415,13 +415,17 @@ class Groundhogg_Email_Services {
 			 * @param string $channel
 			 * @param string $message_id
 			 */
-			do_action(
-				'groundhogg/email_services/transport_result',
-				$result,
-				(string) self::get_current_email_service(),
-				(string) self::get_current_message_type(),
-				(string) self::get_message_id()
-			);
+			try {
+				do_action(
+					'groundhogg/email_services/transport_result',
+					$result,
+					(string) self::get_current_email_service(),
+					(string) self::get_current_message_type(),
+					(string) self::get_message_id()
+				);
+			} catch ( \Throwable $observer_exception ) {
+				// Observability integrations must never change the provider's result.
+			}
 
 			return $result;
 		} catch ( \Throwable $exception ) {
@@ -429,12 +433,16 @@ class Groundhogg_Email_Services {
 			 * A transport callback threw before it could return a result.
 			 * Do not expose exception messages: they may contain addresses or credentials.
 			 */
-			do_action(
-				'groundhogg/email_services/transport_exception',
-				(string) self::get_current_email_service(),
-				(string) self::get_current_message_type(),
-				(string) self::get_message_id()
-			);
+			try {
+				do_action(
+					'groundhogg/email_services/transport_exception',
+					(string) self::get_current_email_service(),
+					(string) self::get_current_message_type(),
+					(string) self::get_message_id()
+				);
+			} catch ( \Throwable $observer_exception ) {
+				// Preserve the original provider exception.
+			}
 
 			throw $exception;
 		} finally {
