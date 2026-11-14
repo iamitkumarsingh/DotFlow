@@ -301,4 +301,36 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
 	}
 
+
+	public function test_postmark_rate_limit_is_durably_queued_by_the_transport() {
+		Postmark_Retry_Queue::maybe_install();
+		$message_id = '<retry-test-004@dotflow.local>';
+		Groundhogg_Email_Services::set_message_id( $message_id );
+		$this->http_filter = static function ( $pre, $args, $url ) {
+			if ( Postmark_Provider::API !== $url ) { return $pre; }
+			return [
+				'headers' => [],
+				'body' => wp_json_encode( [ 'ErrorCode' => 11, 'Message' => 'Rate limit exceeded' ] ),
+				'response' => [ 'code' => 429, 'message' => 'Too Many Requests' ],
+				'cookies' => [],
+				'filename' => null,
+			];
+		};
+		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
+
+		$result = Postmark_Provider::send( [ 'recipient@example.test' ], 'Rate limit test', 'Sensitive body' );
+		$this->assertTrue( $result );
+		$this->assertTrue( Postmark_Retry_Queue::is_queued( $message_id ) );
+
+		global $wpdb;
+		$db = get_db( 'dotflow_postmark_outbox' );
+		$row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT status, payload FROM {$db->get_table_name()} WHERE idempotency_key = %s",
+			hash( 'sha256', $message_id )
+		) );
+		$this->assertSame( 'pending', $row->status );
+		$this->assertStringNotContainsString( 'Sensitive body', $row->payload );
+		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
+	}
+
 }

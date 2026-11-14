@@ -98,7 +98,11 @@ final class Postmark_Provider {
 		if ( '' === $from || '' === $to || '' === $id || strlen( $id ) > 120 ) {
 			return new WP_Error( 'dotflow_postmark_inbound_invalid', __( 'Postmark inbound message is missing required routing information.', 'groundhogg' ), [ 'status' => 400 ] );
 		}
-		return [ 'provider_event_id' => 'postmark-' . sanitize_key( $id ), 'from' => $from, 'to' => $to, 'envelope_to' => $to, 'cc' => (string) ( $data['Cc'] ?? '' ), 'subject' => (string) ( $data['Subject'] ?? '' ), 'text' => (string) ( $data['TextBody'] ?? '' ), 'html' => (string) ( $data['HtmlBody'] ?? '' ), 'source' => 'postmark-inbound' ];
+		$cc = isset( $data['Cc'] ) && is_string( $data['Cc'] ) ? $data['Cc'] : '';
+		$subject = isset( $data['Subject'] ) && is_string( $data['Subject'] ) ? $data['Subject'] : '';
+		$text = isset( $data['TextBody'] ) && is_string( $data['TextBody'] ) ? $data['TextBody'] : '';
+		$html = isset( $data['HtmlBody'] ) && is_string( $data['HtmlBody'] ) ? $data['HtmlBody'] : '';
+		return [ 'provider_event_id' => 'postmark-' . sanitize_key( $id ), 'from' => $from, 'to' => $to, 'envelope_to' => $to, 'cc' => $cc, 'subject' => $subject, 'text' => $text, 'html' => $html, 'source' => 'postmark-inbound' ];
 	}
 
 	public static function send( $to, $subject, $message, $headers = '', $attachments = [] ) {
