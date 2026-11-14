@@ -333,4 +333,21 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
 	}
 
+
+	public function test_delivery_event_deduplication_is_recipient_scoped_without_storing_addresses() {
+		$base = [
+			'MessageID' => '4d3f6b1a-3d5e-4b0a-9d9e-000000000006',
+			'DeliveredAt' => '2026-11-14T12:00:00Z',
+			'Metadata' => [ 'dotflow_channel' => 'transactional' ],
+		];
+		$first = Postmark_Provider::normalize_delivery( $base + [ 'Recipient' => 'one@example.test' ] );
+		$duplicate = Postmark_Provider::normalize_delivery( $base + [ 'Recipient' => 'one@example.test' ] );
+		$second = Postmark_Provider::normalize_delivery( $base + [ 'Recipient' => 'two@example.test' ] );
+
+		$this->assertSame( $first['event_id'], $duplicate['event_id'] );
+		$this->assertNotSame( $first['event_id'], $second['event_id'] );
+		$this->assertArrayNotHasKey( 'Recipient', $first );
+		$this->assertStringNotContainsString( 'one@example.test', $first['event_id'] );
+	}
+
 }

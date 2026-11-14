@@ -82,9 +82,10 @@ final class Postmark_Provider {
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) {
 			$channel = 'broadcasts' === sanitize_key( (string) ( $data['MessageStream'] ?? '' ) ) ? 'marketing' : 'transactional';
 		}
+		$recipient_fingerprint = isset( $data['Recipient'] ) && is_string( $data['Recipient'] ) ? hash( 'sha256', strtolower( trim( $data['Recipient'] ) ) ) : '';
 		$event = isset( $data['ID'] ) && is_scalar( $data['ID'] )
 			? 'postmark-' . sanitize_key( (string) $data['ID'] )
-			: 'postmark-' . substr( hash( 'sha256', $id . '|' . $status . '|' . $suffix ), 0, 48 );
+			: 'postmark-' . substr( hash( 'sha256', $id . '|' . $status . '|' . $suffix . '|' . $recipient_fingerprint ), 0, 48 );
 		return [ 'event_id' => $event, 'message_id' => ( isset( $meta['dotflow_message_id'] ) && is_string( $meta['dotflow_message_id'] ) && preg_match( '/^<[^<>\\s@]+@[^<>\\s@]+>$/', $meta['dotflow_message_id'] ) ) ? $meta['dotflow_message_id'] : '<' . $id . '@postmark.dotflow>', 'status' => $status, 'channel' => $channel, 'error_code' => isset( $data['TypeCode'] ) && is_numeric( $data['TypeCode'] ) ? 'postmark_' . absint( $data['TypeCode'] ) : '' ];
 	}
 
@@ -109,10 +110,16 @@ final class Postmark_Provider {
 		if ( '' === self::secret( 'server_token' ) ) { return self::fail( 'postmark_not_configured' ); }
 		if ( ! empty( $attachments ) ) { return self::fail( 'postmark_attachments_not_supported' ); }
 		$headers = self::parse_headers( $headers );
-		$to = self::emails( $to ); $cc = self::emails( $headers['cc'] ?? [] ); $bcc = self::emails( $headers['bcc'] ?? [] );
+		$to = self::emails( $to );
+		$raw_cc = $headers['cc'] ?? [];
+		$raw_bcc = $headers['bcc'] ?? [];
+		$cc = self::emails( $raw_cc );
+		$bcc = self::emails( $raw_bcc );
+		if ( ( ! empty( $raw_cc ) && empty( $cc ) ) || ( ! empty( $raw_bcc ) && empty( $bcc ) ) ) { return self::fail( 'postmark_invalid_cc_bcc' ); }
 		if ( empty( $to ) || count( $to ) + count( $cc ) + count( $bcc ) > 50 ) { return self::fail( 'postmark_invalid_recipients' ); }
-		$from = $headers['from'] ?? ( get_bloginfo( 'name' ) . ' <' . sanitize_email( get_option( 'admin_email' ) ) . '>' );
+		$from = $headers['from'] ?? ( sanitize_text_field( get_bloginfo( 'name' ) ) . ' <' . sanitize_email( get_option( 'admin_email' ) ) . '>' );
 		if ( ! is_email( self::extract_email( $from ) ) || strlen( $from ) > 255 ) { return self::fail( 'postmark_invalid_sender' ); }
+		if ( strlen( (string) $message ) > 5 * MB_IN_BYTES ) { return self::fail( 'postmark_body_too_large' ); }
 		$channel = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) { $channel = 'transactional'; }
 		$stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
@@ -124,7 +131,7 @@ final class Postmark_Provider {
 			$message_id = '<' . wp_generate_uuid4() . '@dotflow.local>';
 			if ( class_exists( '\Groundhogg_Email_Services' ) ) { \Groundhogg_Email_Services::set_message_id( $message_id ); }
 		}
-		$payload = [ 'From' => $from, 'To' => implode( ',', $to ), 'Subject' => substr( (string) $subject, 0, 2000 ), 'MessageStream' => $stream, 'Metadata' => [ 'dotflow_channel' => $channel, 'dotflow_message_id' => $message_id ], 'Tag' => 'dotflow' ];
+		$payload = [ 'From' => $from, 'To' => implode( ',', $to ), 'Subject' => substr( sanitize_text_field( (string) $subject ), 0, 2000 ), 'MessageStream' => $stream, 'Metadata' => [ 'dotflow_channel' => $channel, 'dotflow_message_id' => $message_id ], 'Tag' => 'dotflow' ];
 		if ( $cc ) { $payload['Cc'] = implode( ',', $cc ); } if ( $bcc ) { $payload['Bcc'] = implode( ',', $bcc ); }
 		if ( ! empty( $headers['reply-to'] ) ) { $reply = self::emails( $headers['reply-to'] ); if ( 1 !== count( $reply ) ) { return self::fail( 'postmark_invalid_reply_to' ); } $payload['ReplyTo'] = $reply[0]; }
 		if ( $html ) { $payload['HtmlBody'] = $body; $payload['TextBody'] = trim( wp_strip_all_tags( $body ) ); } else { $payload['TextBody'] = $body; }
@@ -326,7 +333,7 @@ final class Postmark_Provider {
 	}
 	private static function extract_email( string $value ): string {
 		if ( preg_match( '/<\s*([^<>]+)\s*>/', $value, $m ) ) { $value = $m[1]; }
-		return sanitize_email( trim( $value ) );
+		return trim( $value );
 	}
 }
 
