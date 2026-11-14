@@ -5,6 +5,7 @@ namespace Groundhogg\Abilities\Emails;
 use Groundhogg\Abilities\Ability;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
+use Groundhogg\DotFlow\Messaging\Postmark_Retry_Queue;
 
 /**
  * Reports registered email transports and the service selected for each
@@ -57,6 +58,16 @@ class List_Email_Services extends Ability {
 					],
 					'delivery_webhook_adapters' => [ 'type' => 'array', 'items' => [ 'type' => 'string' ] ],
 					'inbound_email_adapters'    => [ 'type' => 'array', 'items' => [ 'type' => 'string' ] ],
+					'postmark_outbox' => [
+						'type' => 'object',
+						'properties' => [
+							'pending' => [ 'type' => 'integer' ],
+							'processing' => [ 'type' => 'integer' ],
+							'accepted' => [ 'type' => 'integer' ],
+							'failed' => [ 'type' => 'integer' ],
+							'uncertain' => [ 'type' => 'integer' ],
+						],
+					],
 					'channels' => [
 						'type'       => 'object',
 						'properties' => [
@@ -104,6 +115,7 @@ class List_Email_Services extends Ability {
 			'services'                  => $services,
 			'delivery_webhook_adapters' => Provider_Adapter_Registry::ids(),
 			'inbound_email_adapters'    => Inbound_Provider_Registry::ids(),
+			'postmark_outbox'           => Postmark_Retry_Queue::counts(),
 			'channels'                  => $channels,
 		];
 	}

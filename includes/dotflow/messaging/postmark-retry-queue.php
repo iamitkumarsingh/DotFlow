@@ -181,6 +181,33 @@ final class Postmark_Retry_Queue {
 		return absint( $count ) > 0;
 	}
 
+
+	public static function counts(): array {
+		global $wpdb;
+		$counts = [
+			'pending' => 0,
+			'processing' => 0,
+			'accepted' => 0,
+			'failed' => 0,
+			'uncertain' => 0,
+		];
+		$db = \Groundhogg\get_db( 'dotflow_postmark_outbox' );
+		if ( ! $db ) {
+			return $counts;
+		}
+		$rows = $wpdb->get_results(
+			"SELECT status, COUNT(*) AS total FROM {$db->get_table_name()} GROUP BY status",
+			ARRAY_A
+		);
+		foreach ( (array) $rows as $row ) {
+			$status = sanitize_key( (string) ( $row['status'] ?? '' ) );
+			if ( array_key_exists( $status, $counts ) ) {
+				$counts[ $status ] = absint( $row['total'] ?? 0 );
+			}
+		}
+		return $counts;
+	}
+
 	public static function encrypt( string $plain ) {
 		try {
 			$iv = random_bytes( 12 );

@@ -191,8 +191,8 @@ final class Postmark_Provider {
 			'sanitize_callback' => [ __CLASS__, 'sanitize_settings' ],
 			'default' => [],
 		] );
-		add_settings_section( 'dotflow_postmark', __( 'DotFlow · Postmark', 'groundhogg' ), [ __CLASS__, 'render_settings_intro' ], 'gh_email' );
-		add_settings_field( 'dotflow_postmark_server_token', __( 'Postmark server token', 'groundhogg' ), [ __CLASS__, 'render_server_token' ], 'gh_email', 'dotflow_postmark' );
+		add_settings_section( 'gh_dotflow_postmark', __( 'DotFlow · Postmark', 'groundhogg' ), [ __CLASS__, 'render_settings_intro' ], 'gh_email' );
+		add_settings_field( 'dotflow_postmark_server_token', __( 'Postmark server token', 'groundhogg' ), [ __CLASS__, 'render_server_token' ], 'gh_email', 'gh_dotflow_postmark' );
 		add_settings_field( 'dotflow_postmark_webhook_secret', __( 'Webhook Basic Auth password', 'groundhogg' ), [ __CLASS__, 'render_webhook_secret' ], 'gh_email', 'dotflow_postmark' );
 		add_settings_field( 'dotflow_postmark_transactional_stream', __( 'Transactional Message Stream', 'groundhogg' ), [ __CLASS__, 'render_transactional_stream' ], 'gh_email', 'dotflow_postmark' );
 		add_settings_field( 'dotflow_postmark_marketing_stream', __( 'Marketing Message Stream', 'groundhogg' ), [ __CLASS__, 'render_marketing_stream' ], 'gh_email', 'dotflow_postmark' );
