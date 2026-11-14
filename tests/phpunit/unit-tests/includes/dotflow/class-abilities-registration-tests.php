@@ -24,6 +24,7 @@ class DotFlow_Abilities_Registration_Tests extends GH_UnitTestCase {
 			'dotflow/list-contact-events',
 			'dotflow/list-messages',
 			'dotflow/set-message-read-state',
+			'groundhogg/list-email-services',
 		] as $ability_name ) {
 			$this->assertTrue( wp_has_ability( $ability_name ), $ability_name . ' should be registered for AI/MCP discovery.' );
 		}
