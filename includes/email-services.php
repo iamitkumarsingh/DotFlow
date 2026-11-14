@@ -18,6 +18,7 @@ class Groundhogg_Email_Services {
 	private static $message_id = '';
 	private static $current_message_type = null;
 	private static $current_email_service = null;
+	private static $send_depth = 0;
 
 	private static $email_services = [];
 
@@ -358,11 +359,23 @@ class Groundhogg_Email_Services {
 		$previous_message_type  = self::$current_message_type;
 		$previous_email_service = self::$current_email_service;
 		$previous_message_id    = self::$message_id;
+		$previous_last_error    = self::$last_error;
+		$is_outermost_send      = self::$send_depth === 0;
+		$owns_failure_hook      = false;
 
-		// Do not let a prior wp_mail_failed event masquerade as this send's result.
-		self::$last_error = null;
+		// Only the outermost send owns the shared failure hook and error lifecycle.
+		// Nested sends must not remove the hook or erase the outer send's error.
+		if ( $is_outermost_send ) {
+			self::$last_error = null;
+			$owns_failure_hook = false === has_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
+
+			if ( $owns_failure_hook ) {
+				add_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
+			}
+		}
+
+		++self::$send_depth;
 		self::$message_id = '';
-		add_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
 
 		try {
 			/**
@@ -393,8 +406,19 @@ class Groundhogg_Email_Services {
 
 			return call_user_func( $callback, $to, $subject, $message, $headers, $attachments );
 		} finally {
-			// Remove temporary hooks and restore the caller's context even when a provider throws.
-			remove_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
+			--self::$send_depth;
+
+			// Only remove a hook this send installed. A hook registered by another
+			// integration must remain untouched, and nested sends must leave the
+			// outer send's listener and error state intact.
+			if ( $is_outermost_send && $owns_failure_hook ) {
+				remove_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
+			}
+
+			if ( ! $is_outermost_send ) {
+				self::$last_error = $previous_last_error;
+			}
+
 			self::$current_message_type  = $previous_message_type;
 			self::$current_email_service = $previous_email_service;
 			self::$message_id            = $previous_message_id;
