@@ -1,6 +1,6 @@
 # DotFlow — Product & Engineering Blueprint
 
-Status: Phase 0 — foundation and technical planning.
+Status: Foundation active — CRM/events and messaging foundations implemented; provider integrations, expanded automation and product UI remain in progress.
 Working branch: `dotflow/development`.
 Foundation: Groundhogg, preserving applicable GPLv3 notices, attribution and derivative-work obligations.
 
@@ -8,6 +8,20 @@ Foundation: Groundhogg, preserving applicable GPLv3 notices, attribution and der
 DotFlow is a standalone WordPress CRM, marketing automation and customer-engagement platform. DotFlow owns contact records, consent/preferences, event history, segments, campaigns, workflow definitions, execution state, reporting and integration mappings. External services are adapters: providers deliver outbound email; mailbox providers expose inbound messages through webhooks or IMAP; connected platforms supply events and synchronisation data.
 
 DotFlow will not depend on Groundhogg's hosted inbox relay or paid licence for reply ingestion. Implement independent, documented provider webhook and IMAP adapters; do not bypass licensed services.
+
+## Current implementation checkpoint
+
+The repository has moved beyond planning. The following is the current, deliberately conservative status:
+
+- **CRM:** Groundhogg contact, tag, custom-field, note, search and permission infrastructure is retained and exposed through scoped abilities.
+- **Events:** DotFlow typed events, durable storage, source-scoped idempotency, privacy-safe event discovery and AI mutation audit events are implemented.
+- **Conversations:** Inbound/outbound message records, contact-scoped access, threading, duplicate detection, signed reply routing and a provider-neutral authenticated inbound webhook are implemented.
+- **Outbound email:** Existing Groundhogg email-service registration and channel routing are reused. Composed-email handling now validates recipients, sender address and delivery channel, and cleans up temporary hooks and send-state on provider errors.
+- **Email diagnostics:** A read-only ability reports registered delivery services and the selected WordPress, transactional and marketing services. It never returns provider credentials.
+- **Automation:** Existing Groundhogg flows remain the execution engine. DotFlow adds a typed, event-driven benchmark and AI flow configuration support; a separate workflow runtime is not claimed.
+- **Not yet implemented:** Provider-specific outbound API adapters, provider-specific inbound adapters, attachment ingestion, a complete provider-settings UI, the full automation execution/monitoring experience, and the remaining integrations.
+
+Do not interpret inherited Groundhogg capabilities as newly built DotFlow modules. Attachments remain explicitly unsupported by the current inbound webhook until safe storage, malware handling, access control and retention are implemented together.
 
 ## Functional scope
 - CRM: contacts, custom fields, tags, lists/segments, lifecycle status, consent provenance, suppression, duplicate management, import/export and unified activity timeline.
