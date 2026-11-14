@@ -117,21 +117,23 @@ final class Postmark_Provider {
 		$bcc = self::emails( $raw_bcc );
 		if ( ( ! empty( $raw_cc ) && empty( $cc ) ) || ( ! empty( $raw_bcc ) && empty( $bcc ) ) ) { return self::fail( 'postmark_invalid_cc_bcc' ); }
 		if ( empty( $to ) || count( $to ) + count( $cc ) + count( $bcc ) > 50 ) { return self::fail( 'postmark_invalid_recipients' ); }
+		if ( ! is_string( $message ) ) { return self::fail( 'postmark_invalid_body' ); }
+		$body = $message;
+		$subject = is_scalar( $subject ) ? (string) $subject : '';
 		$from = $headers['from'] ?? ( sanitize_text_field( get_bloginfo( 'name' ) ) . ' <' . sanitize_email( get_option( 'admin_email' ) ) . '>' );
 		if ( ! is_email( self::extract_email( $from ) ) || strlen( $from ) > 255 ) { return self::fail( 'postmark_invalid_sender' ); }
-		if ( strlen( (string) $message ) > 5 * MB_IN_BYTES ) { return self::fail( 'postmark_body_too_large' ); }
+		if ( strlen( $body ) > 5 * MB_IN_BYTES ) { return self::fail( 'postmark_body_too_large' ); }
 		$channel = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) { $channel = 'transactional'; }
 		$stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
 		$stream = sanitize_key( apply_filters( 'dotflow/postmark/message_stream/' . $channel, $stream ) ) ?: $stream;
-		$body = is_string( $message ) ? $message : '';
 		$html = false !== strpos( strtolower( (string) ( $headers['content-type'] ?? '' ) ), 'text/html' ) || (bool) preg_match( '/<[^>]+>/', $body );
 		$message_id = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_message_id() : '';
 		if ( ! preg_match( '/^<[^<>\s@]+@[^<>\s@]+>$/', $message_id ) ) {
 			$message_id = '<' . wp_generate_uuid4() . '@dotflow.local>';
 			if ( class_exists( '\Groundhogg_Email_Services' ) ) { \Groundhogg_Email_Services::set_message_id( $message_id ); }
 		}
-		$payload = [ 'From' => $from, 'To' => implode( ',', $to ), 'Subject' => substr( sanitize_text_field( (string) $subject ), 0, 2000 ), 'MessageStream' => $stream, 'Metadata' => [ 'dotflow_channel' => $channel, 'dotflow_message_id' => $message_id ], 'Tag' => 'dotflow' ];
+		$payload = [ 'From' => $from, 'To' => implode( ',', $to ), 'Subject' => substr( sanitize_text_field( $subject ), 0, 2000 ), 'MessageStream' => $stream, 'Metadata' => [ 'dotflow_channel' => $channel, 'dotflow_message_id' => $message_id ], 'Tag' => 'dotflow' ];
 		if ( $cc ) { $payload['Cc'] = implode( ',', $cc ); } if ( $bcc ) { $payload['Bcc'] = implode( ',', $bcc ); }
 		if ( ! empty( $headers['reply-to'] ) ) { $reply = self::emails( $headers['reply-to'] ); if ( 1 !== count( $reply ) ) { return self::fail( 'postmark_invalid_reply_to' ); } $payload['ReplyTo'] = $reply[0]; }
 		if ( $html ) { $payload['HtmlBody'] = $body; $payload['TextBody'] = trim( wp_strip_all_tags( $body ) ); } else { $payload['TextBody'] = $body; }
