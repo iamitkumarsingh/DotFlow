@@ -147,10 +147,12 @@ class List_Messages extends Ability {
 
 			$timestamp = strtotime( sanitize_text_field( $input[ $key ] ) );
 
-			if ( false !== $timestamp ) {
-				$where[]  = "date_created {$operator} %s";
-				$params[] = gmdate( 'Y-m-d H:i:s', $timestamp );
+			if ( false === $timestamp ) {
+				return new WP_Error( 'dotflow_invalid_message_date', __( 'The message date filter must be a valid ISO 8601 date-time.', 'groundhogg' ) );
 			}
+
+			$where[]  = "date_created {$operator} %s";
+			$params[] = gmdate( 'Y-m-d H:i:s', $timestamp );
 		}
 
 		$where_sql = implode( ' AND ', $where );
