@@ -88,14 +88,15 @@ class Email_Sending_Flag_Tests extends GH_UnitTestCase {
 
 		Groundhogg_Email_Services::set_current_message_type( 'transactional' );
 		Groundhogg_Email_Services::set_current_email_service( 'wp_mail' );
+		$original_callback = Groundhogg_Email_Services::get_service_callback( 'wp_mail' );
 		$throw = static function () {
 			throw new RuntimeException( 'transport failed' );
 		};
-		Groundhogg_Email_Services::register( 'dotflow_test_throw', 'DotFlow Test Throw', $throw );
+		Groundhogg_Email_Services::register( 'wp_mail', 'WordPress Default', $throw );
 
 		try {
 			Groundhogg_Email_Services::send_with_service(
-				'dotflow_test_throw',
+				'wp_mail',
 				[ 'person@example.test' ],
 				'Test',
 				'Test body'
@@ -103,6 +104,8 @@ class Email_Sending_Flag_Tests extends GH_UnitTestCase {
 			$this->fail( 'The provider exception should be propagated.' );
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( 'transport failed', $e->getMessage() );
+		} finally {
+			Groundhogg_Email_Services::register( 'wp_mail', 'WordPress Default', $original_callback );
 		}
 
 		$this->assertSame( 'transactional', Groundhogg_Email_Services::get_current_message_type() );
