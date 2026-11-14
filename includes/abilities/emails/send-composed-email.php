@@ -166,9 +166,37 @@ class Send_Composed_Email extends Ability {
 	 */
 	private function send( $input ) {
 
-		$to  = array_values( array_filter( array_map( 'sanitize_email', $input['to'] ?? [] ) ) );
-		$cc  = array_values( array_filter( array_map( 'sanitize_email', $input['cc'] ?? [] ) ) );
-		$bcc = array_values( array_filter( array_map( 'sanitize_email', $input['bcc'] ?? [] ) ) );
+		$normalize_recipients = static function ( $field ) use ( $input ) {
+
+			$values = $input[ $field ] ?? [];
+
+			if ( ! is_array( $values ) ) {
+				return new WP_Error( 'groundhogg_invalid_recipients', __( 'Recipient addresses must be supplied as a list of valid email addresses.', 'groundhogg' ) );
+			}
+
+			$addresses = [];
+
+			foreach ( $values as $value ) {
+
+				if ( ! is_string( $value ) || ! is_email( trim( $value ) ) ) {
+					return new WP_Error( 'groundhogg_invalid_recipients', __( 'Recipient addresses must be valid email addresses.', 'groundhogg' ) );
+				}
+
+				$addresses[] = sanitize_email( trim( $value ) );
+			}
+
+			return array_values( array_unique( $addresses ) );
+		};
+
+		$to  = $normalize_recipients( 'to' );
+		$cc  = $normalize_recipients( 'cc' );
+		$bcc = $normalize_recipients( 'bcc' );
+
+		foreach ( [ $to, $cc, $bcc ] as $recipients ) {
+			if ( is_wp_error( $recipients ) ) {
+				return $recipients;
+			}
+		}
 
 		if ( empty( $to ) && empty( $cc ) && empty( $bcc ) ) {
 			return new WP_Error( 'groundhogg_no_recipients', __( 'At least one to, cc, or bcc address is required.', 'groundhogg' ) );
