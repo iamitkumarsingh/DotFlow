@@ -150,7 +150,7 @@ class Get_System_Manifest extends Ability {
 					'id'          => 'messaging',
 					'label'       => 'Provider-independent messaging and conversations',
 					'status'      => 'foundation',
-					'description' => 'Authenticated provider-neutral inbound email webhook, independent inbox/reply address routing, privacy-minimised inbound events, outbound transport outcome events and an extensible provider-authenticated delivery-status webhook contract are implemented. Delivery callbacks support delivered, bounced, complained and deferred statuses with source-scoped idempotency and message-ID fingerprinting. Transport acceptance remains distinct from mailbox delivery. Concrete provider adapters, encrypted durable retry orchestration and attachment ingestion remain planned.',
+					'description' => 'Authenticated provider-neutral inbound email webhook, independent inbox/reply address routing, provider-specific inbound adapter contracts, privacy-minimised inbound events, outbound transport outcome events and provider-authenticated delivery-status webhook contracts are implemented. Delivery callbacks support delivered, bounced, complained and deferred statuses with source-scoped idempotency and message-ID fingerprinting. Transport acceptance remains distinct from mailbox delivery. Concrete provider adapters, encrypted durable retry orchestration and attachment ingestion remain planned.',
 					'abilities'   => [],
 				],
 				[
