@@ -287,19 +287,25 @@ class Send_Composed_Email extends Ability {
 
 		add_action( 'wp_mail_failed', $catch );
 
-		// we assign the Message-ID ourselves, so that a reply can be matched to what we sent
+		// We assign the Message-ID ourselves, so that a reply can be matched to what we sent.
 		$message_id = Message::use_message_id();
 
-		// replies go to the inbox, when there is one
-		if ( $reply_to = Inbox::reply_to( $message_id ) ) {
-			$headers[] = 'Reply-To: ' . $reply_to;
+		try {
+
+			// Replies go to the inbox, when there is one.
+			if ( $reply_to = Inbox::reply_to( $message_id ) ) {
+				$headers[] = 'Reply-To: ' . $reply_to;
+			}
+
+			$result = \\Groundhogg_Email_Services::send_type( $type, $to, $subject, $content, $headers );
+
+		} finally {
+
+			// A provider can throw as well as return an error. Never leave a stale
+			// Message-ID hook or wp_mail_failed listener attached to later sends.
+			Message::release_message_id();
+			remove_action( 'wp_mail_failed', $catch );
 		}
-
-		$result = \Groundhogg_Email_Services::send_type( $type, $to, $subject, $content, $headers );
-
-		Message::release_message_id();
-
-		remove_action( 'wp_mail_failed', $catch );
 
 		if ( is_wp_error( $mail_error ) ) {
 			return $mail_error;
