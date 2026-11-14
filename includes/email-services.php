@@ -404,7 +404,39 @@ class Groundhogg_Email_Services {
 				$callback = __NAMESPACE__ . '\\wordpress_default_mail';
 			}
 
-			return call_user_func( $callback, $to, $subject, $message, $headers, $attachments );
+			$result = call_user_func( $callback, $to, $subject, $message, $headers, $attachments );
+
+			/**
+			 * A transport callback completed. "accepted" means only that the configured
+			 * transport returned true; it is not proof of inbox delivery.
+			 *
+			 * @param mixed  $result
+			 * @param string $service
+			 * @param string $channel
+			 * @param string $message_id
+			 */
+			do_action(
+				'groundhogg/email_services/transport_result',
+				$result,
+				(string) self::get_current_email_service(),
+				(string) self::get_current_message_type(),
+				(string) self::get_message_id()
+			);
+
+			return $result;
+		} catch ( \Throwable $exception ) {
+			/**
+			 * A transport callback threw before it could return a result.
+			 * Do not expose exception messages: they may contain addresses or credentials.
+			 */
+			do_action(
+				'groundhogg/email_services/transport_exception',
+				(string) self::get_current_email_service(),
+				(string) self::get_current_message_type(),
+				(string) self::get_message_id()
+			);
+
+			throw $exception;
 		} finally {
 			--self::$send_depth;
 
