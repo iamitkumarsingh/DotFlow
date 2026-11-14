@@ -4,6 +4,7 @@ namespace Groundhogg\Abilities\Emails;
 
 use Groundhogg\Abilities\Ability;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
+use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
 
 /**
  * Reports registered email transports and the service selected for each
@@ -55,6 +56,7 @@ class List_Email_Services extends Ability {
 						],
 					],
 					'delivery_webhook_adapters' => [ 'type' => 'array', 'items' => [ 'type' => 'string' ] ],
+					'inbound_email_adapters'    => [ 'type' => 'array', 'items' => [ 'type' => 'string' ] ],
 					'channels' => [
 						'type'       => 'object',
 						'properties' => [
@@ -101,6 +103,7 @@ class List_Email_Services extends Ability {
 		return [
 			'services'                  => $services,
 			'delivery_webhook_adapters' => Provider_Adapter_Registry::ids(),
+			'inbound_email_adapters'    => Inbound_Provider_Registry::ids(),
 			'channels'                  => $channels,
 		];
 	}

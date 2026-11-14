@@ -19,6 +19,8 @@ class List_Email_Services_Ability_Tests extends GH_UnitTestCase {
 		$this->assertArrayHasKey( 'channels', $result );
 		$this->assertArrayHasKey( 'delivery_webhook_adapters', $result );
 		$this->assertIsArray( $result['delivery_webhook_adapters'] );
+		$this->assertArrayHasKey( 'inbound_email_adapters', $result );
+		$this->assertIsArray( $result['inbound_email_adapters'] );
 		foreach ( $result['delivery_webhook_adapters'] as $adapter_id ) {
 			$this->assertMatchesRegularExpression( '/^[a-z0-9_-]{1,48}$/', $adapter_id );
 		}
