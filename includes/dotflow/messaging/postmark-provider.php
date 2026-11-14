@@ -221,7 +221,9 @@ final class Postmark_Provider {
 
 	public static function render_settings_intro() {
 		echo '<p>' . esc_html__( 'Credentials are write-only and encrypted at rest with AES-256-GCM. Select Postmark under Groundhogg Transactional or Marketing email service after saving.', 'groundhogg' ) . '</p>';
-		echo '<p>' . esc_html__( 'Delivery webhook: /wp-json/dotflow/v1/email/delivery/postmark. Inbound webhook: /wp-json/dotflow/v1/inbound/email/postmark. Configure HTTP Basic Authentication using username dotflow and the password below. Inbound also requires independent inbox routing to be enabled.', 'groundhogg' ) . '</p>';
+		echo '<p><strong>' . esc_html__( 'Delivery webhook URL:', 'groundhogg' ) . '</strong> <code>' . esc_html( rest_url( 'dotflow/v1/email/delivery/postmark' ) ) . '</code></p>';
+		echo '<p><strong>' . esc_html__( 'Inbound webhook URL:', 'groundhogg' ) . '</strong> <code>' . esc_html( rest_url( 'dotflow/v1/inbound/email/postmark' ) ) . '</code></p>';
+		echo '<p>' . esc_html__( 'Configure HTTP Basic Authentication with username dotflow and the password below. Postmark does not provide HMAC webhook signatures; use HTTPS, Basic Authentication and IP allowlisting at your edge/WAF where possible. Inbound also requires independent inbox routing to be enabled.', 'groundhogg' ) . '</p>';
 		$url = wp_nonce_url( admin_url( 'admin-post.php?action=dotflow_postmark_test' ), 'dotflow_postmark_test' );
 		echo '<p><a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Test Postmark connection', 'groundhogg' ) . '</a></p>';
 	}
@@ -278,6 +280,7 @@ final class Postmark_Provider {
 	}
 
 	private static function encrypt_secret( string $plain ) {
+		if ( ! function_exists( 'openssl_encrypt' ) ) { return false; }
 		try {
 			$iv = random_bytes( 12 );
 			$tag = '';
@@ -287,7 +290,7 @@ final class Postmark_Provider {
 	}
 
 	private static function decrypt_secret( string $stored ): string {
-		if ( 0 !== strpos( $stored, 'v1:' ) ) { return ''; }
+		if ( ! function_exists( 'openssl_decrypt' ) || 0 !== strpos( $stored, 'v1:' ) ) { return ''; }
 		$raw = base64_decode( substr( $stored, 3 ), true );
 		if ( false === $raw || strlen( $raw ) < 29 ) { return ''; }
 		$plain = openssl_decrypt( substr( $raw, 28 ), 'aes-256-gcm', self::settings_key(), OPENSSL_RAW_DATA, substr( $raw, 0, 12 ), substr( $raw, 12, 16 ) );

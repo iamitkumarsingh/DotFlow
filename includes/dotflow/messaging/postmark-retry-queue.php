@@ -209,6 +209,7 @@ final class Postmark_Retry_Queue {
 	}
 
 	public static function encrypt( string $plain ) {
+		if ( ! function_exists( 'openssl_encrypt' ) ) { return false; }
 		try {
 			$iv = random_bytes( 12 );
 			$tag = '';
@@ -220,7 +221,7 @@ final class Postmark_Retry_Queue {
 	}
 
 	public static function decrypt( string $stored ): string {
-		if ( 0 !== strpos( $stored, 'v1:' ) ) {
+		if ( ! function_exists( 'openssl_decrypt' ) || 0 !== strpos( $stored, 'v1:' ) ) {
 			return '';
 		}
 		$raw = base64_decode( substr( $stored, 3 ), true );
