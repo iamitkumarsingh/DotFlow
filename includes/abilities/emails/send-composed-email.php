@@ -174,6 +174,14 @@ class Send_Composed_Email extends Ability {
 			return new WP_Error( 'groundhogg_no_recipients', __( 'At least one to, cc, or bcc address is required.', 'groundhogg' ) );
 		}
 
+		// The ability schema constrains this value too, but keep the transport
+		// boundary defensive when the class is invoked directly by PHP code.
+		$type = sanitize_key( $input['type'] ?? 'wordpress' );
+
+		if ( ! in_array( $type, [ 'wordpress', 'transactional', 'marketing' ], true ) ) {
+			return new WP_Error( 'groundhogg_invalid_email_type', __( 'The email type must be wordpress, transactional, or marketing.', 'groundhogg' ) );
+		}
+
 		// send_emails gates the ability; on top of that the caller must be able to
 		// view any recipient that is a known contact. All-or-nothing: this is one
 		// send_type() call, so a single forbidden recipient blocks the whole send.
@@ -219,6 +227,10 @@ class Send_Composed_Email extends Ability {
 			$from_name = sanitize_text_field( $input['from_name'] );
 		}
 
+		if ( ! is_email( $from_email ) ) {
+			return new WP_Error( 'groundhogg_invalid_from_email', __( 'A valid sender email address is required.', 'groundhogg' ) );
+		}
+
 		// Merge-field replacement is resolved against the first `to` address, if
 		// it belongs to a contact - same as Emails_Api::send_email().
 		$contact = ! empty( $to ) ? get_contactdata( $to[0] ) : false;
@@ -247,7 +259,6 @@ class Send_Composed_Email extends Ability {
 
 		$content = email_kses( $content );
 		$subject = sanitize_text_field( $input['subject'] );
-		$type    = sanitize_text_field( $input['type'] ?? 'wordpress' );
 
 		if ( $contact && $contact->exists() ) {
 			$content = do_replacements( $content, $contact );
