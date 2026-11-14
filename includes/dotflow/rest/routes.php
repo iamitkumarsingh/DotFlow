@@ -163,6 +163,16 @@ final class Routes {
 					'groundhogg_ingest'  => 'Message::ingest handles contact matching, signed reply-token validation, threading, duplicate detection and storage.',
 				],
 				[
+					'id'                 => 'inbound-provider-email',
+					'method'             => 'POST',
+					'path'               => '/wp-json/dotflow/v1/inbound/email/{provider}',
+					'authentication'    => 'Provider-specific adapter authorization; adapters must verify native signatures, timestamps and replay protection.',
+					'required_fields'    => [ 'provider-native payload mapped to normalized inbound envelope' ],
+					'attachments'        => false,
+					'idempotency'        => 'RFC Message-ID or deterministic Message-ID derived from provider event ID, enforced by the canonical Message::ingest pipeline.',
+					'stored_data'        => 'Message content is stored only in the permission-scoped conversation store; event payloads remain metadata-only.',
+				],
+				[
 					'id'                 => 'outbound-delivery',
 					'method'             => 'POST',
 					'path'               => '/wp-json/dotflow/v1/email/delivery/{provider}',
