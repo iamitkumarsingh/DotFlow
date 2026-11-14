@@ -64,6 +64,31 @@ class DotFlow_Composed_Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		$this->assertFalse( is_sending() );
 	}
 
+	public function test_exception_from_provider_cleans_up_message_id_hook_and_sending_state() {
+
+		$throw = static function () {
+			throw new RuntimeException( 'provider failed' );
+		};
+
+		add_action( 'groundhogg/email_services/before_send', $throw );
+
+		try {
+			$this->ability()->__invoke( [
+				'to'      => [ 'outside@example.test' ],
+				'subject' => 'Test',
+				'content' => '<p>Test</p>',
+			] );
+			$this->fail( 'The provider exception should be propagated.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( 'provider failed', $e->getMessage() );
+		} finally {
+			remove_action( 'groundhogg/email_services/before_send', $throw );
+		}
+
+		$this->assertFalse( is_sending() );
+		$this->assertFalse( has_action( 'phpmailer_init', [ Message::class, 'apply_message_id' ] ) );
+	}
+
 	public function test_exception_during_preparation_restores_the_sending_flag() {
 
 		$throw = static function () {
