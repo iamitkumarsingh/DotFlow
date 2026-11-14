@@ -24,7 +24,7 @@ final class Postmark_Provider {
 
 	public static function register_service() {
 		if ( class_exists( '\\Groundhogg_Email_Services' ) ) {
-			\\Groundhogg_Email_Services::register( self::SERVICE, __( 'Postmark (DotFlow)', 'groundhogg' ), [ __CLASS__, 'send' ] );
+			\Groundhogg_Email_Services::register( self::SERVICE, __( 'Postmark (DotFlow)', 'groundhogg' ), [ __CLASS__, 'send' ] );
 		}
 	}
 	public static function register_delivery() { Provider_Adapter_Registry::register( new Postmark_Delivery_Adapter() ); }
@@ -100,7 +100,7 @@ final class Postmark_Provider {
 		if ( empty( $to ) || count( $to ) + count( $cc ) + count( $bcc ) > 50 ) { return self::fail( 'postmark_invalid_recipients' ); }
 		$from = $headers['from'] ?? ( get_bloginfo( 'name' ) . ' <' . sanitize_email( get_option( 'admin_email' ) ) . '>' );
 		if ( ! is_email( self::extract_email( $from ) ) || strlen( $from ) > 255 ) { return self::fail( 'postmark_invalid_sender' ); }
-		$channel = class_exists( '\\Groundhogg_Email_Services' ) ? (string) \\Groundhogg_Email_Services::get_current_message_type() : 'transactional';
+		$channel = class_exists( '\\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) { $channel = 'transactional'; }
 		$stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
 		$stream = sanitize_key( apply_filters( 'dotflow/postmark/message_stream/' . $channel, $stream ) ) ?: $stream;
@@ -116,7 +116,7 @@ final class Postmark_Provider {
 		if ( $code < 200 || $code >= 300 || ! is_array( $result ) || 0 !== (int) ( $result['ErrorCode'] ?? -1 ) || empty( $result['MessageID'] ) ) { return self::fail( 'postmark_http_' . max( 0, $code ) ); }
 		$id = strtolower( preg_replace( '/[^a-f0-9-]/i', '', (string) $result['MessageID'] ) );
 		if ( '' === $id ) { return self::fail( 'postmark_missing_message_id' ); }
-		if ( class_exists( '\\Groundhogg_Email_Services' ) ) { \\Groundhogg_Email_Services::set_message_id( '<' . $id . '@postmark.dotflow>' ); }
+		if ( class_exists( '\\Groundhogg_Email_Services' ) ) { \Groundhogg_Email_Services::set_message_id( '<' . $id . '@postmark.dotflow>' ); }
 		return true;
 	}
 
