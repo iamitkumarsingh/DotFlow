@@ -87,6 +87,11 @@ class Send_Composed_Email extends Ability {
 						'type'        => 'string',
 						'description' => __( 'The email body as HTML. Sanitized with the same allowed-HTML rules as the email editor, and supports merge-field replacements. The site\'s custom email footer text is appended automatically.', 'groundhogg' ),
 					],
+					'sender_profile' => [
+						'type'        => 'string',
+						'maxLength'   => 100,
+						'description' => __( 'Optional sender profile ID from groundhogg/list-sender-profiles. When supplied, its configured from name and address are used (with dynamic owner merge tags resolved against the first to contact).', 'groundhogg' ),
+					],
 					'from_email' => [
 						'type'        => 'string',
 						'format'      => 'email',
