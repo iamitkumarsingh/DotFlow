@@ -41,7 +41,7 @@ class List_Email_Services_Ability_Tests extends GH_UnitTestCase {
 		$missing    = '__dotflow_missing_option__';
 		$before     = get_option( $option, $missing );
 
-		\\Groundhogg_Email_Services::register( $service_id, 'DotFlow Invalid Callback', 'dotflow_function_that_does_not_exist' );
+		\Groundhogg_Email_Services::register( $service_id, 'DotFlow Invalid Callback', 'dotflow_function_that_does_not_exist' );
 		update_option( $option, $service_id );
 
 		try {
