@@ -120,6 +120,7 @@ final class Postmark_Retry_Queue {
 			$db->get_table_name(),
 			[
 				'status' => $status,
+				'payload' => '',
 				'claim_token' => '',
 				'claimed_at' => '1970-01-01 00:00:00',
 				'provider_message_id' => substr( sanitize_text_field( $provider_id ), 0, 64 ),
@@ -131,7 +132,7 @@ final class Postmark_Retry_Queue {
 				'claim_token' => (string) $reservation['claim_token'],
 				'status' => 'processing',
 			],
-			[ '%s', '%s', '%s', '%s', '%s', '%s' ],
+			[ '%s', '%s', '%s', '%s', '%s', '%s', '%s' ],
 			[ '%d', '%s', '%s' ]
 		);
 	}
@@ -250,7 +251,7 @@ final class Postmark_Retry_Queue {
 		$now = gmdate( 'Y-m-d H:i:s' );
 
 		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$table} SET status = 'uncertain', claim_token = '', last_error_code = 'worker_interrupted', updated_at = %s WHERE status = 'processing' AND claimed_at < %s",
+			"UPDATE {$table} SET status = 'uncertain', payload = '', claim_token = '', last_error_code = 'worker_interrupted', updated_at = %s WHERE status = 'processing' AND claimed_at < %s",
 			$now,
 			gmdate( 'Y-m-d H:i:s', time() - 600 )
 		) );

@@ -211,12 +211,13 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		Postmark_Retry_Queue::process_batch();
 
 		$row = $wpdb->get_row( $wpdb->prepare(
-			"SELECT status, provider_message_id FROM {$db->get_table_name()} WHERE idempotency_key = %s",
+			"SELECT status, provider_message_id, payload FROM {$db->get_table_name()} WHERE idempotency_key = %s",
 			hash( 'sha256', $message_id )
 		) );
 		$this->assertNotEmpty( $row );
 		$this->assertSame( 'accepted', $row->status );
 		$this->assertSame( '4d3f6b1a-3d5e-4b0a-9d9e-000000000005', $row->provider_message_id );
+		$this->assertSame( '', $row->payload ?? '' );
 		$this->assertFalse( Postmark_Retry_Queue::is_queued( $message_id ) );
 		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
 	}
@@ -246,6 +247,58 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 			add_filter( 'dotflow/postmark/server_token', $this->token_filter );
 			add_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
 		}
+	}
+
+
+	public function test_postmark_only_retries_explicit_rate_limit_responses() {
+		$this->http_filter = static function ( $pre, $args, $url ) {
+			if ( Postmark_Provider::API !== $url ) { return $pre; }
+			return [
+				'headers' => [],
+				'body' => wp_json_encode( [ 'ErrorCode' => 11, 'Message' => 'Rate limit exceeded' ] ),
+				'response' => [ 'code' => 429, 'message' => 'Too Many Requests' ],
+				'cookies' => [],
+				'filename' => null,
+			];
+		};
+		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
+		$result = Postmark_Provider::request_payload( [ 'To' => 'recipient@example.test' ] );
+		$this->assertTrue( $result['retryable'] );
+		$this->assertFalse( $result['uncertain'] );
+	}
+
+	public function test_ambiguous_network_failure_becomes_uncertain_and_payload_is_erased() {
+		Postmark_Retry_Queue::maybe_install();
+		$message_id = '<retry-test-003@dotflow.local>';
+		$payload = [
+			'From' => 'sender@example.test',
+			'To' => 'recipient@example.test',
+			'Subject' => 'Uncertain test',
+			'TextBody' => 'Private body',
+			'MessageStream' => 'outbound',
+			'Metadata' => [ 'dotflow_channel' => 'transactional', 'dotflow_message_id' => $message_id ],
+		];
+		$reservation = Postmark_Retry_Queue::reserve( $payload, $message_id );
+		$this->assertIsArray( $reservation );
+		$this->assertTrue( Postmark_Retry_Queue::schedule_retry( $reservation, 0 ) );
+		global $wpdb;
+		$db = get_db( 'dotflow_postmark_outbox' );
+		$wpdb->update( $db->get_table_name(), [ 'available_at' => gmdate( 'Y-m-d H:i:s', time() - 60 ) ], [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
+
+		$this->http_filter = static function ( $pre, $args, $url ) {
+			return Postmark_Provider::API === $url ? new WP_Error( 'http_request_failed', 'Connection timed out' ) : $pre;
+		};
+		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
+		Postmark_Retry_Queue::process_batch();
+
+		$row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT status, payload FROM {$db->get_table_name()} WHERE idempotency_key = %s",
+			hash( 'sha256', $message_id )
+		) );
+		$this->assertSame( 'uncertain', $row->status );
+		$this->assertSame( '', $row->payload );
+		$this->assertFalse( Postmark_Retry_Queue::is_queued( $message_id ) );
+		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
 	}
 
 }

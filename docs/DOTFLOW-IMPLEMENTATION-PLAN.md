@@ -91,3 +91,5 @@ This is a Groundhogg-derived project. Preserve upstream notices and comply with 
 - Network failures and HTTP 5xx responses are marked uncertain and are not automatically retried because Postmark may have accepted the request before the connection failed. Stale in-flight jobs are also marked uncertain, not resent.
 - Only explicit HTTP 429 responses are automatically retried. Other 4xx responses are permanent failures.
 - Provider acceptance and subsequent delivery/bounce/complaint callbacks remain separate states. Retry acceptance emits the same provider-neutral transport outcome event.
+
+- Once a retry reaches a terminal state (accepted, failed or uncertain), the encrypted message payload is erased; only the non-sensitive status, attempt count, provider message identifier and hashed idempotency key remain for diagnostics.
