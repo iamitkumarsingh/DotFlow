@@ -7,6 +7,29 @@ use function Groundhogg\get_db;
 
 class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 
+	public function test_invalid_message_date_filters_are_rejected() {
+
+		$previous_user_id = get_current_user_id();
+		$user_id          = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
+		try {
+			$reflection = new ReflectionClass( List_Messages::class );
+			$ability    = $reflection->newInstanceWithoutConstructor();
+
+			foreach ( [ 'after', 'before' ] as $filter ) {
+				$result = $ability( [
+					$filter => 'not-a-date',
+				] );
+
+				$this->assertWPError( $result );
+				$this->assertSame( 'dotflow_invalid_message_date', $result->get_error_code() );
+			}
+		} finally {
+			wp_set_current_user( $previous_user_id );
+		}
+	}
+
 	public function test_message_content_is_opt_in_and_read_state_is_editable() {
 
 		$previous_user_id = get_current_user_id();
