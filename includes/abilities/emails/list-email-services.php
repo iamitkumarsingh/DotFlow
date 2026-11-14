@@ -75,7 +75,7 @@ class List_Email_Services extends Ability {
 			$services[] = [
 				'id'       => sanitize_key( (string) $id ),
 				'name'     => sanitize_text_field( (string) $name ),
-				'callable' => is_callable( \\Groundhogg_Email_Services::get_service_callback( $id ) ),
+				'callable' => is_callable( \Groundhogg_Email_Services::get_service_callback( $id ) ),
 			];
 		}
 
@@ -85,7 +85,7 @@ class List_Email_Services extends Ability {
 
 			$service_id = (string) \Groundhogg_Email_Services::get_saved_service( $channel );
 			$is_registered = array_key_exists( $service_id, $registered );
-			$is_callable   = $is_registered && is_callable( \\Groundhogg_Email_Services::get_service_callback( $service_id ) );
+			$is_callable   = $is_registered && is_callable( \Groundhogg_Email_Services::get_service_callback( $service_id ) );
 
 			$channels[ $channel ] = [
 				'service_id'   => sanitize_key( $service_id ),
