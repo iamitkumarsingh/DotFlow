@@ -118,6 +118,22 @@ class DotFlow_Inbound_Provider_Webhook_Tests extends GH_UnitTestCase {
 		$message_db->delete( absint( $row->ID ) );
 	}
 
+	public function test_provider_adapter_requires_independent_inbox_configuration() {
+
+		remove_filter( 'dotflow/inbound/inbox_address', $this->inbox_filter );
+		$request = $this->request( [
+			'provider_event_id' => 'provider-inbound-disabled',
+			'from'              => 'sender@example.com',
+			'envelope_to'       => 'private-inbox@example.com',
+			'text'              => 'Must not be accepted while disabled.',
+		] );
+
+		$result = Inbound_Provider_Webhook::authorize( $request );
+		$this->assertWPError( $result );
+		$this->assertSame( 'dotflow_inbound_provider_disabled', $result->get_error_code() );
+		add_filter( 'dotflow/inbound/inbox_address', $this->inbox_filter );
+	}
+
 	public function test_provider_adapter_rejects_invalid_signatures_and_unknown_providers() {
 
 		$request = $this->request( [

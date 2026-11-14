@@ -28,6 +28,10 @@ final class Inbound_Provider_Webhook {
 
 	public static function authorize( WP_REST_Request $request ) {
 
+		if ( ! Inbox_Addresses::is_enabled() ) {
+			return new WP_Error( 'dotflow_inbound_provider_disabled', __( 'Independent inbound email is not configured.', 'groundhogg' ), [ 'status' => 503 ] );
+		}
+
 		if ( ! is_ssl() ) {
 			return new WP_Error( 'dotflow_inbound_provider_https_required', __( 'Provider inbound webhooks require HTTPS.', 'groundhogg' ), [ 'status' => 403 ] );
 		}
