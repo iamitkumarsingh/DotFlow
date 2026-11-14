@@ -1,11 +1,14 @@
 <?php
 
 use Groundhogg\DotFlow\Messaging\Postmark_Provider;
+use Groundhogg\DotFlow\Messaging\Postmark_Retry_Queue;
+use function Groundhogg\get_db;
 
 class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 
 	protected $secret_filter;
 	protected $token_filter;
+	protected $http_filter;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -18,7 +21,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 	public function tearDown(): void {
 		remove_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
 		remove_filter( 'dotflow/postmark/server_token', $this->token_filter );
-		remove_all_filters( 'pre_http_request' );
+		if ( $this->http_filter ) { remove_filter( 'pre_http_request', $this->http_filter, 10 ); }
 		parent::tearDown();
 	}
 
@@ -115,7 +118,8 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 				'filename' => null,
 			];
 		};
-		add_filter( 'pre_http_request', $pre_http, 10, 3 );
+		$this->http_filter = $pre_http;
+		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
 
 		$result = Postmark_Provider::send(
 			[ 'recipient@example.test' ],
@@ -138,4 +142,81 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$result = Postmark_Provider::send( [ 'recipient@example.test' ], 'Subject', 'Body', '', [ '/tmp/file.pdf' ] );
 		$this->assertFalse( $result );
 	}
+
+	public function test_retry_payload_is_encrypted_and_reservation_is_idempotent() {
+		Postmark_Retry_Queue::maybe_install();
+		$message_id = '<retry-test-001@dotflow.local>';
+		$payload = [
+			'To' => 'private-recipient@example.test',
+			'Subject' => 'Sensitive subject',
+			'TextBody' => 'Sensitive email body',
+			'Metadata' => [ 'dotflow_channel' => 'transactional', 'dotflow_message_id' => $message_id ],
+		];
+		$reservation = Postmark_Retry_Queue::reserve( $payload, $message_id );
+		$this->assertIsArray( $reservation );
+		$this->assertSame( 'reserved', $reservation['status'] );
+		$this->assertTrue( Postmark_Retry_Queue::is_queued( $message_id ) );
+
+		$duplicate = Postmark_Retry_Queue::reserve( $payload, $message_id );
+		$this->assertIsArray( $duplicate );
+		$this->assertTrue( $duplicate['duplicate'] );
+		$this->assertSame( 'processing', $duplicate['status'] );
+
+		global $wpdb;
+		$db = get_db( 'dotflow_postmark_outbox' );
+		$row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT payload FROM {$db->get_table_name()} WHERE idempotency_key = %s",
+			hash( 'sha256', $message_id )
+		) );
+		$this->assertNotEmpty( $row );
+		$this->assertStringNotContainsString( 'private-recipient@example.test', $row->payload );
+		$this->assertStringNotContainsString( 'Sensitive email body', $row->payload );
+
+		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
+	}
+
+	public function test_retry_worker_processes_429_queue_and_records_acceptance() {
+		Postmark_Retry_Queue::maybe_install();
+		$message_id = '<retry-test-002@dotflow.local>';
+		$payload = [
+			'From' => 'sender@example.test',
+			'To' => 'recipient@example.test',
+			'Subject' => 'Retry test',
+			'TextBody' => 'Retry body',
+			'MessageStream' => 'outbound',
+			'Metadata' => [ 'dotflow_channel' => 'transactional', 'dotflow_message_id' => $message_id ],
+		];
+		$reservation = Postmark_Retry_Queue::reserve( $payload, $message_id );
+		$this->assertIsArray( $reservation );
+		$this->assertTrue( Postmark_Retry_Queue::schedule_retry( $reservation, 0 ) );
+
+		$this->http_filter = static function ( $pre, $args, $url ) {
+			if ( Postmark_Provider::API !== $url ) {
+				return $pre;
+			}
+			return [
+				'headers' => [],
+				'body' => wp_json_encode( [ 'ErrorCode' => 0, 'MessageID' => '4d3f6b1a-3d5e-4b0a-9d9e-000000000005' ] ),
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'cookies' => [],
+				'filename' => null,
+			];
+		};
+		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
+
+		Postmark_Retry_Queue::process_batch();
+
+		global $wpdb;
+		$db = get_db( 'dotflow_postmark_outbox' );
+		$row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT status, provider_message_id FROM {$db->get_table_name()} WHERE idempotency_key = %s",
+			hash( 'sha256', $message_id )
+		) );
+		$this->assertNotEmpty( $row );
+		$this->assertSame( 'accepted', $row->status );
+		$this->assertSame( '4d3f6b1a-3d5e-4b0a-9d9e-000000000005', $row->provider_message_id );
+		$this->assertFalse( Postmark_Retry_Queue::is_queued( $message_id ) );
+		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
+	}
+
 }
