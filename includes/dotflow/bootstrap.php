@@ -13,6 +13,7 @@ use Groundhogg\DotFlow\Abilities\List_Messages;
 use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
+use Groundhogg\DotFlow\Database\Postmark_Outbox as DotFlow_Postmark_Outbox_DB;
 use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
 use Groundhogg\DotFlow\Events\Store;
 use Groundhogg\DotFlow\REST\Routes;
@@ -129,6 +130,9 @@ final class Bootstrap {
 	public static function register_database( $manager ) {
 		if ( ! $manager->dotflow_events ) {
 			$manager->dotflow_events = new DotFlow_Events_DB();
+		}
+		if ( ! $manager->dotflow_postmark_outbox ) {
+			$manager->dotflow_postmark_outbox = new DotFlow_Postmark_Outbox_DB();
 		}
 	}
 

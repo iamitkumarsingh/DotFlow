@@ -39,6 +39,11 @@ final class Outbound_Delivery_Events {
 		$accepted = true === $result;
 		$error_code = '';
 
+		if ( 'dotflow_postmark' === $service && class_exists( Postmark_Retry_Queue::class ) && Postmark_Retry_Queue::is_queued( (string) $message_id ) ) {
+			self::dispatch( 'email.transport.queued', $service, $channel, $message_id, 'postmark_rate_limited' );
+			return;
+		}
+
 		if ( is_wp_error( $result ) ) {
 			$accepted   = false;
 			$error_code = sanitize_key( (string) $result->get_error_code() );
@@ -92,7 +97,7 @@ final class Outbound_Delivery_Events {
 		$payload = [
 			'provider'           => $service,
 			'channel'            => $channel,
-			'outcome'            => 'email.transport.accepted' === $event_name ? 'accepted_by_transport' : 'failed',
+			'outcome'            => 'email.transport.accepted' === $event_name ? 'accepted_by_transport' : ( 'email.transport.queued' === $event_name ? 'queued_for_retry' : 'failed' ),
 			'message_fingerprint' => $fingerprint,
 		];
 

@@ -20,6 +20,7 @@ final class Postmark_Provider {
 		add_action( 'Groundhogg/email_services/init', [ __CLASS__, 'register_service' ] );
 		add_action( 'dotflow/email/delivery_adapters/register', [ __CLASS__, 'register_delivery' ] );
 		add_action( 'dotflow/email/inbound_adapters/register', [ __CLASS__, 'register_inbound' ] );
+		Postmark_Retry_Queue::register();
 	}
 
 	public static function register_service() {
@@ -75,7 +76,7 @@ final class Postmark_Provider {
 		$event = isset( $data['ID'] ) && is_scalar( $data['ID'] )
 			? 'postmark-' . sanitize_key( (string) $data['ID'] )
 			: 'postmark-' . substr( hash( 'sha256', $id . '|' . $status . '|' . $suffix ), 0, 48 );
-		return [ 'event_id' => $event, 'message_id' => '<' . $id . '@postmark.dotflow>', 'status' => $status, 'channel' => $channel, 'error_code' => isset( $data['TypeCode'] ) && is_numeric( $data['TypeCode'] ) ? 'postmark_' . absint( $data['TypeCode'] ) : '' ];
+		return [ 'event_id' => $event, 'message_id' => ( isset( $meta['dotflow_message_id'] ) && is_string( $meta['dotflow_message_id'] ) && preg_match( '/^<[^<>\\s@]+@[^<>\\s@]+>$/', $meta['dotflow_message_id'] ) ) ? $meta['dotflow_message_id'] : '<' . $id . '@postmark.dotflow>', 'status' => $status, 'channel' => $channel, 'error_code' => isset( $data['TypeCode'] ) && is_numeric( $data['TypeCode'] ) ? 'postmark_' . absint( $data['TypeCode'] ) : '' ];
 	}
 
 	public static function normalize_inbound( array $data ) {
@@ -92,32 +93,84 @@ final class Postmark_Provider {
 	}
 
 	public static function send( $to, $subject, $message, $headers = '', $attachments = [] ) {
-		$token = self::secret( 'server_token' );
-		if ( '' === $token ) { return self::fail( 'postmark_not_configured' ); }
+		if ( '' === self::secret( 'server_token' ) ) { return self::fail( 'postmark_not_configured' ); }
 		if ( ! empty( $attachments ) ) { return self::fail( 'postmark_attachments_not_supported' ); }
 		$headers = self::parse_headers( $headers );
 		$to = self::emails( $to ); $cc = self::emails( $headers['cc'] ?? [] ); $bcc = self::emails( $headers['bcc'] ?? [] );
 		if ( empty( $to ) || count( $to ) + count( $cc ) + count( $bcc ) > 50 ) { return self::fail( 'postmark_invalid_recipients' ); }
 		$from = $headers['from'] ?? ( get_bloginfo( 'name' ) . ' <' . sanitize_email( get_option( 'admin_email' ) ) . '>' );
 		if ( ! is_email( self::extract_email( $from ) ) || strlen( $from ) > 255 ) { return self::fail( 'postmark_invalid_sender' ); }
-		$channel = class_exists( '\\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
+		$channel = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) { $channel = 'transactional'; }
 		$stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
 		$stream = sanitize_key( apply_filters( 'dotflow/postmark/message_stream/' . $channel, $stream ) ) ?: $stream;
 		$body = is_string( $message ) ? $message : '';
 		$html = false !== strpos( strtolower( (string) ( $headers['content-type'] ?? '' ) ), 'text/html' ) || (bool) preg_match( '/<[^>]+>/', $body );
-		$payload = [ 'From' => $from, 'To' => implode( ',', $to ), 'Subject' => substr( (string) $subject, 0, 2000 ), 'MessageStream' => $stream, 'Metadata' => [ 'dotflow_channel' => $channel ], 'Tag' => 'dotflow' ];
+		$message_id = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_message_id() : '';
+		if ( ! preg_match( '/^<[^<>\s@]+@[^<>\s@]+>$/', $message_id ) ) {
+			$message_id = '<' . wp_generate_uuid4() . '@dotflow.local>';
+			if ( class_exists( '\Groundhogg_Email_Services' ) ) { \Groundhogg_Email_Services::set_message_id( $message_id ); }
+		}
+		$payload = [ 'From' => $from, 'To' => implode( ',', $to ), 'Subject' => substr( (string) $subject, 0, 2000 ), 'MessageStream' => $stream, 'Metadata' => [ 'dotflow_channel' => $channel, 'dotflow_message_id' => $message_id ], 'Tag' => 'dotflow' ];
 		if ( $cc ) { $payload['Cc'] = implode( ',', $cc ); } if ( $bcc ) { $payload['Bcc'] = implode( ',', $bcc ); }
 		if ( ! empty( $headers['reply-to'] ) ) { $reply = self::emails( $headers['reply-to'] ); if ( 1 !== count( $reply ) ) { return self::fail( 'postmark_invalid_reply_to' ); } $payload['ReplyTo'] = $reply[0]; }
 		if ( $html ) { $payload['HtmlBody'] = $body; $payload['TextBody'] = trim( wp_strip_all_tags( $body ) ); } else { $payload['TextBody'] = $body; }
-		$response = wp_remote_post( self::API, [ 'timeout' => 20, 'redirection' => 0, 'reject_unsafe_urls' => true, 'sslverify' => true, 'headers' => [ 'Accept' => 'application/json', 'Content-Type' => 'application/json', 'X-Postmark-Server-Token' => $token ], 'body' => wp_json_encode( $payload ) ] );
-		if ( is_wp_error( $response ) ) { do_action( 'dotflow/postmark/transport_uncertain', 'network_error' ); return self::fail( 'postmark_network_error' ); }
-		$code = (int) wp_remote_retrieve_response_code( $response ); $result = json_decode( (string) wp_remote_retrieve_body( $response ), true );
-		if ( $code < 200 || $code >= 300 || ! is_array( $result ) || 0 !== (int) ( $result['ErrorCode'] ?? -1 ) || empty( $result['MessageID'] ) ) { return self::fail( 'postmark_http_' . max( 0, $code ) ); }
-		$id = strtolower( preg_replace( '/[^a-f0-9-]/i', '', (string) $result['MessageID'] ) );
-		if ( '' === $id ) { return self::fail( 'postmark_missing_message_id' ); }
-		if ( class_exists( '\\Groundhogg_Email_Services' ) ) { \Groundhogg_Email_Services::set_message_id( '<' . $id . '@postmark.dotflow>' ); }
-		return true;
+
+		$reservation = Postmark_Retry_Queue::reserve( $payload, $message_id );
+		if ( ! is_array( $reservation ) ) { return self::fail( 'postmark_outbox_unavailable' ); }
+		if ( ! empty( $reservation['duplicate'] ) ) {
+			return in_array( $reservation['status'], [ 'pending', 'processing', 'accepted' ], true );
+		}
+
+		$result = self::request_payload( $payload );
+		if ( ! empty( $result['accepted'] ) ) {
+			Postmark_Retry_Queue::complete( $reservation, 'accepted', '', (string) $result['provider_id'] );
+			return true;
+		}
+		if ( ! empty( $result['retryable'] ) ) {
+			Postmark_Retry_Queue::schedule_retry( $reservation, 0, (string) $result['error_code'] );
+			return true;
+		}
+		Postmark_Retry_Queue::complete( $reservation, ! empty( $result['uncertain'] ) ? 'uncertain' : 'failed', (string) $result['error_code'] );
+		return self::fail( (string) $result['error_code'] );
+	}
+
+	/**
+	 * Submit a previously validated payload to Postmark. Only HTTP 429 is
+	 * considered safely retryable; transport errors and 5xx are ambiguous.
+	 */
+	public static function request_payload( array $payload ): array {
+		$token = self::secret( 'server_token' );
+		if ( '' === $token ) {
+			return [ 'accepted' => false, 'retryable' => false, 'uncertain' => false, 'error_code' => 'postmark_not_configured' ];
+		}
+		$response = wp_remote_post( self::API, [
+			'timeout' => 20,
+			'redirection' => 0,
+			'reject_unsafe_urls' => true,
+			'sslverify' => true,
+			'headers' => [ 'Accept' => 'application/json', 'Content-Type' => 'application/json', 'X-Postmark-Server-Token' => $token ],
+			'body' => wp_json_encode( $payload ),
+		] );
+		if ( is_wp_error( $response ) ) {
+			return [ 'accepted' => false, 'retryable' => false, 'uncertain' => true, 'error_code' => 'postmark_network_error' ];
+		}
+		$status = (int) wp_remote_retrieve_response_code( $response );
+		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		if ( 429 === $status ) {
+			return [ 'accepted' => false, 'retryable' => true, 'uncertain' => false, 'error_code' => 'postmark_rate_limited' ];
+		}
+		if ( $status >= 500 ) {
+			return [ 'accepted' => false, 'retryable' => false, 'uncertain' => true, 'error_code' => 'postmark_server_error' ];
+		}
+		if ( $status < 200 || $status >= 300 || ! is_array( $data ) || 0 !== (int) ( $data['ErrorCode'] ?? -1 ) || empty( $data['MessageID'] ) ) {
+			return [ 'accepted' => false, 'retryable' => false, 'uncertain' => false, 'error_code' => 'postmark_http_' . max( 0, $status ) ];
+		}
+		$id = strtolower( preg_replace( '/[^a-f0-9-]/i', '', (string) $data['MessageID'] ) );
+		if ( '' === $id ) {
+			return [ 'accepted' => false, 'retryable' => false, 'uncertain' => true, 'error_code' => 'postmark_missing_message_id' ];
+		}
+		return [ 'accepted' => true, 'retryable' => false, 'uncertain' => false, 'provider_id' => $id, 'error_code' => '' ];
 	}
 
 	private static function fail( string $code ): bool {

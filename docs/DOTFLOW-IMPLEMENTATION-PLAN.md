@@ -82,3 +82,12 @@ This is a Groundhogg-derived project. Preserve upstream notices and comply with 
 - Postmark delivery, bounce and complaint webhooks use HTTPS and HTTP Basic Authentication with username `dotflow`. Postmark does not currently support HMAC webhook signatures. Successful Postmark callbacks return HTTP 200.
 - Inbound Postmark payloads are normalized through the canonical inbound pipeline. Attachments remain rejected and the independent inbox address configuration in wp-config.php is still required.
 - No Postmark account credentials have been configured and no email has been sent from this development branch.
+
+
+## Postmark retry handling
+
+- Postmark HTTP 429 rate-limit responses are persisted to a dedicated retry ledger. The message payload is encrypted with AES-256-GCM before database storage; the idempotency key is a SHA-256 hash of the stable RFC Message-ID.
+- The worker claims bounded batches atomically and applies exponential backoff, with a maximum of five retry attempts.
+- Network failures and HTTP 5xx responses are marked uncertain and are not automatically retried because Postmark may have accepted the request before the connection failed. Stale in-flight jobs are also marked uncertain, not resent.
+- Only explicit HTTP 429 responses are automatically retried. Other 4xx responses are permanent failures.
+- Provider acceptance and subsequent delivery/bounce/complaint callbacks remain separate states. Retry acceptance emits the same provider-neutral transport outcome event.
