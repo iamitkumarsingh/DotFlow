@@ -18,6 +18,7 @@ use Groundhogg\DotFlow\Events\Store;
 use Groundhogg\DotFlow\REST\Routes;
 use Groundhogg\DotFlow\Inbound\Inbox_Addresses;
 use Groundhogg\DotFlow\Inbound\Message_Events;
+use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
 use Groundhogg\DotFlow\Messaging\Outbound_Delivery_Events;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
@@ -94,6 +95,7 @@ final class Bootstrap {
 		// Independent provider inbox mode is opt-in and never replaces a provisioned relay.
 		Inbox_Addresses::register();
 		Message_Events::register();
+		Inbound_Provider_Registry::register_adapters();
 		Outbound_Delivery_Events::register();
 		Provider_Adapter_Registry::register_adapters();
 

@@ -5,6 +5,7 @@ namespace Groundhogg\DotFlow\REST;
 use Groundhogg\DotFlow\Abilities\Get_System_Manifest;
 use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Inbound\Inbound_Email_Webhook;
+use Groundhogg\DotFlow\Inbound\Inbound_Provider_Webhook;
 use Groundhogg\DotFlow\Messaging\Delivery_Webhook;
 use WP_Error;
 use WP_REST_Request;
@@ -26,6 +27,7 @@ final class Routes {
 	public static function register() {
 
 		Inbound_Email_Webhook::register_route();
+		Inbound_Provider_Webhook::register_route();
 		Delivery_Webhook::register_route();
 
 		register_rest_route( 'dotflow/v1', '/manifest', [

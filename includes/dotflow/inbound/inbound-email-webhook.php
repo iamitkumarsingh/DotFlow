@@ -109,6 +109,18 @@ final class Inbound_Email_Webhook {
 			);
 		}
 
+		return self::ingest_normalized( $input );
+	}
+
+	/**
+	 * Pass a provider-normalized envelope through the canonical validator and ingest pipeline.
+	 * Provider adapters must authenticate the original request before calling this method.
+	 *
+	 * @param array $input Normalized inbound message.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function ingest_normalized( array $input ) {
+
 		$payload = self::normalize_payload( $input );
 
 		if ( is_wp_error( $payload ) ) {
