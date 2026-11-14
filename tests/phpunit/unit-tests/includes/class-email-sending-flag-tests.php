@@ -84,6 +84,60 @@ class Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		$this->assertFalse( is_sending() );
 	}
 
+	public function test_transport_state_and_failure_hook_are_restored_when_a_provider_throws() {
+
+		Groundhogg_Email_Services::set_current_message_type( 'transactional' );
+		Groundhogg_Email_Services::set_current_email_service( 'wp_mail' );
+		$throw = static function () {
+			throw new RuntimeException( 'transport failed' );
+		};
+		Groundhogg_Email_Services::register( 'dotflow_test_throw', 'DotFlow Test Throw', $throw );
+
+		try {
+			Groundhogg_Email_Services::send_with_service(
+				'dotflow_test_throw',
+				[ 'person@example.test' ],
+				'Test',
+				'Test body'
+			);
+			$this->fail( 'The provider exception should be propagated.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( 'transport failed', $e->getMessage() );
+		}
+
+		$this->assertSame( 'transactional', Groundhogg_Email_Services::get_current_message_type() );
+		$this->assertSame( 'wp_mail', Groundhogg_Email_Services::get_current_email_service() );
+		$this->assertFalse( has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] ) );
+	}
+
+	public function test_before_send_exception_also_restores_transport_state_and_hook() {
+
+		Groundhogg_Email_Services::set_current_message_type( 'marketing' );
+		Groundhogg_Email_Services::set_current_email_service( 'wp_mail' );
+		$throw = static function () {
+			throw new RuntimeException( 'before send failed' );
+		};
+		add_action( 'groundhogg/email_services/before_send', $throw );
+
+		try {
+			Groundhogg_Email_Services::send_with_service(
+				'wp_mail',
+				[ 'person@example.test' ],
+				'Test',
+				'Test body'
+			);
+			$this->fail( 'The before_send exception should be propagated.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( 'before send failed', $e->getMessage() );
+		} finally {
+			remove_action( 'groundhogg/email_services/before_send', $throw );
+		}
+
+		$this->assertSame( 'marketing', Groundhogg_Email_Services::get_current_message_type() );
+		$this->assertSame( 'wp_mail', Groundhogg_Email_Services::get_current_email_service() );
+		$this->assertFalse( has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] ) );
+	}
+
 	public function test_the_flag_is_off_when_something_throws_while_sending() {
 
 		add_action( 'groundhogg/email/before_send', function () {
