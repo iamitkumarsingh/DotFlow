@@ -1,6 +1,7 @@
 <?php
 
 use Groundhogg\Abilities\Emails\Send_Composed_Email;
+use Groundhogg\Classes\Message;
 use function Groundhogg\is_sending;
 
 /**
