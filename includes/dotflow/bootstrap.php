@@ -95,10 +95,10 @@ final class Bootstrap {
 		// Independent provider inbox mode is opt-in and never replaces a provisioned relay.
 		Inbox_Addresses::register();
 		Message_Events::register();
+		Postmark_Provider::boot();
 		Inbound_Provider_Registry::register_adapters();
 		Outbound_Delivery_Events::register();
 		Provider_Adapter_Registry::register_adapters();
-		Postmark_Provider::boot();
 
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
