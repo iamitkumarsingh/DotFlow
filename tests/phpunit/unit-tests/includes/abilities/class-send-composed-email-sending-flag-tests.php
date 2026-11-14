@@ -37,6 +37,19 @@ class DotFlow_Composed_Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		$this->assertFalse( is_sending() );
 	}
 
+	public function test_existing_sending_state_is_restored_for_nested_sends() {
+
+		is_sending( true );
+
+		$result = $this->ability()->__invoke( [
+			'subject' => 'Test',
+			'content' => '<p>Test</p>',
+		] );
+
+		$this->assertWPError( $result );
+		$this->assertTrue( is_sending() );
+	}
+
 	public function test_invalid_reply_headers_restore_the_sending_flag() {
 
 		$result = $this->ability()->__invoke( [
