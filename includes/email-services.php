@@ -354,44 +354,51 @@ class Groundhogg_Email_Services {
 
 		disable_emojis();
 
-		/**
-		 * Allow hooks to swap wap outF flags before the email is sent based on the current state of Groundhogg_Email_Services
-		 *
-		 * @param mixed  $to      the recipients of the email
-		 * @param string $subject the email subject line
-		 * @param string $message the email message
-		 * @param mixed  $headers the email headers
-		 */
-		do_action( 'groundhogg/email_services/before_send', $to, $subject, $message, $headers, $attachments );
+		// Preserve the surrounding transport context when a provider triggers a nested send.
+		$previous_message_type  = self::$current_message_type;
+		$previous_email_service = self::$current_email_service;
+		$previous_message_id    = self::$message_id;
 
-		// If we detect a staging environment, we should set the Marketing and Transactional streams to Log Only
-        // do this before getting the callback, and not modify the callback directly so logging records using the log-only service
-		if ( ! self::current_message_type_is_wordpress() // marketing or transactional only
-             && is_staging_environment() // we're in staging
-             && ! is_option_enabled( 'gh_allow_email_in_staging' ) // the override is not set
-        ) {
-			self::set_current_email_service( 'log_only' ); // forward to log only anyway
-		}
-
-		$callback = self::get_service_callback();
-
-		// fallback to the default mailer if service callback is not available, or we somehow got wp_mail
-		if ( ! is_callable( $callback ) ) {
-			$callback = __NAMESPACE__ . '\wordpress_default_mail';
-		}
-
-		// clear the message id from any previous send
+		// Do not let a prior wp_mail_failed event masquerade as this send's result.
+		self::$last_error = null;
 		self::$message_id = '';
-
 		add_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
 
-		$sent = call_user_func( $callback, $to, $subject, $message, $headers, $attachments );
+		try {
+			/**
+			 * Allow integrations to adjust the transport before the email is sent.
+			 *
+			 * @param mixed  $to          The recipients of the email.
+			 * @param string $subject     The email subject line.
+			 * @param string $message     The email message.
+			 * @param mixed  $headers     The email headers.
+			 * @param mixed  $attachments The email attachments.
+			 */
+			do_action( 'groundhogg/email_services/before_send', $to, $subject, $message, $headers, $attachments );
 
-		self::clear();
+			// On staging, route marketing and transactional streams to Log Only unless explicitly allowed.
+			if ( ! self::current_message_type_is_wordpress()
+				&& is_staging_environment()
+				&& ! is_option_enabled( 'gh_allow_email_in_staging' )
+			) {
+				self::set_current_email_service( 'log_only' );
+			}
 
-		remove_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
+			$callback = self::get_service_callback();
 
-		return $sent;
+			// Fall back to the default mailer if the selected service is unavailable.
+			if ( ! is_callable( $callback ) ) {
+				$callback = __NAMESPACE__ . '\\wordpress_default_mail';
+			}
+
+			return call_user_func( $callback, $to, $subject, $message, $headers, $attachments );
+		} finally {
+			// Remove temporary hooks and restore the caller's context even when a provider throws.
+			remove_action( 'wp_mail_failed', [ self::class, 'catch_wp_mail_failed' ] );
+			self::$current_message_type  = $previous_message_type;
+			self::$current_email_service = $previous_email_service;
+			self::$message_id            = $previous_message_id;
+		}
 	}
 
 	/**
