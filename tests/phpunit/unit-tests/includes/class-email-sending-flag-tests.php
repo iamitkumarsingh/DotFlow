@@ -113,6 +113,77 @@ class Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		$this->assertFalse( has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] ) );
 	}
 
+
+	public function test_nested_send_preserves_outer_hook_transport_and_error_state() {
+
+		$inner_callback = static function () {
+			if ( Groundhogg_Email_Services::get_current_email_service() !== 'dotflow_test_inner' ) {
+				return false;
+			}
+
+			do_action( 'wp_mail_failed', new WP_Error( 'dotflow_inner_failure', 'Inner send failed.' ) );
+
+			return true;
+		};
+		$outer_callback = function () use ( &$inner_hook_present, &$outer_service_after_inner, &$error_after_inner ) {
+			$inner_hook_present = false !== has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] );
+
+			$sent = Groundhogg_Email_Services::send_with_service(
+				'dotflow_test_inner',
+				[ 'inner@example.test' ],
+				'Inner',
+				'Inner body'
+			);
+
+			$inner_hook_present = $inner_hook_present && false !== has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] );
+			$outer_service_after_inner = Groundhogg_Email_Services::get_current_email_service();
+			$error_after_inner = Groundhogg_Email_Services::get_last_error();
+
+			return $sent;
+		};
+
+		Groundhogg_Email_Services::register( 'dotflow_test_inner', 'DotFlow Test Inner', $inner_callback );
+		Groundhogg_Email_Services::register( 'dotflow_test_outer', 'DotFlow Test Outer', $outer_callback );
+
+		$inner_hook_present = false;
+		$outer_service_after_inner = '';
+		$error_after_inner = new WP_Error( 'not_set' );
+
+		$sent = Groundhogg_Email_Services::send_with_service(
+			'dotflow_test_outer',
+			[ 'outer@example.test' ],
+			'Outer',
+			'Outer body'
+		);
+
+		$this->assertTrue( $sent );
+		$this->assertTrue( $inner_hook_present, 'The nested send must not remove the outer failure hook.' );
+		$this->assertSame( 'dotflow_test_outer', $outer_service_after_inner );
+		$this->assertNull( $error_after_inner, 'An inner failure must not overwrite the outer send error state.' );
+		$this->assertFalse( has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] ) );
+	}
+
+	public function test_send_does_not_remove_a_failure_hook_registered_by_another_integration() {
+
+		$callback = static function () {
+			return true;
+		};
+		Groundhogg_Email_Services::register( 'dotflow_test_external_hook', 'DotFlow External Hook', $callback );
+		add_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] );
+
+		try {
+			Groundhogg_Email_Services::send_with_service(
+				'dotflow_test_external_hook',
+				[ 'person@example.test' ],
+				'Test',
+				'Test body'
+			);
+			$this->assertNotFalse( has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] ) );
+		} finally {
+			remove_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] );
+		}
+	}
+
 	public function test_before_send_exception_also_restores_transport_state_and_hook() {
 
 		Groundhogg_Email_Services::set_current_message_type( 'marketing' );
