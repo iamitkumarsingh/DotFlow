@@ -5,9 +5,9 @@ namespace Groundhogg\Abilities\Emails;
 use Groundhogg\Abilities\Ability;
 
 /**
- * Reports the registered email transports and the service selected for each
- * message channel. This is intentionally a capability/status view only: provider
- * credentials, API keys, SMTP hosts and connection secrets are never returned.
+ * Reports registered email transports and the service selected for each
+ * message channel. This is a capability/status view only: provider credentials,
+ * API keys, SMTP hosts and connection secrets are never returned.
  */
 class List_Email_Services extends Ability {
 
@@ -19,6 +19,15 @@ class List_Email_Services extends Ability {
 	protected const IDEMPOTENT = true;
 
 	protected function get_args(): array {
+
+		$channel_schema = [
+			'type'       => 'object',
+			'properties' => [
+				'service_id'   => [ 'type' => 'string' ],
+				'service_name' => [ 'type' => 'string' ],
+				'available'    => [ 'type' => 'boolean' ],
+			],
+		];
 
 		return [
 			'label'       => __( 'List Email Services', 'groundhogg' ),
@@ -44,19 +53,9 @@ class List_Email_Services extends Ability {
 					'channels' => [
 						'type'       => 'object',
 						'properties' => [
-							'wordpress'     => [ '$ref' => '#/$defs/channel' ],
-							'transactional' => [ '$ref' => '#/$defs/channel' ],
-							'marketing'     => [ '$ref' => '#/$defs/channel' ],
-						],
-					],
-				],
-				'$defs' => [
-					'channel' => [
-						'type'       => 'object',
-						'properties' => [
-							'service_id'   => [ 'type' => 'string' ],
-							'service_name' => [ 'type' => 'string' ],
-						'available'    => [ 'type' => 'boolean' ],
+							'wordpress'     => $channel_schema,
+							'transactional' => $channel_schema,
+							'marketing'     => $channel_schema,
 						],
 					],
 				],
