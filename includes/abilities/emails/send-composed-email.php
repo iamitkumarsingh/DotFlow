@@ -308,7 +308,7 @@ class Send_Composed_Email extends Ability {
 				$headers[] = 'Reply-To: ' . $reply_to;
 			}
 
-			$result = \\Groundhogg_Email_Services::send_type( $type, $to, $subject, $content, $headers );
+			$result = \Groundhogg_Email_Services::send_type( $type, $to, $subject, $content, $headers );
 
 		} finally {
 
