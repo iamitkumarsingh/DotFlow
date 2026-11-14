@@ -175,7 +175,7 @@ final class Routes {
 				],
 			],
 			'write_policy' => [
-				'rest_mutations'       => 'No generic REST CRUD. Inbound email uses its server-side token. Outbound delivery callbacks require a registered provider adapter to authenticate and normalize each webhook.',
+				'rest_mutations'       => 'No generic REST CRUD. Inbound email uses either its server-side token or a registered provider adapter. Outbound delivery callbacks require a registered provider adapter to authenticate and normalize each webhook.',
 				'preferred_interface' => 'Purpose-built WordPress Abilities with strict schemas and capability checks.',
 				'arbitrary_sql'        => false,
 				'credential_readback'  => false,
