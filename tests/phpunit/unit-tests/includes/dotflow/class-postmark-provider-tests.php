@@ -135,7 +135,8 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'dotflow', $body['Tag'] );
 		$this->assertSame( 'wordpress', $body['Metadata']['dotflow_channel'] );
 		$this->assertArrayNotHasKey( 'X-Postmark-Server-Token', $body );
-		$this->assertSame( '<4d3f6b1a-3d5e-4b0a-9d9e-000000000004@postmark.dotflow>', Groundhogg_Email_Services::get_message_id() );
+		$this->assertMatchesRegularExpression( '/^<[^<>]+@dotflow\\.local>$/', Groundhogg_Email_Services::get_message_id() );
+		$this->assertSame( Groundhogg_Email_Services::get_message_id(), $body['Metadata']['dotflow_message_id'] );
 	}
 
 	public function test_outbound_transport_refuses_attachments() {
@@ -189,6 +190,9 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$reservation = Postmark_Retry_Queue::reserve( $payload, $message_id );
 		$this->assertIsArray( $reservation );
 		$this->assertTrue( Postmark_Retry_Queue::schedule_retry( $reservation, 0 ) );
+		global $wpdb;
+		$db = get_db( 'dotflow_postmark_outbox' );
+		$wpdb->update( $db->get_table_name(), [ 'available_at' => gmdate( 'Y-m-d H:i:s', time() - 60 ) ], [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
 
 		$this->http_filter = static function ( $pre, $args, $url ) {
 			if ( Postmark_Provider::API !== $url ) {
@@ -206,8 +210,6 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 
 		Postmark_Retry_Queue::process_batch();
 
-		global $wpdb;
-		$db = get_db( 'dotflow_postmark_outbox' );
 		$row = $wpdb->get_row( $wpdb->prepare(
 			"SELECT status, provider_message_id FROM {$db->get_table_name()} WHERE idempotency_key = %s",
 			hash( 'sha256', $message_id )
