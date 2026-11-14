@@ -3,6 +3,7 @@
 namespace Groundhogg\Abilities\Emails;
 
 use Groundhogg\Abilities\Ability;
+use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 
 /**
  * Reports registered email transports and the service selected for each
@@ -33,7 +34,7 @@ class List_Email_Services extends Ability {
 
 		return [
 			'label'       => __( 'List Email Services', 'groundhogg' ),
-			'description' => __( 'List registered email delivery services and the selected service for WordPress, transactional and marketing email. Reports whether each provider is registered and has a callable transport; never returns credentials or provider secrets.', 'groundhogg' ),
+			'description' => __( 'List registered email delivery services, provider webhook adapters and the selected service for WordPress, transactional and marketing email. Reports callable transport status without returning credentials or provider secrets.', 'groundhogg' ),
 			'input_schema' => [
 				'type'                 => 'object',
 				'additionalProperties' => false,
@@ -53,6 +54,7 @@ class List_Email_Services extends Ability {
 							],
 						],
 					],
+					'delivery_webhook_adapters' => [ 'type' => 'array', 'items' => [ 'type' => 'string' ] ],
 					'channels' => [
 						'type'       => 'object',
 						'properties' => [
@@ -97,8 +99,9 @@ class List_Email_Services extends Ability {
 		}
 
 		return [
-			'services' => $services,
-			'channels' => $channels,
+			'services'                  => $services,
+			'delivery_webhook_adapters' => Provider_Adapter_Registry::ids(),
+			'channels'                  => $channels,
 		];
 	}
 }
