@@ -80,7 +80,7 @@ final class Inbound_Provider_Webhook {
 		}
 
 		$response = Inbound_Email_Webhook::ingest_normalized( $normalized );
-		if ( 'postmark' === $provider && $response instanceof \\WP_REST_Response && $response->get_status() < 400 ) { $response->set_status( 200 ); }
+		if ( 'postmark' === $provider && $response instanceof \WP_REST_Response && $response->get_status() < 400 ) { $response->set_status( 200 ); }
 		return $response;
 	}
 }
