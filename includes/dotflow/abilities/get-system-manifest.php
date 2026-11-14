@@ -109,7 +109,7 @@ class Get_System_Manifest extends Ability {
 					'label'       => 'Campaigns and broadcasts',
 					'status'      => 'inherited',
 					'description' => 'Groundhogg campaigns, email templates, broadcasts and their supported management abilities.',
-					'abilities'   => [ 'groundhogg/list-campaigns', 'groundhogg/create-campaign', 'groundhogg/list-email-templates', 'groundhogg/create-email-template', 'groundhogg/update-email-template', 'groundhogg/list-broadcasts', 'groundhogg/get-broadcast', 'groundhogg/send-email-broadcast', 'groundhogg/cancel-broadcast' ],
+					'abilities'   => [ 'groundhogg/list-campaigns', 'groundhogg/create-campaign', 'groundhogg/list-email-templates', 'groundhogg/create-email-template', 'groundhogg/list-email-services', 'groundhogg/update-email-template', 'groundhogg/list-broadcasts', 'groundhogg/get-broadcast', 'groundhogg/send-email-broadcast', 'groundhogg/cancel-broadcast' ],
 				],
 				[
 					'id'          => 'automation',
