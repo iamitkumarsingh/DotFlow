@@ -38,9 +38,10 @@ final class Provider_Adapter_Registry {
 	 */
 	public static function register( Delivery_Webhook_Adapter $adapter ) {
 
-		$id = sanitize_key( (string) $adapter->get_id() );
+		$raw_id = (string) $adapter->get_id();
+		$id     = sanitize_key( $raw_id );
 
-		if ( '' === $id || strlen( $id ) > 48 ) {
+		if ( '' === $id || strlen( $id ) > 48 || $raw_id !== $id || ! preg_match( '/^[a-z0-9_-]{1,48}$/', $raw_id ) ) {
 			throw new InvalidArgumentException( 'Delivery adapter IDs must contain 1 to 48 lowercase safe characters.' );
 		}
 

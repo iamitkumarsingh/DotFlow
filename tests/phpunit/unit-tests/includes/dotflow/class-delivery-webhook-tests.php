@@ -121,15 +121,26 @@ class DotFlow_Delivery_Webhook_Tests extends GH_UnitTestCase {
 			'channel'    => 'transactional',
 		];
 
-		$first  = Delivery_Webhook::receive( $this->request( $payload ) );
-		$second = Delivery_Webhook::receive( $this->request( $payload ) );
+		$dispatch_count = 0;
+		$listener = function ( $event ) use ( &$dispatch_count ) {
+			++$dispatch_count;
+		};
+		add_action( 'dotflow/event/email.delivery.bounced', $listener, 10, 1 );
 
-		$this->assertSame( 202, $first->get_status() );
-		$this->assertSame( 202, $second->get_status() );
-		$this->assertNotEmpty( $this->find_event( 'provider-event-duplicate' ) );
+		try {
+			$first  = Delivery_Webhook::receive( $this->request( $payload ) );
+			$second = Delivery_Webhook::receive( $this->request( $payload ) );
 
-		$row = $this->find_event( 'provider-event-duplicate' );
-		get_db( 'dotflow_events' )->delete( absint( $row->ID ) );
+			$this->assertSame( 202, $first->get_status() );
+			$this->assertSame( 202, $second->get_status() );
+			$this->assertSame( 1, $dispatch_count, 'A duplicate provider event must not trigger listeners twice.' );
+
+			$row = $this->find_event( 'provider-event-duplicate' );
+			$this->assertNotEmpty( $row );
+			get_db( 'dotflow_events' )->delete( absint( $row->ID ) );
+		} finally {
+			remove_action( 'dotflow/event/email.delivery.bounced', $listener, 10 );
+		}
 	}
 
 	public function test_invalid_signature_is_rejected() {
