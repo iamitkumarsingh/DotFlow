@@ -47,14 +47,14 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 			'MessageID' => '4d3f6b1a-3d5e-4b0a-9d9e-000000000001',
 			'DeliveredAt' => '2026-11-14T12:00:00Z',
 			'MessageStream' => 'broadcasts',
-			'Metadata' => [ 'dotflow_channel' => 'marketing' ],
+			'Metadata' => [ 'dotflow_channel' => 'marketing', 'dotflow_message_id' => '<stable-message-001@dotflow.local>' ],
 			'Recipient' => 'private@example.test',
 		] );
 
 		$this->assertIsArray( $normalized );
 		$this->assertSame( 'delivered', $normalized['status'] );
 		$this->assertSame( 'marketing', $normalized['channel'] );
-		$this->assertSame( '<4d3f6b1a-3d5e-4b0a-9d9e-000000000001@postmark.dotflow>', $normalized['message_id'] );
+		$this->assertSame( '<stable-message-001@dotflow.local>', $normalized['message_id'] );
 		$this->assertArrayNotHasKey( 'Recipient', $normalized );
 	}
 
@@ -219,6 +219,33 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$this->assertSame( '4d3f6b1a-3d5e-4b0a-9d9e-000000000005', $row->provider_message_id );
 		$this->assertFalse( Postmark_Retry_Queue::is_queued( $message_id ) );
 		$wpdb->delete( $db->get_table_name(), [ 'idempotency_key' => hash( 'sha256', $message_id ) ] );
+	}
+
+
+	public function test_postmark_settings_encrypt_secrets_at_rest() {
+		$missing = '__dotflow_missing_option__';
+		$before = get_option( Postmark_Provider::OPTION, $missing );
+		remove_filter( 'dotflow/postmark/server_token', $this->token_filter );
+		remove_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
+
+		try {
+			$stored = Postmark_Provider::sanitize_settings( [
+				'server_token' => 'test-server-secret-value',
+				'webhook_secret' => 'test-webhook-secret-value',
+				'transactional_stream' => 'outbound',
+				'marketing_stream' => 'broadcasts',
+			] );
+			$this->assertStringNotContainsString( 'test-server-secret-value', $stored['server_token'] );
+			$this->assertStringNotContainsString( 'test-webhook-secret-value', $stored['webhook_secret'] );
+			update_option( Postmark_Provider::OPTION, $stored );
+			$this->assertSame( 'test-server-secret-value', Postmark_Provider::secret( 'server_token' ) );
+			$this->assertSame( 'test-webhook-secret-value', Postmark_Provider::secret( 'webhook_secret' ) );
+		} finally {
+			if ( $before === $missing ) { delete_option( Postmark_Provider::OPTION ); }
+			else { update_option( Postmark_Provider::OPTION, $before ); }
+			add_filter( 'dotflow/postmark/server_token', $this->token_filter );
+			add_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
+		}
 	}
 
 }
