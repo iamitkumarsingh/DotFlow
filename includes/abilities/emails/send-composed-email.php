@@ -148,12 +148,13 @@ class Send_Composed_Email extends Ability {
 		// Merge-field generation can expose values which are only appropriate while
 		// an email is being sent. Always restore the process-wide flag, including
 		// validation failures and exceptions.
+		$was_sending = is_sending();
 		is_sending( true );
 
 		try {
 			return $this->send( $input );
 		} finally {
-			is_sending( false );
+			is_sending( $was_sending );
 		}
 	}
 
