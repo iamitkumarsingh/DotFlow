@@ -127,6 +127,7 @@ class Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		};
 		$outer_callback = function () use ( &$inner_hook_present, &$outer_service_after_inner, &$error_after_inner ) {
 			$inner_hook_present = false !== has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] );
+			do_action( 'wp_mail_failed', new WP_Error( 'dotflow_outer_failure', 'Outer send failed.' ) );
 
 			$sent = Groundhogg_Email_Services::send_with_service(
 				'dotflow_test_inner',
@@ -159,7 +160,8 @@ class Email_Sending_Flag_Tests extends GH_UnitTestCase {
 		$this->assertTrue( $sent );
 		$this->assertTrue( $inner_hook_present, 'The nested send must not remove the outer failure hook.' );
 		$this->assertSame( 'dotflow_test_outer', $outer_service_after_inner );
-		$this->assertNull( $error_after_inner, 'An inner failure must not overwrite the outer send error state.' );
+		$this->assertWPError( $error_after_inner );
+		$this->assertSame( 'dotflow_outer_failure', $error_after_inner->get_error_code(), 'An inner failure must not overwrite the outer send error state.' );
 		$this->assertFalse( has_action( 'wp_mail_failed', [ Groundhogg_Email_Services::class, 'catch_wp_mail_failed' ] ) );
 	}
 
