@@ -62,13 +62,13 @@ final class Automation_Dashboard {
 		$queue_table   = $queue->get_table_name();
 		$history_table = $history->get_table_name();
 
-		$union = "SELECT ID, contact_id, funnel_id, step_id, status, error_code, time
+		$union = "SELECT ID, contact_id, funnel_id, step_id, status, error_code, time_scheduled AS time
 			FROM {$queue_table}
-			WHERE event_type = %d AND time >= %d AND time <= %d
+			WHERE event_type = %d AND time_scheduled >= %d AND time_scheduled <= %d
 			UNION ALL
-			SELECT ID, contact_id, funnel_id, step_id, status, error_code, time
+			SELECT ID, contact_id, funnel_id, step_id, status, error_code, time_scheduled AS time
 			FROM {$history_table}
-			WHERE event_type = %d AND time >= %d AND time <= %d";
+			WHERE event_type = %d AND time_scheduled >= %d AND time_scheduled <= %d";
 
 		$base_args = [ Event::FUNNEL, $start, $end, Event::FUNNEL, $start, $end ];
 		$sql = "SELECT status, COUNT(*) AS total, COUNT(DISTINCT contact_id) AS contacts
