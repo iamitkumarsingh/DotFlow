@@ -10,7 +10,7 @@ class DotFlow_DenFlow_Branding_Test extends WP_UnitTestCase {
 	public function test_customer_facing_product_name_is_rebranded() {
 		$this->assertSame(
 			'DenFlow CRM',
-			denflow_branding_replace_product_name( 'Groundhogg CRM', 'Groundhogg CRM', 'groundhogg' )
+			\\Groundhogg\\denflow_branding_replace_product_name( 'Groundhogg CRM', 'Groundhogg CRM', 'groundhogg' )
 		);
 	}
 
