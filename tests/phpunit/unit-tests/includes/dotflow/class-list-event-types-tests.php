@@ -9,6 +9,17 @@ class DotFlow_List_Event_Types_Tests extends GH_UnitTestCase {
 
 	protected $event_ids = [];
 
+	public function setUp(): void {
+		parent::setUp();
+		Store::maybe_install();
+
+		$db = get_db( 'dotflow_events' );
+		if ( $db ) {
+			global $wpdb;
+			$wpdb->query( "DELETE FROM {$db->get_table_name()}" );
+		}
+	}
+
 	public function tearDown(): void {
 
 		global $wpdb;
