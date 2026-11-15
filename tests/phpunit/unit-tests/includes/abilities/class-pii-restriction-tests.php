@@ -447,7 +447,7 @@ class Pii_Restriction_Tests extends GH_UnitTestCase {
 		] );
 
 		$this->assertWPError( $added );
-		$this->assertSame( 'groundhogg_pii_restricted', $added->get_error_code() );
+		$this->assertSame( 'groundhogg_cannot_view_contact', $added->get_error_code() );
 
 		$listed = $this->execute( 'groundhogg/list-contact-notes', [ 'contact_id' => $this->contact_id ] );
 		$this->assertWPError( $listed );
