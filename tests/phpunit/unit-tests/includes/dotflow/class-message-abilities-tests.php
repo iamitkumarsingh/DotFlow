@@ -30,6 +30,26 @@ class DotFlow_Message_Abilities_Tests extends GH_UnitTestCase {
 		}
 	}
 
+	public function test_reversed_message_date_range_is_rejected() {
+
+		$previous_user_id = get_current_user_id();
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
+		try {
+			$reflection = new ReflectionClass( List_Messages::class );
+			$ability = $reflection->newInstanceWithoutConstructor();
+			$result = $ability( [
+				'after' => '2026-11-15T12:00:00Z',
+				'before' => '2026-11-14T12:00:00Z',
+			] );
+			$this->assertWPError( $result );
+			$this->assertSame( 'dotflow_invalid_message_date_range', $result->get_error_code() );
+		} finally {
+			wp_set_current_user( $previous_user_id );
+		}
+	}
+
 	public function test_message_content_is_opt_in_and_read_state_is_editable() {
 
 		$previous_user_id = get_current_user_id();
