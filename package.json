@@ -1,7 +1,7 @@
 {
   "name": "dotflow",
   "version": "0.1.0",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "main": "blocks/gutenberg/index.js",
   "scripts": {
     "dev": "cross-env BABEL_ENV=default webpack --watch",
