@@ -1,6 +1,6 @@
 # DotFlow — Product & Engineering Blueprint
 
-Status: Stage 2 implementation completed on `dotflow/development` — Postmark transport, provider webhooks, encrypted settings and bounded durable rate-limit retries implemented and CI-tested. No production deployment, provider credentials or live email sending performed.
+Status: Stage 3 core automation controls completed on `dotflow/development`; Stages 1–2 messaging foundations and Postmark integration remain implemented and CI-tested. Existing Groundhogg visual flow editor and durable event engine are retained; DotFlow adds event-triggered enrolment, contact-scoped pause/resume/cancel/restart, and privacy-minimised journey history. No production deployment, provider credentials or live email sending performed.
 Working branch: `dotflow/development`.
 Foundation: Groundhogg, preserving applicable GPLv3 notices, attribution and derivative-work obligations.
 
@@ -107,3 +107,6 @@ Stage 2 is complete for the first provider (Postmark) on the development branch.
 - `dotflow/manage-contact-automation` provides contact-scoped pause, resume, cancel and restart. It checks per-contact and per-flow permissions. Restart creates the new entry event first and atomically moves previous waiting/paused events into history; on failure the transaction rolls back and the existing journey remains intact.
 - `dotflow/list-contact-automation-history` merges the contact's queue and event history with bounded pagination. It returns flow/step IDs, status, error code and timestamps only; event args, email content, addresses and error messages are excluded.
 - Existing email sending already blocks non-transactional messages to contacts that are not marketable and blocks undeliverable contacts. Existing Groundhogg queue and event history provide durable delays and step-level outcomes; DotFlow does not add a second scheduler.
+
+
+Stage 3 CI verification: commit `95a97dab92844474f4ad47158d08554e1c3bb3b6` passed PHP syntax validation and WordPress integration tests on PHP 8.0, 8.2 and 8.3. The new tests cover contact-level pause/resume/cancel, atomic restart, per-contact permission enforcement and privacy-safe history output.
