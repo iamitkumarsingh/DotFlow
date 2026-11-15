@@ -127,6 +127,12 @@ class DotFlow_Webhook extends Action {
 			return new \WP_Error( 'dotflow_webhook_url_invalid', __( 'The configured webhook URL is invalid.', 'groundhogg' ) );
 		}
 
+
+		$secret = self::get_secret();
+		if ( strlen( $secret ) < 32 ) {
+			return new \WP_Error( 'dotflow_webhook_secret_missing', __( 'Configure DOTFLOW_WEBHOOK_SECRET with at least 32 random characters before enabling webhook steps.', 'groundhogg' ) );
+		}
+
 		$payload = [
 			'schema_version' => 1,
 			'event'           => 'automation.step.completed',
