@@ -1,6 +1,10 @@
 <?php
 
 use Groundhogg\DotFlow\Admin\Automation_Dashboard;
+use Groundhogg\Funnel;
+use Groundhogg\Steps\Actions\Delay_Timer;
+use function Groundhogg\get_contactdata;
+use function Groundhogg\get_db;
 
 class DotFlow_Automation_Dashboard_Tests extends GH_UnitTestCase {
 
