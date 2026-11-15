@@ -8,8 +8,9 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Postmark integration. Secrets are supplied through wp-config.php constants
- * or server-side filters and are never stored in the WordPress options table.
+ * Postmark integration. Secrets may be supplied through wp-config.php
+ * constants or server-side filters. Values entered in the settings UI are
+ * encrypted with AES-256-GCM before they are stored in a WordPress option.
  */
 final class Postmark_Provider {
 
