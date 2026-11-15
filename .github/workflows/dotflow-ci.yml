@@ -9,6 +9,10 @@ on:
       - master
       - dotflow/development
 
+concurrency:
+  group: dotflow-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
