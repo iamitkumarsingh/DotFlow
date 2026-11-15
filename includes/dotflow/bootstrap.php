@@ -11,6 +11,8 @@ use Groundhogg\DotFlow\Abilities\List_Events;
 use Groundhogg\DotFlow\Abilities\List_Event_Types;
 use Groundhogg\DotFlow\Abilities\List_Messages;
 use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
+use Groundhogg\DotFlow\Abilities\Manage_Contact_Automation;
+use Groundhogg\DotFlow\Abilities\List_Contact_Automation_History;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
 use Groundhogg\DotFlow\Database\Postmark_Outbox as DotFlow_Postmark_Outbox_DB;
@@ -242,6 +244,8 @@ final class Bootstrap {
 		Abilities::add_ability( List_Contact_Events::class );
 		Abilities::add_ability( List_Messages::class );
 		Abilities::add_ability( Set_Message_Read_State::class );
+		Abilities::add_ability( Manage_Contact_Automation::class );
+		Abilities::add_ability( List_Contact_Automation_History::class );
 	}
 
 	/**
