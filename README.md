@@ -69,7 +69,9 @@ Elementor MCP edits page layouts and widget settings. WordPress Abilities/MCP ed
 - Native `dotflow_event` workflow benchmark for contact-linked events, with exact event-name/source matching and no arbitrary payload forwarding.
 - Permission-scoped WordPress Abilities for contact profiles, event history, published forms and conversation access; inherited typed CRM, campaign, email and workflow abilities remain available.
 - Privacy-minimised audit events for every currently exposed AI mutation ability; platform-wide wp-admin/third-party mutation auditing is not claimed.
-- Native Elementor form widget with active-form revalidation.
+- Native Elementor form widget with a shared live published-form resolver, bounded editor choices, safe wrapper classes and active-form revalidation.
+- Read-only DotFlow Operations screen under Settings with provider connection status, event health, Postmark outbox counts and AI mutation audit metadata; credentials and raw event payloads are never rendered.
+- Hardened event and conversation search contracts with invalid/reversed date rejection, bounded pagination and graceful storage-unavailable errors.
 - Independent HTTPS/token-authenticated inbound email webhook using Groundhogg's native routing, signed reply tokens, threading and duplicate detection; provider-specific adapters and attachment ingestion remain outstanding.
 - WordPress/MariaDB PHPUnit integration suite covering event storage, PII boundaries, audit coverage, permissions, REST contracts, inbound mail and security policies.
 - GitHub Actions matrix for PHP syntax and integration tests on PHP 8.0, 8.2 and 8.3.
