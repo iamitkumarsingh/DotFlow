@@ -37,3 +37,7 @@ README.md
 
 # Source maps are development-only and are not required to run the plugin.
 *.map
+
+# Legacy onboarding and partner-promotion artwork is not referenced by runtime code.
+/assets/images/welcome/
+/assets/images/recommended/
