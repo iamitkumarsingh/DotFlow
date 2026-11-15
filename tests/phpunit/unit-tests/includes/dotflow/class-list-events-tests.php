@@ -1,10 +1,10 @@
 <?php
 
-use Groundhogg\\DotFlow\\Abilities\\List_Events;
-use Groundhogg\\DotFlow\\Events\\Event;
-use Groundhogg\\DotFlow\\Events\\Store;
-use Groundhogg\\Pii;
-use function Groundhogg\\get_db;
+use Groundhogg\DotFlow\Abilities\List_Events;
+use Groundhogg\DotFlow\Events\Event;
+use Groundhogg\DotFlow\Events\Store;
+use Groundhogg\Pii;
+use function Groundhogg\get_db;
 
 class DotFlow_List_Events_Tests extends GH_UnitTestCase {
 
