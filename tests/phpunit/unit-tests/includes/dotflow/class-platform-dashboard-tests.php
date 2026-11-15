@@ -63,4 +63,5 @@ class DotFlow_Platform_Dashboard_Tests extends GH_UnitTestCase {
 		} finally {
 			wp_set_current_user( $previous_user_id );
 		}
-	}}
+	}
+}
