@@ -55,7 +55,7 @@ final class DotForm_Integration {
 
 		Dispatcher::dispatch( new Event( 'form.submitted', $payload, 'dotform', $event_id ) );
 		if ( $contact->is_marketable() ) {
-			Dispatcher::dispatch( new Event( 'form.marketing_eligible', $payload, 'dotform', 'marketing-' . $event_id ) );
+			Dispatcher::dispatch( new Event( 'form.marketing_eligible', $payload, 'dotform', 'dotform-marketing-' . substr( hash( 'sha256', $event_id ), 0, 48 ) ) );
 		}
 	}
 }
