@@ -1,3 +1,6 @@
+          ! grep -Eq '\\.(po|pot|map)$' dist/archive-files.txt
+          grep -Eq '\\.mo$' dist/archive-files.txt
+          du -h dist/dotflow-0.1.0.zip
 name: DotFlow development checks
 
 on:
@@ -188,9 +191,7 @@ jobs:
           # Export the exact tested commit, then apply the production distribution
           # allowlist/exclusions. Keep runtime assets and compiled .mo translations.
           git archive --format=tar HEAD | tar -xf - -C dist/source
-          rsync -a --delete --exclude-from=.distignore \\
-            --exclude='*.po' --exclude='*.pot' --exclude='*.map' \\
-            dist/source/ dist/package/dotflow/
+          rsync -a --delete --exclude-from=.distignore --exclude='*.po' --exclude='*.pot' --exclude='*.map' dist/source/ dist/package/dotflow/
           test -s dist/package/dotflow/groundhogg.php
           # Ship the complete, unmodified GPL-3.0 text with the derivative plugin.
           curl --fail --silent --show-error --location --retry 3 https://www.gnu.org/licenses/gpl-3.0.txt -o dist/GPL-3.0.txt
