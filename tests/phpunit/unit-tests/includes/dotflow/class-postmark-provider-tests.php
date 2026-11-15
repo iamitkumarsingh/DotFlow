@@ -165,7 +165,10 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'reserved', $reservation['status'] );
 		$this->assertTrue( Postmark_Retry_Queue::is_queued( $message_id ) );
 
+		global $wpdb;
+		$wpdb->last_error = '';
 		$duplicate = Postmark_Retry_Queue::reserve( $payload, $message_id );
+		$this->assertSame( '', $wpdb->last_error, 'A duplicate idempotency reservation must not produce a database error.' );
 		$this->assertIsArray( $duplicate );
 		$this->assertTrue( $duplicate['duplicate'] );
 		$this->assertSame( 'processing', $duplicate['status'] );
