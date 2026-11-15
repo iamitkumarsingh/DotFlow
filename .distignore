@@ -30,3 +30,10 @@ README.md
 
 /mobile-app
 /mu-plugins
+
+# Translation source files are build-time inputs; WordPress loads compiled .mo files.
+*.po
+*.pot
+
+# Source maps are development-only and are not required to run the plugin.
+*.map
