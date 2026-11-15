@@ -94,30 +94,32 @@ Exit gates:
 
 ## Phase 6 — Integrations and analytics
 
-**Status: architecture and integration requirements documented; implementation is staged.**
+**Status: DotForm event bridge contract and consent-gated GA4/GTM forwarding implemented; live DotForm, consent-manager and Google property validation remains environment-dependent.**
 
 Scope:
-- DotForm and WordPress form integrations.
-- GA4/GTM event forwarding with consent controls and deduplication.
-- Email provider integrations and delivery webhooks.
-- CRM attribution and campaign reporting.
+- DotForm submission bridge (`dotform/submission/after`) with stable event IDs and marketing-eligibility gating through the CRM contact's marketability state.
+- GA4 Measurement Protocol and GTM dataLayer forwarding from an explicit event allowlist, only after a site consent manager grants analytics consent.
+- Postmark outbound transport and delivery/bounce/complaint webhook pipeline with encrypted retry storage for explicit rate-limit responses.
+- CRM attribution and campaign reporting remain future work; no unsupported attribution or revenue reports are claimed.
 
 Exit gates:
-- Contract tests with provider sandboxes.
+- Contract tests for the DotForm bridge, GA4 payload mapping and GTM dataLayer output.
+- Live Google measurement ID, API secret, container and consent-manager validation on staging.
 - Consent and data-minimisation verification.
 - No duplicate conversion events or leaked credentials.
 
 ## Phase 7 — Release readiness
 
-**Status: not started.**
+**Status: release packaging workflow, product metadata, developer/test separation and ZIP-content verification implemented; exact-release CI and staging acceptance remain release gates.**
 
 Scope:
-- Full test matrix, static analysis, dependency/security audit and performance profiling.
-- Fresh-install, upgrade, rollback, backup/restore and multisite checks.
+- PHP syntax and DotFlow PHPUnit matrix on PHP 8.0, 8.2 and 8.3; complete PHPUnit suite on PHP 8.2; JavaScript unit tests; targeted PHPCS security/coding-standard scan; Composer dependency audit.
+- Reproducible WordPress plugin ZIP from the exact tested Git commit, archive integrity/content checks and SHA-256 checksum.
+- Fresh-install, upgrade, rollback, backup/restore, multisite and supported-version Elementor staging checks remain manual acceptance gates.
 - Staging acceptance, documentation, release notes and GPL notices.
 
 Exit gates:
-- All required CI jobs pass on the release commit.
+- All required CI jobs pass on the release commit, including the archive build job.
 - Runtime tests pass on a disposable staging site with Elementor and representative integrations.
 - No unresolved critical/high security findings.
 - Explicit user approval before any production deployment.
