@@ -93,7 +93,7 @@ final class Bootstrap {
 	public static function init() {
 
 		if ( ! defined( 'DOTFLOW_VERSION' ) ) {
-			define( 'DOTFLOW_VERSION', '0.1.0-dev' );
+			define( 'DOTFLOW_VERSION', '0.1.0' );
 		}
 
 		if ( ! defined( 'DOTFLOW_API_VERSION' ) ) {
