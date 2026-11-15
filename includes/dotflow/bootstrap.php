@@ -33,6 +33,8 @@ use Groundhogg\DotFlow\Messaging\Postmark_Provider;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 use Groundhogg\DotFlow\Steps\Actions\DotFlow_Webhook;
 use Groundhogg\DotFlow\Steps\Actions\Stop_Contact_Flow;
+use Groundhogg\DotFlow\Analytics\Analytics_Forwarder;
+use Groundhogg\DotFlow\Integrations\DotForm_Integration;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -107,8 +109,8 @@ final class Bootstrap {
 		Form_Submission::register();
 		CRM_Events::register();
 		Tracking_Events::register();
-\t\tAnalytics_Forwarder::register();
-\t\tDotForm_Integration::register();
+		Analytics_Forwarder::register();
+		DotForm_Integration::register();
 
 		// Independent provider inbox mode is opt-in and never replaces a provisioned relay.
 		Inbox_Addresses::register();
