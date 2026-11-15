@@ -20,6 +20,7 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		parent::setUp();
 		Store::maybe_install();
 		Form_Submission::register();
+		$this->assertSame( 10, has_action( 'groundhogg/form/submission_handler/after', [ Form_Submission::class, 'record_submission' ] ) );
 	}
 
 	public function tearDown(): void {
@@ -74,7 +75,7 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		$this->assertTrue( $submission->exists() );
 		$this->assertTrue( $contact->is_marketable() );
 
-		do_action( 'groundhogg/form/submission_handler/after', $submission, $contact, null );
+		Form_Submission::record_submission( $submission, $contact );
 
 		$db = get_db( 'dotflow_events' );
 		$rows = $wpdb->get_results(
