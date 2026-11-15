@@ -115,6 +115,9 @@ final class Analytics_Forwarder {
 	 * @return bool
 	 */
 	public static function send_ga4( Event $event, array $mapped ) {
+		if ( ! self::has_consent( $event ) ) {
+			return false;
+		}
 		$measurement_id = self::setting( 'DOTFLOW_GA4_MEASUREMENT_ID', 'dotflow/analytics/ga4_measurement_id' );
 		$api_secret = self::setting( 'DOTFLOW_GA4_API_SECRET', 'dotflow/analytics/ga4_api_secret' );
 		$client_id = apply_filters( 'dotflow/analytics/client_id', '', $event );
