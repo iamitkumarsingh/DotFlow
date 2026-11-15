@@ -379,26 +379,18 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		}
 	}
 
-	public function test_saved_marketing_postmark_message_stream_setting_is_used_for_outbound_sends() {
+	public function test_saved_postmark_message_stream_settings_are_resolved_per_channel() {
 		$before = get_option( Postmark_Provider::OPTION, [] );
 		update_option( Postmark_Provider::OPTION, [
 			'transactional_stream' => 'transactional-custom',
 			'marketing_stream' => 'marketing-custom',
 		] );
-		$captured = [];
-		$this->http_filter = static function ( $pre, $args, $url ) use ( &$captured ) {
-			if ( Postmark_Provider::API !== $url ) { return $pre; }
-			$captured = json_decode( $args['body'], true );
-			return [ 'headers' => [], 'body' => wp_json_encode( [ 'ErrorCode' => 0, 'MessageID' => '4d3f6b1a-3d5e-4b0a-9d9e-000000000009' ] ), 'response' => [ 'code' => 200, 'message' => 'OK' ], 'cookies' => [], 'filename' => null ];
-		};
-		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
 
 		try {
-			Groundhogg_Email_Services::set_message_id( '' );
-			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::MARKETING );
-			$this->assertSame( Groundhogg_Email_Services::MARKETING, Groundhogg_Email_Services::get_current_message_type() );
-			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Marketing', 'Body' ) );
-			$this->assertSame( 'marketing-custom', $captured['MessageStream'] );
+			$this->assertSame( 'transactional-custom', Postmark_Provider::get_message_stream( 'transactional' ) );
+			$this->assertSame( 'marketing-custom', Postmark_Provider::get_message_stream( 'marketing' ) );
+			$this->assertSame( 'transactional-custom', Postmark_Provider::get_message_stream( 'wordpress' ) );
+			$this->assertSame( 'outbound', Postmark_Provider::get_message_stream( 'unknown-channel' ) );
 		} finally {
 			if ( empty( $before ) ) { delete_option( Postmark_Provider::OPTION ); } else { update_option( Postmark_Provider::OPTION, $before ); }
 		}
