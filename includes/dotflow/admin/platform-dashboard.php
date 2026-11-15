@@ -105,7 +105,7 @@ final class Platform_Dashboard {
 				],
 				'outbound_adapters' => Provider_Adapter_Registry::ids(),
 				'inbound_adapters' => Inbound_Provider_Registry::ids(),
-				'postmark_outbox' => $outbox,
+				'postmark_outbox' => $outbox,\n\t\t\t\t'analytics' => Analytics_Forwarder::get_status(),\n\t\t\t\t'dotform_hook_registered' => false !== has_action( 'dotform/submission/after' ),
 			],
 			'wordpress' => [
 				'elementor_active' => class_exists( 'Elementor\Plugin' ),
