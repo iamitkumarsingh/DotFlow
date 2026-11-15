@@ -13,6 +13,7 @@ use Groundhogg\DotFlow\Abilities\List_Messages;
 use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
 use Groundhogg\DotFlow\Abilities\Manage_Contact_Automation;
 use Groundhogg\DotFlow\Abilities\List_Contact_Automation_History;
+use Groundhogg\DotFlow\Admin\Automation_Dashboard;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
 use Groundhogg\DotFlow\Database\Postmark_Outbox as DotFlow_Postmark_Outbox_DB;
@@ -109,6 +110,7 @@ final class Bootstrap {
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
 		add_action( 'groundhogg/abilities/register_categories', [ __CLASS__, 'register_ability_category' ] );
+		add_action( 'groundhogg/admin/init', [ Automation_Dashboard::class, 'register' ] );
 		add_action( 'groundhogg/abilities/register_abilities', [ __CLASS__, 'register_abilities' ] );
 
 		// Elementor is optional. Register native widgets only after its API is available.

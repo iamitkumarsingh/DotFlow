@@ -115,9 +115,10 @@ Stage 3 CI verification: commit `3510bed113a60a7213c954edb319eed58a01d2ff` passe
 - Reply interruption can be composed without a global destructive default: create a DotFlow Event benchmark for `email.inbound.received` and add the Stop Contact in Flow action targeting the original nurture flow. This cancels only that contact's waiting/paused events in the selected flow and moves them to event history; the reply handler flow itself continues.
 
 
-### Remaining automation product work
+### Stage 3 reporting and recovery boundary
 
-- A dedicated automation analytics/reporting surface (journey conversion, step drop-off, action failure trends and retry/recovery views) is not yet implemented; the existing Groundhogg reporting remains available.
-- Failed outbound webhook actions are recorded by the Groundhogg event history but are not automatically retried. Automatic retry is intentionally withheld until a receiver-side idempotency contract is enforced, to avoid duplicate external side effects.
+- A dedicated **Reports → Automation** tab is now registered in the existing Groundhogg reporting area. It reports queue/history outcomes by status, flow and failed step over the last 30 days. It uses aggregate data only and does not expose contact IDs, event arguments, message content or raw error messages. The reporting range is bounded in the query layer to a maximum of two years.
+- Metrics are deliberately labelled as workflow-step events. They are not presented as unique journey conversions: a reliable conversion metric requires an explicitly configured goal event and attribution window, which is a separate product decision.
+- Failed actions are visible by flow, step and safe error code. A retry button or automatic retry is intentionally not enabled yet. A timed-out webhook may already have performed its remote side effect; replay without a receiver-enforced idempotency key could create duplicate records, messages or payments. The dashboard explains this boundary rather than offering an unsafe retry.
 - Reply interruption is deliberately configured per flow rather than globally: use the `email.inbound.received` event benchmark followed by `dotflow_stop_flow` to stop only the relevant nurture flow for that contact.
 - Before using webhook actions, define `DOTFLOW_WEBHOOK_SECRET` in `wp-config.php` with at least 32 random characters (for example, generate a value locally with `openssl rand -hex 32`) and configure the same secret at the receiving endpoint. Do not commit the secret to Git or place it in a flow URL.
