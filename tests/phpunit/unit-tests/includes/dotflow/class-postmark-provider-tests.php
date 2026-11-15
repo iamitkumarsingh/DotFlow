@@ -9,10 +9,13 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 	protected $secret_filter;
 	protected $token_filter;
 	protected $http_filter;
+	protected $previous_channel;
 
 	public function setUp(): void {
-		parent::setUp();
-		$this->secret_filter = static function ( $value ) { return 'a-long-postmark-webhook-test-secret'; };
+\t\tparent::setUp();
+	\t$this->previous_channel = Groundhogg_Email_Services::get_current_message_type();
+	\tGroundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::WORDPRESS );
+	\t$this->secret_filter = static function ( $value ) { return 'a-long-postmark-webhook-test-secret'; };
 		$this->token_filter = static function ( $value ) { return 'postmark-test-server-token'; };
 		add_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
 		add_filter( 'dotflow/postmark/server_token', $this->token_filter );
@@ -22,6 +25,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		remove_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
 		remove_filter( 'dotflow/postmark/server_token', $this->token_filter );
 		if ( $this->http_filter ) { remove_filter( 'pre_http_request', $this->http_filter, 10 ); }
+		Groundhogg_Email_Services::set_current_message_type( $this->previous_channel );
 		parent::tearDown();
 	}
 
