@@ -1,8 +1,8 @@
 <?php
 
-namespace Groundhogg\\DotFlow\\Analytics;
+namespace Groundhogg\DotFlow\Analytics;
 
-use Groundhogg\\DotFlow\\Events\\Event;
+use Groundhogg\DotFlow\Events\Event;
 
 /**
  * Consent-gated, privacy-minimised GA4 Measurement Protocol and GTM bridge.
