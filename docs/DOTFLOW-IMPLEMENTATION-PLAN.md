@@ -102,10 +102,11 @@ Stage 2 is complete for the first provider (Postmark) on the development branch.
 
 ## Stage 3 automation execution controls
 
-- The inherited Groundhogg flow editor remains the visual authoring surface. It already supports trigger benchmarks, actions, delay timers, YES/NO branches, nested branches, immutable published changes and flow-level activation/deactivation.
+- The inherited Groundhogg flow editor remains the visual authoring surface. It already supports trigger benchmarks, actions, delay timers, YES/NO branches, nested branches, immutable published changes and flow-level activation/deactivation. DotFlow adds a native `dotflow_webhook` action that sends a minimal JSON event payload to an HTTPS endpoint; WordPress safe HTTP validation, private-address rejection, disabled redirects, TLS verification, bounded timeout and response size protect the request.
 - DotFlow event benchmarks enrol contacts from durable events and pass only the event name, source and ID into workflow arguments; arbitrary event payloads and message content are not copied into the queue.
 - `dotflow/manage-contact-automation` provides contact-scoped pause, resume, cancel and restart. It checks per-contact and per-flow permissions. Restart creates the new entry event first and atomically moves previous waiting/paused events into history; on failure the transaction rolls back and the existing journey remains intact.
 - `dotflow/list-contact-automation-history` merges the contact's queue and event history with bounded pagination. It returns flow/step IDs, status, error code and timestamps only; event args, email content, addresses and error messages are excluded.
+- The native webhook action sends only contact/flow/step/event IDs and an occurrence timestamp. It never forwards contact email, message content, event args, or provider credentials.
 - Existing email sending already blocks non-transactional messages to contacts that are not marketable and blocks undeliverable contacts. Existing Groundhogg queue and event history provide durable delays and step-level outcomes; DotFlow does not add a second scheduler.
 
 

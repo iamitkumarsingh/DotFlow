@@ -26,6 +26,7 @@ use Groundhogg\DotFlow\Messaging\Outbound_Delivery_Events;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Messaging\Postmark_Provider;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
+use Groundhogg\DotFlow\Steps\Actions\DotFlow_Webhook;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -149,6 +150,7 @@ final class Bootstrap {
 
 		if ( is_object( $manager ) && method_exists( $manager, 'add_step' ) ) {
 			$manager->add_step( new DotFlow_Event() );
+			$manager->add_step( new DotFlow_Webhook() );
 		}
 	}
 
@@ -159,9 +161,16 @@ final class Bootstrap {
 	 */
 	public static function register_step_type_schema() {
 
-		if ( ! \Groundhogg\Plugin::instance()->step_manager->type_is_registered( 'dotflow_event' ) || in_array( 'dotflow_event', Step_Type_Schema::supported_types(), true ) ) {
-			return;
+		if ( \Groundhogg\Plugin::instance()->step_manager->type_is_registered( 'dotflow_event' ) && ! in_array( 'dotflow_event', Step_Type_Schema::supported_types(), true ) ) {
+			self::register_dotflow_event_schema();
 		}
+
+		if ( \Groundhogg\Plugin::instance()->step_manager->type_is_registered( 'dotflow_webhook' ) && ! in_array( 'dotflow_webhook', Step_Type_Schema::supported_types(), true ) ) {
+			self::register_dotflow_webhook_schema();
+		}
+	}
+
+	private static function register_dotflow_event_schema() {
 
 		Step_Type_Schema::extend( 'dotflow_event', [
 			'type'                 => 'object',
@@ -215,6 +224,28 @@ final class Bootstrap {
 					'source'     => $source,
 				],
 			];
+		} );
+	}
+
+
+	private static function register_dotflow_webhook_schema() {
+		Step_Type_Schema::extend( 'dotflow_webhook', [
+			'type'                 => 'object',
+			'additionalProperties' => false,
+			'required'             => [ 'url' ],
+			'properties'           => [
+				'url' => [
+					'type'        => 'string',
+					'format'      => 'uri',
+					'maxLength'   => 2048,
+					'description' => __( 'HTTPS endpoint. Private/local addresses, non-standard ports, embedded credentials and redirects are blocked.', 'groundhogg' ),
+				],
+			],
+		], [], function ( array $settings ) {
+			if ( 1 !== count( $settings ) || empty( $settings['url'] ) || ! is_string( $settings['url'] ) || ! DotFlow_Webhook::is_safe_url( $settings['url'] ) ) {
+				return new \WP_Error( 'dotflow_webhook_url_invalid', __( 'A valid HTTPS webhook URL is required.', 'groundhogg' ) );
+			}
+			return [ 'settings' => [ 'url' => esc_url_raw( $settings['url'], [ 'https' ] ) ] ];
 		} );
 	}
 
