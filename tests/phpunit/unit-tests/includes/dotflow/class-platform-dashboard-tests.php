@@ -50,8 +50,23 @@ class DotFlow_Platform_Dashboard_Tests extends GH_UnitTestCase {
 		$this->assertArrayNotHasKey( 'webhook_secret', $snapshot['providers']['postmark'] );
 	}
 
-	public function test_admin_menu_registration_uses_manage_options() {
-		Platform_Dashboard::register();
-		$this->assertTrue( current_user_can( 'manage_options' ) );
+	public function test_admin_menu_registration_is_restricted_to_manage_options() {
+		global $submenu;
+
+		$previous_user_id = get_current_user_id();
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
+		try {
+			Platform_Dashboard::register();
+			$matches = array_filter( $submenu['options-general.php'] ?? [], function ( $item ) {
+				return isset( $item[2] ) && Platform_Dashboard::PAGE === $item[2];
+			} );
+			$this->assertNotEmpty( $matches );
+			$entry = reset( $matches );
+			$this->assertSame( 'manage_options', $entry[1] );
+		} finally {
+			wp_set_current_user( $previous_user_id );
+		}
 	}
 }
