@@ -1,9 +1,9 @@
 <?php
 
-use Groundhogg\\Contact;\nuse Groundhogg\\Preferences;
-use Groundhogg\\DotFlow\\Events\\Store;
-use Groundhogg\\DotFlow\\Integrations\\DotForm_Integration;
-use function Groundhogg\\get_db;
+use Groundhogg\Contact;\nuse Groundhogg\Preferences;
+use Groundhogg\DotFlow\Events\Store;
+use Groundhogg\DotFlow\Integrations\DotForm_Integration;
+use function Groundhogg\get_db;
 
 class DotFlow_DotForm_Integration_Tests extends GH_UnitTestCase {
 
