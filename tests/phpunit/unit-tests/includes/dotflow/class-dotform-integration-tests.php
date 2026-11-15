@@ -1,6 +1,6 @@
 <?php
 
-use Groundhogg\\Contact;
+use Groundhogg\\Contact;\nuse Groundhogg\\Preferences;
 use Groundhogg\\DotFlow\\Events\\Store;
 use Groundhogg\\DotFlow\\Integrations\\DotForm_Integration;
 use function Groundhogg\\get_db;
@@ -30,7 +30,7 @@ class DotFlow_DotForm_Integration_Tests extends GH_UnitTestCase {
 	public function test_dotform_submission_emits_identifier_only_events_and_respects_marketing_eligibility() {
 		global $wpdb;
 		Store::maybe_install();
-		$contact_id = self::factory()->contacts->create();
+		$contact_id = self::factory()->contacts->create( [ 'optin_status' => Preferences::CONFIRMED ] );
 		$this->contact_ids[] = $contact_id;
 		$contact = new Contact( $contact_id );
 		$event_id = 'dotform-test-' . wp_generate_uuid4();
