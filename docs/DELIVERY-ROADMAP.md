@@ -62,7 +62,7 @@ Exit gates:
 
 ## Phase 4 — Campaigns, workflows and event automation
 
-**Status: inherited CRM automation abilities and the DotFlow Event workflow benchmark are implemented; end-to-end queue-enqueue and duplicate-delivery tests pass. Workflow simulation and operational retry validation remain.**
+**Status: workflow editing, simulation, publishing controls, broadcast scheduling/cancellation and trigger-frequency controls are inherited and covered by integration tests. DotFlow now bridges successful CRM form submissions and marketing-consent grant/revocation into privacy-minimised events; marketing-eligible form triggers are gated by Groundhogg marketability. Duplicate, source-scoped idempotency and out-of-order occurrence-time regression tests are added. Page/CTA tracking producers, final rollback coverage and operational retry validation remain before this phase can be marked complete.**
 
 Scope:
 - Connect consent-aware form, page, CTA and CRM events to workflow triggers.
