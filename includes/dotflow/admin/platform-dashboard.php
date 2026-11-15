@@ -1,12 +1,12 @@
 <?php
 
-namespace Groundhogg\\DotFlow\\Admin;
+namespace Groundhogg\DotFlow\Admin;
 
-use Groundhogg\\DotFlow\\Messaging\\Postmark_Provider;
-use Groundhogg\\DotFlow\\Messaging\\Postmark_Retry_Queue;
-use Groundhogg\\DotFlow\\Messaging\\Provider_Adapter_Registry;
-use Groundhogg\\DotFlow\\Inbound\\Inbound_Provider_Registry;
-use function Groundhogg\\get_db;
+use Groundhogg\DotFlow\Messaging\Postmark_Provider;
+use Groundhogg\DotFlow\Messaging\Postmark_Retry_Queue;
+use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
+use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
+use function Groundhogg\get_db;
 
 /**
  * Read-only DotFlow operations console.
@@ -104,7 +104,7 @@ final class Platform_Dashboard {
 				'postmark_outbox' => $outbox,
 			],
 			'wordpress' => [
-				'elementor_active' => class_exists( 'Elementor\\Plugin' ),
+				'elementor_active' => class_exists( 'Elementor\Plugin' ),
 				'php_version' => PHP_VERSION,
 				'wordpress_version' => get_bloginfo( 'version' ),
 			],
