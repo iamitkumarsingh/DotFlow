@@ -95,11 +95,11 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		$this->assertSame( [ 'contact_id', 'object_type', 'object_id', 'form_id' ], array_keys( $events['form.submitted'] ) );
 	}
 
-	public function test_unmarketable_contact_gets_service_event_but_not_marketing_trigger() {
+	public function test_unsubscribed_contact_gets_service_event_but_not_marketing_trigger() {
 		global $wpdb;
 
 		Store::maybe_install();
-		[ $submission, $contact ] = $this->make_submission( Preferences::UNCONFIRMED );
+		[ $submission, $contact ] = $this->make_submission( Preferences::UNSUBSCRIBED );
 
 		$this->assertFalse( $contact->is_marketable() );
 
