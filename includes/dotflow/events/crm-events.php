@@ -22,6 +22,18 @@ final class CRM_Events {
 	}
 
 	/**
+	 * Unregister lifecycle hooks (primarily for isolated integration tests).
+	 *
+	 * @return void
+	 */
+	public static function unregister() {
+		remove_action( 'groundhogg/contact/created', [ __CLASS__, 'record_contact_created' ] );
+		remove_action( 'groundhogg/contact/tag_applied', [ __CLASS__, 'record_tag_applied' ], 10 );
+		remove_action( 'groundhogg/contact/tag_removed', [ __CLASS__, 'record_tag_removed' ], 10 );
+		remove_action( 'groundhogg/contact/preferences/unsubscribed', [ __CLASS__, 'record_unsubscribe' ], 10 );
+	}
+
+	/**
 	 * Record a newly created contact.
 	 *
 	 * @param Contact $contact Contact.
