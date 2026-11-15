@@ -36,4 +36,5 @@
 /wp-cli.phar export-ignore
 /wp-cli.yml export-ignore
 /mobile-app export-ignore
+/mu-plugins export-ignore
 /README.md export-ignore
