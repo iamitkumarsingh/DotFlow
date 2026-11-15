@@ -67,6 +67,31 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 		);
 	}
 
+	public function test_unsubscribe_preference_change_emits_a_contact_event() {
+		global $wpdb;
+
+		$contact_id = self::factory()->contacts->create();
+		$contact    = new Contact( $contact_id );
+		$this->contact_ids[] = $contact_id;
+
+		$contact->update( [ 'optin_status' => \Groundhogg\Preferences::UNSUBSCRIBED ] );
+
+		$db  = get_db( 'dotflow_events' );
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT event_id, event_name, payload FROM {$db->get_table_name()} WHERE source = %s AND contact_id = %d AND event_name = %s ORDER BY ID DESC LIMIT 1",
+				'groundhogg',
+				$contact_id,
+				'contact.unsubscribed'
+			),
+			ARRAY_A
+		);
+
+		$this->assertIsArray( $row );
+		$this->event_ids[] = $row['event_id'];
+		$this->assertSame( [ 'contact_id', 'object_type', 'object_id' ], array_keys( json_decode( $row['payload'], true ) ) );
+	}
+
 	public function test_tag_applied_and_removed_events_include_only_relationship_identifiers() {
 		global $wpdb;
 
