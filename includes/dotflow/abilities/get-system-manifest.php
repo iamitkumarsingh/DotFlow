@@ -136,7 +136,7 @@ class Get_System_Manifest extends Ability {
 					'id'          => 'domain-events',
 					'label'       => 'DotFlow domain events',
 					'status'      => 'implemented',
-					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction, privacy-safe event-type discovery, administrator-only event history, native Groundhogg form/consent/page-visit/email-click bridges, and a contact-aware CTA integration hook. Page and link paths are stored without query strings or fragments.',
+					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction, privacy-safe event-type discovery, administrator-only event history, native Groundhogg contact/tag/unsubscribe/form/consent/page-visit/email-click bridges, and a contact-aware CTA integration hook. Page and link paths are stored without query strings or fragments.',
 					'abilities'   => [ 'dotflow/list-events', 'dotflow/list-contact-events', 'dotflow/list-event-types' ],
 				],
 				[
