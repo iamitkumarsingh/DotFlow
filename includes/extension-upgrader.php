@@ -163,6 +163,8 @@ class Extension_Upgrader {
 	 */
 	public static function remote_install( $item_id, $license = '' ) {
 
+		return new \\WP_Error( 'denflow_remote_extensions_disabled', 'DenFlow does not download paid extensions from an external store.' );
+
 		// already installed :)
 		if ( Extension::installed( $item_id ) ) {
 			return true;
@@ -326,6 +328,9 @@ class Extension_Upgrader {
 	 */
 	public static function maybe_batch_get_package_info_from_store() {
 
+		// DenFlow does not contact the former vendor store.
+		return false;
+
 		if ( flagged( __METHOD__ ) ) {
 			return false;
 		}
@@ -387,6 +392,9 @@ class Extension_Upgrader {
 	 * @return object|false
 	 */
 	public static function get_package_info_from_store( $item_id, $version = '' ) {
+
+		// Updates for external paid add-ons are not part of DenFlow.
+		return false;
 
 		$slug        = basename( self::$file_map[ $item_id ], '.php' );
 		$license_key = License_Manager::get_license( $item_id );

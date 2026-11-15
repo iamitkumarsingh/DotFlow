@@ -820,6 +820,8 @@ class License_Manager {
 	 */
 	public static function licence_api_request( string $action, string $license_key = '' ) {
 
+		return new WP_Error( 'denflow_licensing_disabled', 'DenFlow does not use a remote licence API.' );
+
 		return remote_post_json( static::$storeUrl, [
             'edd_action' => $action,
             'license'    => $license_key,
@@ -850,6 +852,9 @@ class License_Manager {
 	 * @return array|mixed|object
 	 */
 	public static function get_store_products( $args = array() ) {
+
+		// DenFlow has no remote extension store.
+		return [];
 
 		$args = wp_parse_args( $args, array(
 			'category' => '',
