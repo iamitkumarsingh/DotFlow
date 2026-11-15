@@ -39,8 +39,16 @@ class DotFlow_Webhook_Step_Tests extends GH_UnitTestCase {
 		$step->commit();
 		$step->update_meta( 'url', 'https://example.com/dotflow-hook' );
 		$element = $step->get_step_element();
-		$event_id = $step->enqueue( $contact );
-		$event = new Event( $event_id, 'event_queue' );
+		$step->enqueue( $contact );
+		$queued = event_queue_db()->query( [
+			'contact_id' => $contact_id,
+			'funnel_id'  => $funnel->get_id(),
+			'step_id'    => $step->get_id(),
+			'event_type' => Event::FUNNEL,
+		] );
+		$event = new Event( $queued[0], 'event_queue' );
+		$this->assertSame( $funnel->get_id(), $event->get_funnel_id() );
+		$event_id = $event->get_id();
 
 		$secret = str_repeat( 'test-secret-', 4 );
 		$seen = [];
