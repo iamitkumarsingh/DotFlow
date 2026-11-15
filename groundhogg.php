@@ -2,16 +2,16 @@
 /*
  * Plugin Name: DotFlow
  * Plugin URI: https://github.com/iamitkumarsingh/DotFlow
- * Description: AI-powered CRM, email marketing and marketing automation for WordPress
- * Version: 0.1.0-dev
- * Author: DotFlow contributors (based on Groundhogg)
+ * Description: WordPress CRM, email marketing, conversations and AI-powered marketing automation.
+ * Version: 0.1.0
+ * Author: DotFlow contributors
  * Author URI: https://github.com/iamitkumarsingh/DotFlow
  * Text Domain: groundhogg
  * Domain Path: /languages
  * Requires at least: 6.9
  * Requires PHP: 8.0
  * License: GPLv3
- * License URI: https://www.gnu.org/licenses/gpl.md
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * Groundhogg is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
