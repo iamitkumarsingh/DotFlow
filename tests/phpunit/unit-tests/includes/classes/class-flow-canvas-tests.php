@@ -193,6 +193,11 @@ class Flow_Canvas_Tests extends GH_UnitTestCase {
 			$saved_html = preg_replace( $debug_labels, '', $saved_html );
 			$actual_html = preg_replace( $debug_labels, '', $actual_html );
 
+			// Remove whitespace-only wrappers left behind when WP_DEBUG labels are stripped.
+			$empty_labels = '/(<div class="step-labels[^"]*">)\\s*(<\\/div>)/';
+			$saved_html = preg_replace( $empty_labels, '$1$2', $saved_html );
+			$actual_html = preg_replace( $empty_labels, '$1$2', $actual_html );
+
 			$this->assertSame( $saved_html, $actual_html, "The server draws the $name flow differently than the JS fixture, run with GH_UPDATE_JS_FIXTURES=1 and check tests/js" );
 		}
 	}
