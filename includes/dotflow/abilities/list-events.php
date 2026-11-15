@@ -161,20 +161,28 @@ class List_Events extends Ability {
 			$params[] = absint( $input['object_id'] );
 		}
 
+		$after = null;
+		$before = null;
 		if ( ! empty( $input['after'] ) ) {
-			$timestamp = strtotime( sanitize_text_field( $input['after'] ) );
-			if ( false !== $timestamp ) {
-				$where[]  = 'occurred_at >= %s';
-				$params[] = gmdate( 'Y-m-d H:i:s', $timestamp );
+			$after = strtotime( sanitize_text_field( $input['after'] ) );
+			if ( false === $after ) {
+				return new WP_Error( 'dotflow_invalid_event_date', __( 'The event date filters must be valid ISO 8601 date-times.', 'groundhogg' ) );
 			}
+			$where[]  = 'occurred_at >= %s';
+			$params[] = gmdate( 'Y-m-d H:i:s', $after );
 		}
 
 		if ( ! empty( $input['before'] ) ) {
-			$timestamp = strtotime( sanitize_text_field( $input['before'] ) );
-			if ( false !== $timestamp ) {
-				$where[]  = 'occurred_at <= %s';
-				$params[] = gmdate( 'Y-m-d H:i:s', $timestamp );
+			$before = strtotime( sanitize_text_field( $input['before'] ) );
+			if ( false === $before ) {
+				return new WP_Error( 'dotflow_invalid_event_date', __( 'The event date filters must be valid ISO 8601 date-times.', 'groundhogg' ) );
 			}
+			$where[]  = 'occurred_at <= %s';
+			$params[] = gmdate( 'Y-m-d H:i:s', $before );
+		}
+
+		if ( null !== $after && null !== $before && $before < $after ) {
+			return new WP_Error( 'dotflow_invalid_event_date_range', __( 'The event end date must be on or after the start date.', 'groundhogg' ) );
 		}
 
 		$where_sql = implode( ' AND ', $where );
