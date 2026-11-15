@@ -1,6 +1,6 @@
 {
-  "name": "groundhogg",
-  "version": "2.2.18",
+  "name": "dotflow",
+  "version": "0.1.0",
   "license": "MIT",
   "main": "blocks/gutenberg/index.js",
   "scripts": {
