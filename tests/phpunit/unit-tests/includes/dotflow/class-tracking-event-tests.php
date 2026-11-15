@@ -74,6 +74,39 @@ class DotFlow_Tracking_Event_Tests extends GH_UnitTestCase {
 		$this->assertStringNotContainsString( 'private@example.com', $row['payload'] );
 	}
 
+	public function test_native_email_link_click_activity_emits_contact_link_event() {
+		global $wpdb;
+
+		$contact  = $this->contact();
+		$activity = \Groundhogg\track_activity(
+			$contact,
+			\Groundhogg\Classes\Activity::EMAIL_CLICKED,
+			[],
+			[ 'referer' => home_url( '/offers/?email=private@example.com' ) ]
+		);
+
+		$this->assertNotFalse( $activity );
+		$event_id = 'activity-link-click-' . $activity->get_id();
+		$this->event_ids[] = $event_id;
+
+		$db  = get_db( 'dotflow_events' );
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT event_name, payload FROM {$db->get_table_name()} WHERE source = %s AND event_id = %s",
+				'groundhogg',
+				$event_id
+			),
+			ARRAY_A
+		);
+
+		$this->assertIsArray( $row );
+		$this->assertSame( 'link.clicked', $row['event_name'] );
+		$payload = json_decode( $row['payload'], true );
+		$this->assertSame( '/offers/', $payload['link_path'] );
+		$this->assertSame( 'email', $payload['channel'] );
+		$this->assertStringNotContainsString( 'private@example.com', $row['payload'] );
+	}
+
 	public function test_cta_click_hook_records_safe_metadata_and_stable_idempotency() {
 		global $wpdb;
 
