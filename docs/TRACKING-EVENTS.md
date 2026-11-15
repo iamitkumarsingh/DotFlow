@@ -66,7 +66,15 @@ DotFlow registers the optional WordPress action `dotform/submission/after` with 
 
 DotForm should emit the action only after a submission is successfully persisted and a CRM contact has been associated. Example:
 
-```php\ndo_action(\n    'dotform/submission/after',\n    $groundhogg_contact_id,\n    $form_id,\n    $submission_id,\n    'dotform-submission-' . $submission_id\n);\n```
+```php
+do_action(
+    'dotform/submission/after',
+    $groundhogg_contact_id,
+    $form_id,
+    $submission_id,
+    'dotform-submission-' . $submission_id
+);
+```
 
 The bridge stores identifiers only. It never forwards submitted field values, names, email addresses, message text, uploaded-file URLs or payment data. The marketing-eligible event is emitted only if the associated Groundhogg contact is marketable.
 
@@ -74,7 +82,11 @@ The bridge stores identifiers only. It never forwards submitted field values, na
 
 Set these constants in `wp-config.php` (or provide equivalent server-side filters):
 
-```php\ndefine( 'DOTFLOW_GA4_MEASUREMENT_ID', 'G-XXXXXXXXXX' );\ndefine( 'DOTFLOW_GA4_API_SECRET', 'server-side-api-secret' );\ndefine( 'DOTFLOW_GTM_CONTAINER_ID', 'GTM-XXXXXXX' );\n```
+```php
+define( 'DOTFLOW_GA4_MEASUREMENT_ID', 'G-XXXXXXXXXX' );
+define( 'DOTFLOW_GA4_API_SECRET', 'server-side-api-secret' );
+define( 'DOTFLOW_GTM_CONTAINER_ID', 'GTM-XXXXXXX' );
+```
 
 The analytics bridge is disabled unless a consent manager explicitly grants analytics consent using `dotflow/analytics/consent_granted`. It defaults to false. The consent callback should return true only after the visitor has granted the appropriate analytics category. Supply the existing consented GA client ID using `dotflow/analytics/client_id`; DotFlow does not create or infer browser identifiers.
 
