@@ -158,9 +158,6 @@ class List_Messages extends Ability {
 			$params[] = gmdate( 'Y-m-d H:i:s', $timestamp );
 		}
 
-		if ( isset( $timestamp ) ) {
-			// The individual filters are validated above; compare the parsed bounds below.
-		}
 		$after_timestamp = ! empty( $input['after'] ) ? strtotime( sanitize_text_field( $input['after'] ) ) : null;
 		$before_timestamp = ! empty( $input['before'] ) ? strtotime( sanitize_text_field( $input['before'] ) ) : null;
 		if ( null !== $after_timestamp && null !== $before_timestamp && $before_timestamp < $after_timestamp ) {
