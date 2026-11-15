@@ -39,5 +39,19 @@ function denflow_branding_replace_product_name( $translated, $original = '', $do
 	return preg_replace( '/\bGroundhogg\b(?!\s+Inc\.?|\.io)/i', 'DenFlow', (string) $translated );
 }
 
+/**
+ * Context-aware translation wrapper.
+ *
+ * @param string $translated Translated string.
+ * @param string $original   Original source string.
+ * @param string $context    Translation context.
+ * @param string $domain     Translation domain.
+ *
+ * @return string
+ */
+function denflow_branding_replace_product_name_with_context( $translated, $original = '', $context = '', $domain = '' ) {
+	return denflow_branding_replace_product_name( $translated, $original, $domain );
+}
+
 add_filter( 'gettext', 'denflow_branding_replace_product_name', 99, 3 );
-add_filter( 'gettext_with_context', 'denflow_branding_replace_product_name', 99, 4 );
+add_filter( 'gettext_with_context', 'denflow_branding_replace_product_name_with_context', 99, 4 );
