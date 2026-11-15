@@ -95,6 +95,54 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		$this->assertSame( [ 'contact_id', 'object_type', 'object_id', 'form_id' ], array_keys( $events['form.submitted'] ) );
 	}
 
+	public function test_marketing_consent_grant_and_revocation_emit_contact_events() {
+		global $wpdb;
+
+		Store::maybe_install();
+		Form_Submission::register();
+
+		$contact_id = self::factory()->contacts->create();
+		$contact    = new Contact( $contact_id );
+		$this->contact_ids[] = $contact_id;
+
+		$contact->set_marketing_consent();
+		$contact->revoke_gdpr_consent( 'marketing' );
+
+		$db = get_db( 'dotflow_events' );
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT event_name, payload FROM {$db->get_table_name()} WHERE source = %s AND contact_id = %d AND event_name IN (%s, %s)",
+				'groundhogg',
+				$contact_id,
+				'contact.marketing_consent.granted',
+				'contact.marketing_consent.revoked'
+			),
+			ARRAY_A
+		);
+
+		$this->assertSame(
+			[ 'contact.marketing_consent.granted', 'contact.marketing_consent.revoked' ],
+			wp_list_pluck( $rows, 'event_name' )
+		);
+
+		foreach ( $rows as $row ) {
+			$payload = json_decode( $row['payload'], true );
+			$this->assertSame( $contact_id, $payload['contact_id'] );
+			$this->assertSame( [ 'contact_id', 'object_type', 'object_id' ], array_keys( $payload ) );
+		}
+
+		$event_rows = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$db->get_table_name()} WHERE source = %s AND contact_id = %d AND event_name IN (%s, %s)",
+				'groundhogg',
+				$contact_id,
+				'contact.marketing_consent.granted',
+				'contact.marketing_consent.revoked'
+			)
+		);
+		$this->event_ids = array_merge( $this->event_ids, array_map( 'absint', $event_rows ) );
+	}
+
 	public function test_unsubscribed_contact_gets_service_event_but_not_marketing_trigger() {
 		global $wpdb;
 
