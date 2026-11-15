@@ -51,3 +51,33 @@ The caller is responsible for enforcing the site's consent policy before emittin
 5. Simulate and review the workflow before publishing it.
 
 Marketing sends must continue to use Groundhogg's native marketability, suppression and unsubscribe checks. A page-view, link-click or CTA event is an engagement signal, not marketing consent.
+
+
+## DotForm and analytics integration contract
+
+### DotForm
+
+DotFlow registers the optional WordPress action `dotform/submission/after` with this argument order:
+
+1. Existing Groundhogg contact ID
+2. DotForm form ID
+3. DotForm submission ID
+4. Optional stable source event ID
+
+DotForm should emit the action only after a submission is successfully persisted and a CRM contact has been associated. Example:
+
+```php\ndo_action(\n    'dotform/submission/after',\n    $groundhogg_contact_id,\n    $form_id,\n    $submission_id,\n    'dotform-submission-' . $submission_id\n);\n```
+
+The bridge stores identifiers only. It never forwards submitted field values, names, email addresses, message text, uploaded-file URLs or payment data. The marketing-eligible event is emitted only if the associated Groundhogg contact is marketable.
+
+### GA4 and Google Tag Manager
+
+Set these constants in `wp-config.php` (or provide equivalent server-side filters):
+
+```php\ndefine( 'DOTFLOW_GA4_MEASUREMENT_ID', 'G-XXXXXXXXXX' );\ndefine( 'DOTFLOW_GA4_API_SECRET', 'server-side-api-secret' );\ndefine( 'DOTFLOW_GTM_CONTAINER_ID', 'GTM-XXXXXXX' );\n```
+
+The analytics bridge is disabled unless a consent manager explicitly grants analytics consent using `dotflow/analytics/consent_granted`. It defaults to false. The consent callback should return true only after the visitor has granted the appropriate analytics category. Supply the existing consented GA client ID using `dotflow/analytics/client_id`; DotFlow does not create or infer browser identifiers.
+
+Forwarded event allowlist: `form.submitted`, `page.viewed`, `cta.clicked` and `link.clicked`. DotFlow maps these to GA4 recommended events and sends only an event ID fingerprint, source, safe path and selected numeric/stable identifiers. No contact ID or personal data is forwarded. Marketing-consent events and AI audit events are excluded. GTM is enqueued only after consent and receives the same allowlisted event data through `dataLayer`.
+
+Google credentials are never rendered in the admin console or sent to the browser. GA4 Measurement Protocol calls are non-blocking. Validate the live property, consent manager and container on staging before enabling in production.
