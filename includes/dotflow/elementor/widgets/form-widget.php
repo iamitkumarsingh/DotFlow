@@ -4,6 +4,7 @@ namespace Groundhogg\DotFlow\Elementor\Widgets;
 
 use Elementor\Controls_Manager;
 use Elementor\Widget_Base;
+use Groundhogg\DotFlow\Elementor\Form_Resolver;
 
 /**
  * Native Elementor widget for embedding a published CRM web form.
@@ -39,38 +40,7 @@ class Form_Widget extends Widget_Base {
 	 * @return array
 	 */
 	protected function get_form_options() {
-
-		global $wpdb;
-
-		$steps_table = \Groundhogg\get_db( 'steps' )->get_table_name();
-
-		$steps = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT ID, step_title FROM {$steps_table} WHERE step_type IN (%s, %s) AND step_status = %s ORDER BY step_title ASC LIMIT %d",
-				'web_form',
-				'form_fill',
-				'active',
-				100
-			)
-		);
-
-		$options = [
-			'' => __( 'Select a published form', 'groundhogg' ),
-		];
-
-		foreach ( $steps as $step ) {
-			$options[ absint( $step->ID ) ] = sprintf(
-				'%1$s (ID: %2$d)',
-				sanitize_text_field( $step->step_title ),
-				absint( $step->ID )
-			);
-		}
-
-		if ( count( $options ) === 1 ) {
-			$options[''] = __( 'No active web form steps found', 'groundhogg' );
-		}
-
-		return $options;
+		return Form_Resolver::get_form_options();
 	}
 
 	protected function register_controls() {
@@ -128,10 +98,10 @@ class Form_Widget extends Widget_Base {
 			return;
 		}
 
-		// Re-check the step type and status at render time; do not trust stored Elementor settings.
-		$step = new \Groundhogg\Step( $step_id );
+		// Re-check the live CRM record at render time; Elementor document settings are untrusted.
+		$step = Form_Resolver::get_published_form( $step_id );
 
-		if ( ! $step->exists() || ! in_array( $step->get_type(), [ 'web_form', 'form_fill' ], true ) || 'active' !== $step->step_status ) {
+		if ( ! $step ) {
 			if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
 				echo '<div class="dotflow-form-placeholder">';
 				echo esc_html__( 'The selected form is unavailable or is no longer published.', 'groundhogg' );
