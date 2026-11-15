@@ -126,7 +126,10 @@ final class Postmark_Provider {
 		if ( strlen( $body ) > 5 * MB_IN_BYTES ) { return self::fail( 'postmark_body_too_large' ); }
 		$channel = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) { $channel = 'transactional'; }
-		$stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
+		$settings = get_option( self::OPTION, [] );
+		$default_stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
+		$configured_stream = is_array( $settings ) ? ( $settings[ 'marketing' === $channel ? 'marketing_stream' : 'transactional_stream' ] ?? $default_stream ) : $default_stream;
+		$stream = sanitize_key( (string) $configured_stream ) ?: $default_stream;
 		$stream = sanitize_key( apply_filters( 'dotflow/postmark/message_stream/' . $channel, $stream ) ) ?: $stream;
 		$html = false !== strpos( strtolower( (string) ( $headers['content-type'] ?? '' ) ), 'text/html' ) || (bool) preg_match( '/<[^>]+>/', $body );
 		$message_id = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_message_id() : '';
@@ -207,7 +210,7 @@ final class Postmark_Provider {
 		] );
 		add_settings_section( 'gh_dotflow_postmark', __( 'DotFlow · Postmark', 'groundhogg' ), [ __CLASS__, 'render_settings_intro' ], 'gh_email' );
 		add_settings_field( 'dotflow_postmark_server_token', __( 'Postmark server token', 'groundhogg' ), [ __CLASS__, 'render_server_token' ], 'gh_email', 'gh_dotflow_postmark' );
-		add_settings_field( 'dotflow_postmark_webhook_secret', __( 'Webhook Basic Auth password', 'groundhogg' ), [ __CLASS__, 'render_webhook_secret' ], 'gh_email', 'dotflow_postmark' );
+		add_settings_field( 'dotflow_postmark_webhook_secret', __( 'Webhook Basic Auth password', 'groundhogg' ), [ __CLASS__, 'render_webhook_secret' ], 'gh_email', 'gh_dotflow_postmark' );
 		add_settings_field( 'dotflow_postmark_transactional_stream', __( 'Transactional Message Stream', 'groundhogg' ), [ __CLASS__, 'render_transactional_stream' ], 'gh_email', 'dotflow_postmark' );
 		add_settings_field( 'dotflow_postmark_marketing_stream', __( 'Marketing Message Stream', 'groundhogg' ), [ __CLASS__, 'render_marketing_stream' ], 'gh_email', 'dotflow_postmark' );
 	}
