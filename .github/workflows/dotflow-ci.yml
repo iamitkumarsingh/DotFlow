@@ -10,8 +10,8 @@ on:
       - dotflow/development
 
 concurrency:
-  group: dotflow-ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: dotflow-ci-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
