@@ -153,6 +153,14 @@ class Send_Email_Broadcast_Tests extends GH_UnitTestCase {
 	/**
 	 * search-contacts is the reference: what it counts is who should be sent to
 	 */
+	public function test_broadcast_without_an_explicit_audience_is_rejected() {
+
+		$out = $this->broadcast( [ 'send_now' => true ] );
+
+		$this->assertWPError( $out );
+		$this->assertSame( 'groundhogg_no_audience', $out->get_error_code() );
+	}
+
 	public function test_search_contacts_baseline() {
 
 		$out = wp_get_ability( 'groundhogg/search-contacts' )->execute( $this->segment() );
