@@ -110,8 +110,11 @@ class List_Messages extends Ability {
 			return new WP_Error( 'dotflow_message_contact_required', __( 'Provide a contact ID you are allowed to view, or use an administrator account to list all conversations.', 'groundhogg' ), [ 'status' => 403 ] );
 		}
 
-		$db     = get_db( 'messages' );
-		$table  = $db->get_table_name();
+		$db = get_db( 'messages' );
+		if ( ! $db ) {
+			return new WP_Error( 'dotflow_messages_unavailable', __( 'Conversation storage is unavailable.', 'groundhogg' ) );
+		}
+		$table = $db->get_table_name();
 		$where  = [ 'object_type = %s' ];
 		$params = [ 'contact' ];
 
@@ -155,9 +158,18 @@ class List_Messages extends Ability {
 			$params[] = gmdate( 'Y-m-d H:i:s', $timestamp );
 		}
 
+		if ( isset( $timestamp ) ) {
+			// The individual filters are validated above; compare the parsed bounds below.
+		}
+		$after_timestamp = ! empty( $input['after'] ) ? strtotime( sanitize_text_field( $input['after'] ) ) : null;
+		$before_timestamp = ! empty( $input['before'] ) ? strtotime( sanitize_text_field( $input['before'] ) ) : null;
+		if ( null !== $after_timestamp && null !== $before_timestamp && $before_timestamp < $after_timestamp ) {
+			return new WP_Error( 'dotflow_invalid_message_date_range', __( 'The message end date must be on or after the start date.', 'groundhogg' ) );
+		}
+
 		$where_sql = implode( ' AND ', $where );
 		$limit     = isset( $input['limit'] ) ? min( 100, max( 1, absint( $input['limit'] ) ) ) : 50;
-		$offset    = isset( $input['offset'] ) ? absint( $input['offset'] ) : 0;
+		$offset    = isset( $input['offset'] ) ? min( 100000, absint( $input['offset'] ) ) : 0;
 
 		$count_sql = "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}";
 		$total     = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, $params ) );
