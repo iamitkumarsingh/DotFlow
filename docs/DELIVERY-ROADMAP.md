@@ -13,10 +13,11 @@ This is the working delivery plan for the `dotflow/development` branch. A phase 
 
 ## Phase 1 — Platform foundation and security
 
-**Status: foundation implemented; hardening and coverage continue.**
+**Status: implementation hardened; final phase-matrix verification pending.**
 
 Scope:
 - DotFlow bootstrap, module manifest, versioned REST discovery and durable event store.
+- Bounded and validated event/conversation query windows, database-unavailable error handling, explicit reversed-date rejection, and PII-aware event/operations views.
 - Typed CRM, campaign, workflow, email and conversation abilities.
 - PII-aware access, sensitive-setting and license-key redaction.
 - Actor-attributed audit events for exposed AI mutations.
@@ -29,7 +30,7 @@ Exit gates:
 
 ## Phase 2 — AI-facing CRM data layer
 
-**Status: core inherited abilities and DotFlow contact-profile/timeline foundation exist; contract review continues.**
+**Status: core permission-scoped abilities, privacy-aware message/event access, shared Elementor form resolver and read-only operations console implemented; runtime compatibility verification pending.**
 
 Scope:
 - Permission-scoped contact search/profile, custom fields, tags, notes, campaigns, workflows and conversation reads.
@@ -79,7 +80,7 @@ Exit gates:
 
 ## Phase 5 — Elementor and WordPress operator experience
 
-**Status: native DotFlow Form widget foundation implemented; editor/runtime validation remains.**
+**Status: native DotFlow Form widget, live published-form resolver and DotFlow Operations screens implemented; supported-version Elementor editor/frontend validation remains.**
 
 Scope:
 - Native Elementor widgets and controls for CRM forms and approved experiences.
