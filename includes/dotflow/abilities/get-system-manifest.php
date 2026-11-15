@@ -157,7 +157,7 @@ class Get_System_Manifest extends Ability {
 					'id'          => 'elementor',
 					'label'       => 'Elementor editing',
 					'status'      => 'foundation',
-					'description' => 'Native DotFlow Form widget and Elementor document editing through Elementor-compatible MCP save APIs.',
+					'description' => 'Native DotFlow Form widget with live published-form resolution, bounded editor choices and trusted CRM form rendering; Elementor document editing remains through Elementor-compatible MCP save APIs. The DotFlow Operations screen reports provider connection state, event health and audit metadata without exposing credentials or raw payloads.',
 					'abilities'   => [ 'dotflow/list-published-forms' ],
 				],
 				[
