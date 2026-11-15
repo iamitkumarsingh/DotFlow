@@ -23,6 +23,8 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 	public function tearDown(): void {
 		global $wpdb;
 
+		CRM_Events::unregister();
+
 		$events = get_db( 'dotflow_events' );
 		if ( $events ) {
 			foreach ( $this->event_ids as $event_id ) {
@@ -45,6 +47,7 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 
 		$contact_id = self::factory()->contacts->create();
 		$this->contact_ids[] = $contact_id;
+		do_action( 'groundhogg/contact/created', new Contact( $contact_id ) );
 		$event_id = 'contact-created-' . $contact_id;
 		$this->event_ids[] = $event_id;
 
