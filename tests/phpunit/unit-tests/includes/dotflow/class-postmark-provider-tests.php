@@ -12,10 +12,10 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 	protected $previous_channel;
 
 	public function setUp(): void {
-\t\tparent::setUp();
-	\t$this->previous_channel = Groundhogg_Email_Services::get_current_message_type();
-	\tGroundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::WORDPRESS );
-	\t$this->secret_filter = static function ( $value ) { return 'a-long-postmark-webhook-test-secret'; };
+		parent::setUp();
+		$this->previous_channel = Groundhogg_Email_Services::get_current_message_type();
+		Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::WORDPRESS );
+		$this->secret_filter = static function ( $value ) { return 'a-long-postmark-webhook-test-secret'; };
 		$this->token_filter = static function ( $value ) { return 'postmark-test-server-token'; };
 		add_filter( 'dotflow/postmark/webhook_secret', $this->secret_filter );
 		add_filter( 'dotflow/postmark/server_token', $this->token_filter );
