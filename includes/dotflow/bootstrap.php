@@ -106,7 +106,7 @@ final class Bootstrap {
 		add_action( 'rest_api_init', [ Routes::class, 'register' ] );
 		Form_Submission::register();
 		CRM_Events::register();
-		Tracking_Events::register();
+		Tracking_Events::register();\n\t\tAnalytics_Forwarder::register();\n\t\tDotForm_Integration::register();
 
 		// Independent provider inbox mode is opt-in and never replaces a provisioned relay.
 		Inbox_Addresses::register();
