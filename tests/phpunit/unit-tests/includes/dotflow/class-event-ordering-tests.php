@@ -48,19 +48,19 @@ class DotFlow_Event_Ordering_Tests extends GH_UnitTestCase {
 			// Deliberately deliver the newer occurrence before the older occurrence.
 			$newer_result = Store::record_with_status( $newer );
 			$older_result = Store::record_with_status( $older );
+			if ( is_array( $older_result ) && ! empty( $older_result['inserted'] ) ) {
+				$recorded_ids[] = $older_result['id'];
+			}
 			$duplicate    = Store::record_with_status( $newer );
 			$other_source = Store::record_with_status( $same_id_other_source );
+			if ( is_array( $other_source ) && ! empty( $other_source['inserted'] ) ) {
+				$recorded_ids[] = $other_source['id'];
+			}
 
 			$this->assertIsArray( $newer_result );
 			$this->assertIsArray( $older_result );
 			$this->assertIsArray( $duplicate );
 			$this->assertIsArray( $other_source );
-
-			$recorded_ids = [
-				$newer_result['id'],
-				$older_result['id'],
-				$other_source['id'],
-			];
 
 			$this->assertTrue( $newer_result['inserted'] );
 			$this->assertTrue( $older_result['inserted'] );
@@ -72,9 +72,9 @@ class DotFlow_Event_Ordering_Tests extends GH_UnitTestCase {
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT source, event_id, occurred_at FROM {$db->get_table_name()} WHERE ID IN (%d, %d, %d)",
-					$recorded_ids[0],
-					$recorded_ids[1],
-					$recorded_ids[2]
+					$newer_result['id'],
+					$older_result['id'],
+					$other_source['id']
 				),
 				ARRAY_A
 			);
