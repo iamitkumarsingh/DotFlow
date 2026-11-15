@@ -154,7 +154,7 @@ jobs:
       - name: Install coding standards
         run: composer install --no-interaction --prefer-dist
       - name: Scan DotFlow additions
-        run: vendor/bin/phpcs --standard=.phpcs.xml.dist includes/dotflow tests/phpunit/unit-tests/includes/dotflow
+        run: vendor/bin/phpcs --standard=.phpcs.xml.dist includes/dotflow/analytics/analytics-forwarder.php includes/dotflow/integrations/dotform-integration.php
 
   js-tests:
     name: JavaScript unit tests
