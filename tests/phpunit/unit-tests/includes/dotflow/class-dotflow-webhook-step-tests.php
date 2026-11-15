@@ -3,6 +3,7 @@
 use Groundhogg\DotFlow\Steps\Actions\DotFlow_Webhook;
 use Groundhogg\Event;
 use function Groundhogg\get_contactdata;
+use function Groundhogg\event_queue_db;
 
 class DotFlow_Webhook_Step_Tests extends GH_UnitTestCase {
 
