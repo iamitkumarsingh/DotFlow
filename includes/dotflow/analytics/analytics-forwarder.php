@@ -162,7 +162,7 @@ final class Analytics_Forwarder {
 		wp_enqueue_script( 'dotflow-google-tag-manager', 'https://www.googletagmanager.com/gtm.js?id=' . rawurlencode( $container ), [], null, false );
 		wp_add_inline_script(
 			'dotflow-google-tag-manager',
-			'window.dataLayer=window.dataLayer||[];window.dataLayer.push({"event":"dotflow_analytics_consent_granted"});',
+			'window.dataLayer=window.dataLayer||[];window.dataLayer.push({"gtm.start":(new Date()).getTime(),event:"gtm.js"});window.dataLayer.push({"event":"dotflow_analytics_consent_granted"});',
 			'before'
 		);
 	}
