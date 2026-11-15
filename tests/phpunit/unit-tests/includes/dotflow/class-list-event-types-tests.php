@@ -34,6 +34,20 @@ class DotFlow_List_Event_Types_Tests extends GH_UnitTestCase {
 		parent::tearDown();
 	}
 
+	protected function keep_only_test_events( $prefix ) {
+		global $wpdb;
+
+		$db = get_db( 'dotflow_events' );
+		if ( $db ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$db->get_table_name()} WHERE event_id NOT LIKE %s",
+					$wpdb->esc_like( $prefix ) . '%'
+				)
+			);
+		}
+	}
+
 	protected function record_event( $name, $source, $id ) {
 
 		$this->event_ids[] = $id;
@@ -56,6 +70,7 @@ class DotFlow_List_Event_Types_Tests extends GH_UnitTestCase {
 		$this->record_event( 'ai.mutation.completed', 'mcp', 'event-type-test-004' );
 
 		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->keep_only_test_events( 'event-type-test-' );
 		wp_set_current_user( $user_id );
 
 		$reflection = new ReflectionClass( List_Event_Types::class );
@@ -86,6 +101,8 @@ class DotFlow_List_Event_Types_Tests extends GH_UnitTestCase {
 		Store::maybe_install();
 		$this->record_event( 'email.inbound.received', 'email', 'event-type-search-001' );
 		$this->record_event( 'contact.form_submitted', 'dotform', 'event-type-search-002' );
+
+		$this->keep_only_test_events( 'event-type-search-' );
 
 		$reflection = new ReflectionClass( List_Event_Types::class );
 		$ability    = $reflection->newInstanceWithoutConstructor();
