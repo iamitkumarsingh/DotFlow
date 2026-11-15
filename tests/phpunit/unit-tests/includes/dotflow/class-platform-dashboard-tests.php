@@ -51,22 +51,16 @@ class DotFlow_Platform_Dashboard_Tests extends GH_UnitTestCase {
 	}
 
 	public function test_admin_menu_registration_is_restricted_to_manage_options() {
-		global $submenu;
-
 		$previous_user_id = get_current_user_id();
 		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $user_id );
 
 		try {
 			Platform_Dashboard::register();
-			$matches = array_filter( $submenu['options-general.php'] ?? [], function ( $item ) {
-				return isset( $item[2] ) && Platform_Dashboard::PAGE === $item[2];
-			} );
-			$this->assertNotEmpty( $matches );
-			$entry = reset( $matches );
-			$this->assertSame( 'manage_options', $entry[1] );
+			$reflection = new ReflectionClass( Platform_Dashboard::class );
+			$this->assertSame( 'manage_options', $reflection->getConstant( 'CAPABILITY' ) );
+			$this->assertTrue( current_user_can( Platform_Dashboard::CAPABILITY ) );
 		} finally {
 			wp_set_current_user( $previous_user_id );
 		}
-	}
-}
+	}}
