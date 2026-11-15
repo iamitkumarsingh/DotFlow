@@ -6,6 +6,7 @@ use Groundhogg\DotFlow\Messaging\Postmark_Provider;
 use Groundhogg\DotFlow\Messaging\Postmark_Retry_Queue;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
+use Groundhogg\Pii;
 use function Groundhogg\get_db;
 
 /**
@@ -62,8 +63,7 @@ final class Platform_Dashboard {
 					'event_name' => sanitize_text_field( $row['event_name'] ),
 					'source' => sanitize_key( $row['source'] ),
 					'object_type' => sanitize_key( $row['object_type'] ),
-					'object_id' => absint( $row['object_id'] ),
-					'contact_id' => absint( $row['contact_id'] ),
+					'object_id' => ( Pii::is_restricted() && 'contact' === $row['object_type'] ) ? 0 : absint( $row['object_id'] ),
 					'occurred_at' => (string) $row['occurred_at'],
 				];
 				if ( null === $events['last_event'] ) {
@@ -78,7 +78,7 @@ final class Platform_Dashboard {
 						'id' => absint( $row['ID'] ),
 						'action' => is_array( $payload ) && isset( $payload['action'] ) ? sanitize_text_field( $payload['action'] ) : 'mutation',
 						'object_type' => sanitize_key( $row['object_type'] ),
-						'object_id' => absint( $row['object_id'] ),
+						'object_id' => ( Pii::is_restricted() && 'contact' === $row['object_type'] ) ? 0 : absint( $row['object_id'] ),
 						'actor_user_id' => is_array( $payload ) ? absint( $payload['actor_user_id'] ?? 0 ) : 0,
 						'occurred_at' => (string) $row['occurred_at'],
 					];
