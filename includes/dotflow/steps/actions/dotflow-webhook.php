@@ -29,7 +29,7 @@ class DotFlow_Webhook extends Action {
 	}
 
 	public function get_description() {
-		return esc_html_x( 'Send a signed-by-transport-context-free, minimal JSON event to an HTTPS endpoint. Contact message content and event arguments are never included.', 'step_description', 'groundhogg' );
+		return esc_html_x( 'Send a minimal JSON event to an HTTPS endpoint. Contact message content and event arguments are never included.', 'step_description', 'groundhogg' );
 	}
 
 	public function get_icon() {
@@ -91,13 +91,14 @@ class DotFlow_Webhook extends Action {
 		}
 
 		$host = strtolower( rtrim( (string) $parts['host'], '.' ) );
-		if ( 'localhost' === $host || 'localhost' === substr( $host, -10 ) || false !== strpos( $host, '.local' ) || false !== strpos( $host, '.internal' ) ) {
+		if ( 'localhost' === $host || '.localhost' === substr( $host, -10 ) || '.local' === substr( $host, -6 ) || '.internal' === substr( $host, -9 ) ) {
 			return false;
 		}
 
-		if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+		$ip_host = trim( $host, '[]' );
+		if ( filter_var( $ip_host, FILTER_VALIDATE_IP ) ) {
 			$flags = FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
-			if ( ! filter_var( $host, FILTER_VALIDATE_IP, $flags ) ) {
+			if ( ! filter_var( $ip_host, FILTER_VALIDATE_IP, $flags ) ) {
 				return false;
 			}
 		}
