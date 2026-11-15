@@ -27,6 +27,7 @@ use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Messaging\Postmark_Provider;
 use Groundhogg\DotFlow\Steps\Benchmarks\DotFlow_Event;
 use Groundhogg\DotFlow\Steps\Actions\DotFlow_Webhook;
+use Groundhogg\DotFlow\Steps\Actions\Stop_Contact_Flow;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -151,6 +152,7 @@ final class Bootstrap {
 		if ( is_object( $manager ) && method_exists( $manager, 'add_step' ) ) {
 			$manager->add_step( new DotFlow_Event() );
 			$manager->add_step( new DotFlow_Webhook() );
+			$manager->add_step( new Stop_Contact_Flow() );
 		}
 	}
 
@@ -246,6 +248,28 @@ final class Bootstrap {
 				return new \WP_Error( 'dotflow_webhook_url_invalid', __( 'A valid HTTPS webhook URL is required.', 'groundhogg' ) );
 			}
 			return [ 'settings' => [ 'url' => esc_url_raw( $settings['url'], [ 'https' ] ) ] ];
+		} );
+	}
+
+
+	private static function register_dotflow_stop_flow_schema() {
+		Step_Type_Schema::extend( 'dotflow_stop_flow', [
+			'type'                 => 'object',
+			'additionalProperties' => false,
+			'required'             => [ 'flow_id' ],
+			'properties'           => [
+				'flow_id' => [
+					'type'        => 'integer',
+					'minimum'     => 1,
+					'description' => __( 'Target flow ID whose pending events should be cancelled for the current contact.', 'groundhogg' ),
+				],
+			],
+		], [], function ( array $settings ) {
+			$flow_id = absint( $settings['flow_id'] ?? 0 );
+			if ( 1 !== count( $settings ) || ! $flow_id || ! ( new \Groundhogg\Funnel( $flow_id ) )->exists() ) {
+				return new \WP_Error( 'dotflow_stop_flow_target_invalid', __( 'A valid existing target flow_id is required.', 'groundhogg' ) );
+			}
+			return [ 'settings' => [ 'flow_id' => $flow_id ] ];
 		} );
 	}
 
