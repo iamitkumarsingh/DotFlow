@@ -6,10 +6,19 @@ use function Groundhogg\get_db;
 
 class DotFlow_Outbound_Delivery_Events_Tests extends GH_UnitTestCase {
 
+	protected $previous_channel;
+
 	public function setUp(): void {
 		parent::setUp();
+		$this->previous_channel = Groundhogg_Email_Services::get_current_message_type();
+		Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::WORDPRESS );
 		Store::maybe_install();
 		Outbound_Delivery_Events::register();
+	}
+
+	public function tearDown(): void {
+		Groundhogg_Email_Services::set_current_message_type( $this->previous_channel );
+		parent::tearDown();
 	}
 
 	protected function event_for( $message_id ) {
