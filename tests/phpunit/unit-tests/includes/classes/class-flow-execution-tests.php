@@ -280,6 +280,31 @@ class Flow_Execution_Tests extends GH_UnitTestCase {
 		$this->assertSame( [ 'a', 'staged', 'b' ], array_column( $draft['steps'], 'title' ) );
 	}
 
+	public function test_discarding_staged_changes_restores_the_live_flow() {
+
+		$ids = $this->create_flow( [ $this->action( 'a' ), $this->action( 'b' ) ] );
+		$this->activate( $ids['flow'] );
+
+		$this->edit( $ids['flow'], [
+			[ 'op' => 'add', 'at' => [ 'after' => $ids['a'] ], 'steps' => [ $this->action( 'draft only' ) ] ],
+			[ 'op' => 'delete', 'step' => $ids['b'] ],
+		] );
+
+		$draft = $this->execute( 'groundhogg/get-flow', [ 'flow_id' => $ids['flow'], 'view' => 'draft' ] );
+		$this->assertTrue( $draft['has_unpublished_changes'] );
+		$this->assertSame( [ 'a', 'draft only' ], array_column( $draft['steps'], 'title' ) );
+
+		$discard = $this->execute( 'groundhogg/discard-flow-changes', [ 'flow_id' => $ids['flow'] ] );
+		$this->assertTrue( $discard['had_changes'] );
+
+		$restored_draft = $this->execute( 'groundhogg/get-flow', [ 'flow_id' => $ids['flow'], 'view' => 'draft' ] );
+		$live            = $this->execute( 'groundhogg/get-flow', [ 'flow_id' => $ids['flow'], 'view' => 'live' ] );
+
+		$this->assertFalse( $restored_draft['has_unpublished_changes'] );
+		$this->assertSame( [ 'a', 'b' ], array_column( $restored_draft['steps'], 'title' ) );
+		$this->assertSame( [ 'a', 'b' ], array_column( $live['steps'], 'title' ) );
+	}
+
 	public function test_staged_changes_only_run_once_published() {
 
 		$ids = $this->create_flow( [ $this->action( 'a' ), $this->action( 'b' ) ] );
