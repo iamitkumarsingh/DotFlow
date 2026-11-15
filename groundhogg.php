@@ -1,10 +1,10 @@
 <?php
 /*
- * Plugin Name: DotFlow
+ * Plugin Name: DenFlow
  * Plugin URI: https://github.com/iamitkumarsingh/DotFlow
- * Description: WordPress CRM, email marketing, conversations and AI-powered marketing automation.
+ * Description: DenFlow CRM, email marketing, conversations and AI-powered marketing automation.
  * Version: 0.1.0
- * Author: DotFlow contributors
+ * Author: DenFlow contributors
  * Author URI: https://github.com/iamitkumarsingh/DotFlow
  * Text Domain: groundhogg
  * Domain Path: /languages
