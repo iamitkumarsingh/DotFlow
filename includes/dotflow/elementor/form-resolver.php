@@ -1,6 +1,6 @@
 <?php
 
-namespace Groundhogg\\DotFlow\\Elementor;
+namespace Groundhogg\DotFlow\Elementor;
 
 /**
  * Resolves published CRM form steps for public Elementor rendering.
@@ -14,7 +14,7 @@ final class Form_Resolver {
 	 * Return the selected published form step or false.
 	 *
 	 * @param int $step_id Stored Elementor form step ID.
-	 * @return \\Groundhogg\\Step|false
+	 * @return \Groundhogg\Step|false
 	 */
 	public static function get_published_form( $step_id ) {
 
@@ -23,7 +23,7 @@ final class Form_Resolver {
 			return false;
 		}
 
-		$step = new \\Groundhogg\\Step( $step_id );
+		$step = new \Groundhogg\Step( $step_id );
 		if ( ! $step->exists() ) {
 			return false;
 		}
@@ -44,7 +44,7 @@ final class Form_Resolver {
 
 		global $wpdb;
 
-		$db = \\Groundhogg\\get_db( 'steps' );
+		$db = \Groundhogg\get_db( 'steps' );
 		if ( ! $db ) {
 			return [ '' => __( 'Form list is temporarily unavailable', 'groundhogg' ) ];
 		}
@@ -56,7 +56,7 @@ final class Form_Resolver {
 				'web_form',
 				'form_fill',
 				'active',
-				100
+				99
 			)
 		);
 
