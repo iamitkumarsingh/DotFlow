@@ -34,7 +34,6 @@ use function Groundhogg\get_upload_wp_error;
 use function Groundhogg\get_url_var;
 use function Groundhogg\html;
 use function Groundhogg\is_option_enabled;
-use function Groundhogg\is_pro_features_active;
 use function Groundhogg\isset_not_empty;
 use function Groundhogg\map_to_class;
 use function Groundhogg\notices;
@@ -1006,7 +1005,7 @@ class Funnels_Page extends Admin_Page {
 				'description' => wp_specialchars_decode( $step->get_description(), ENT_QUOTES ),
 				'group'       => $step->get_group(),
 				'sub_group'   => $step->get_sub_group(),
-				'premium'     => $step->is_premium() && ! is_pro_features_active(),
+				'premium'     => false,
 			];
 		}
 

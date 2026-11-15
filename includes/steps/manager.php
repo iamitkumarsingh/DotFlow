@@ -25,8 +25,6 @@ use Groundhogg\Steps\Benchmarks\Web_Form;
 use Groundhogg\Steps\Logic\If_Else;
 use Groundhogg\Steps\Logic\Logic;
 use function Groundhogg\get_array_var;
-use function Groundhogg\is_pro_features_active;
-use function Groundhogg\is_white_labeled;
 
 /**
  * Created by PhpStorm.
@@ -113,9 +111,8 @@ class Manager {
 		/* Logic */
 		$this->add_step( new If_Else() );
 
-		// Premium steps, don't include if white labeled
-		if ( ! is_pro_features_active() && ! is_white_labeled() ) {
-			// actions
+		// All premium step implementations bundled with DenFlow are available to every site.
+		// actions
 			$this->add_step( new Premium\Actions\Apply_Owner() );
 			$this->add_step( new Premium\Actions\Create_User() );
 			$this->add_step( new Premium\Actions\Edit_Meta() );
@@ -149,7 +146,6 @@ class Manager {
 			$this->add_step( new Premium\Logic\Logic_Jump() );
 //			$this->add_step( new Premium\Logic\Timer_Skip() );
 
-		}
 
 		do_action( 'groundhogg/steps/init', $this );
 	}
