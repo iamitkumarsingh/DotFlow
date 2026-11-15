@@ -184,18 +184,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p dist
-          git archive --format=zip --prefix=dotflow/ HEAD > dist/dotflow-0.1.0.zip
-          test -s dist/dotflow-0.1.0.zip
-          unzip -t dist/dotflow-0.1.0.zip
+          mkdir -p dist/source dist/package/dotflow
+          # Export the exact tested commit, then apply the production distribution
+          # allowlist/exclusions. Keep runtime assets and compiled .mo translations.
+          git archive --format=tar HEAD | tar -xf - -C dist/source
+          rsync -a --delete --exclude-from=.distignore \\
+            --exclude='*.po' --exclude='*.pot' --exclude='*.map' \\
+            dist/source/ dist/package/dotflow/
+          test -s dist/package/dotflow/groundhogg.php
           # Ship the complete, unmodified GPL-3.0 text with the derivative plugin.
           curl --fail --silent --show-error --location --retry 3 https://www.gnu.org/licenses/gpl-3.0.txt -o dist/GPL-3.0.txt
-          mkdir -p dist/staging
-          unzip -q dist/dotflow-0.1.0.zip -d dist/staging
-          cp dist/GPL-3.0.txt dist/staging/dotflow/LICENSE.txt
-          rm dist/dotflow-0.1.0.zip
-          ( cd dist/staging && zip -qr ../dotflow-0.1.0.zip dotflow )
-          rm -rf dist/staging dist/GPL-3.0.txt
+          cp dist/GPL-3.0.txt dist/package/dotflow/LICENSE.txt
+          ( cd dist/package && zip -qr ../dotflow-0.1.0.zip dotflow )
+          rm -rf dist/source dist/package dist/GPL-3.0.txt
           unzip -t dist/dotflow-0.1.0.zip
       - name: Verify installable archive contents
         shell: bash
