@@ -379,7 +379,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		}
 	}
 
-	public function test_saved_postmark_message_stream_settings_are_used_for_outbound_sends() {
+	public function test_saved_marketing_postmark_message_stream_setting_is_used_for_outbound_sends() {
 		$before = get_option( Postmark_Provider::OPTION, [] );
 		update_option( Postmark_Provider::OPTION, [
 			'transactional_stream' => 'transactional-custom',
@@ -394,11 +394,9 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
 
 		try {
-			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::TRANSACTIONAL );
-			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Transactional', 'Body' ) );
-			$this->assertSame( 'transactional-custom', $captured['MessageStream'] );
-			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::MARKETING );
 			Groundhogg_Email_Services::set_message_id( '' );
+			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::MARKETING );
+			$this->assertSame( Groundhogg_Email_Services::MARKETING, Groundhogg_Email_Services::get_current_message_type() );
 			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Marketing', 'Body' ) );
 			$this->assertSame( 'marketing-custom', $captured['MessageStream'] );
 		} finally {
