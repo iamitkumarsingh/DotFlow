@@ -104,7 +104,7 @@ final class Platform_Dashboard {
 				'postmark_outbox' => $outbox,
 			],
 			'wordpress' => [
-				'elementor_active' => class_exists( '\\\\Elementor\\\\Plugin' ),
+				'elementor_active' => class_exists( 'Elementor\\Plugin' ),
 				'php_version' => PHP_VERSION,
 				'wordpress_version' => get_bloginfo( 'version' ),
 			],
@@ -113,7 +113,7 @@ final class Platform_Dashboard {
 
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to view DotFlow operations.', 'groundhogg' ), 403 );
+			wp_die( esc_html__( 'You do not have permission to view DotFlow operations.', 'groundhogg' ), '', [ 'response' => 403 ] );
 		}
 
 		$snapshot = self::get_snapshot();
