@@ -187,7 +187,7 @@ class List_Events extends Ability {
 
 		$where_sql = implode( ' AND ', $where );
 		$limit     = isset( $input['limit'] ) ? min( 100, max( 1, absint( $input['limit'] ) ) ) : 50;
-		$offset    = isset( $input['offset'] ) ? absint( $input['offset'] ) : 0;
+		$offset    = isset( $input['offset'] ) ? min( 100000, absint( $input['offset'] ) ) : 0;
 
 		$count_sql = "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}";
 		$total     = (int) $wpdb->get_var( $params ? $wpdb->prepare( $count_sql, $params ) : $count_sql );
