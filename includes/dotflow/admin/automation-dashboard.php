@@ -139,6 +139,54 @@ final class Automation_Dashboard {
 			$flows[ $flow_id ]['title'] = $funnel->exists() ? $funnel->get_title() : sprintf( __( 'Deleted flow #%d', 'groundhogg' ), $flow_id );
 		}
 
+		$step_sql = "SELECT funnel_id, step_id, status, COUNT(*) AS total
+			FROM ({$union}) AS automation_events
+			GROUP BY funnel_id, step_id, status
+			ORDER BY funnel_id ASC, step_id ASC";
+		$step_rows = $wpdb->get_results( $wpdb->prepare( $step_sql, $base_args ) );
+		$steps = [];
+		foreach ( $step_rows as $row ) {
+			$key = absint( $row->funnel_id ) . ':' . absint( $row->step_id );
+			if ( ! isset( $steps[ $key ] ) ) {
+				$steps[ $key ] = [
+					'flow_id' => absint( $row->funnel_id ),
+					'step_id' => absint( $row->step_id ),
+					'total' => 0,
+					'waiting' => 0,
+					'paused' => 0,
+					'complete' => 0,
+					'failed' => 0,
+					'cancelled' => 0,
+					'skipped' => 0,
+					'in_progress' => 0,
+				];
+			}
+			$status = sanitize_key( $row->status );
+			$count = absint( $row->total );
+			$steps[ $key ]['total'] += $count;
+			if ( isset( $steps[ $key ][ $status ] ) ) {
+				$steps[ $key ][ $status ] += $count;
+			}
+		}
+
+		$daily_sql = "SELECT FLOOR(time / 86400) AS utc_day, status, COUNT(*) AS total
+			FROM ({$union}) AS automation_events
+			GROUP BY utc_day, status
+			ORDER BY utc_day ASC";
+		$daily_rows = $wpdb->get_results( $wpdb->prepare( $daily_sql, $base_args ) );
+		$daily = [];
+		foreach ( $daily_rows as $row ) {
+			$day = absint( $row->utc_day );
+			if ( ! isset( $daily[ $day ] ) ) {
+				$daily[ $day ] = [ 'date' => gmdate( 'Y-m-d', $day * 86400 ), 'total' => 0, 'failed' => 0 ];
+			}
+			$count = absint( $row->total );
+			$daily[ $day ]['total'] += $count;
+			if ( Event::FAILED === $row->status ) {
+				$daily[ $day ]['failed'] += $count;
+			}
+		}
+
 		$failed_sql = "SELECT funnel_id, step_id, error_code, COUNT(*) AS total
 			FROM ({$union}) AS automation_events
 			WHERE status = %s
@@ -166,6 +214,8 @@ final class Automation_Dashboard {
 			'end'      => $end,
 			'summary'  => $summary,
 			'flows'    => array_values( $flows ),
+			'steps'    => array_values( $steps ),
+			'daily'    => array_values( $daily ),
 			'failures' => $failures,
 		];
 	}
@@ -211,6 +261,27 @@ final class Automation_Dashboard {
 		}
 		foreach ( $metrics['flows'] as $flow ) {
 			echo '<tr><td>' . esc_html( $flow['title'] ) . '</td><td>' . esc_html( number_format_i18n( $flow['total'] ) ) . '</td><td>' . esc_html( number_format_i18n( $flow['waiting'] ) ) . '</td><td>' . esc_html( number_format_i18n( $flow['paused'] ) ) . '</td><td>' . esc_html( number_format_i18n( $flow['complete'] ) ) . '</td><td>' . esc_html( number_format_i18n( $flow['failed'] ) ) . '</td><td>' . esc_html( number_format_i18n( $flow['cancelled'] ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Daily activity and failure trend', 'groundhogg' ) . '</h3>';
+		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'UTC date', 'groundhogg' ) . '</th><th>' . esc_html__( 'Workflow-step events', 'groundhogg' ) . '</th><th>' . esc_html__( 'Failed events', 'groundhogg' ) . '</th></tr></thead><tbody>';
+		if ( empty( $metrics['daily'] ) ) {
+			echo '<tr><td colspan="3">' . esc_html__( 'No activity in this period.', 'groundhogg' ) . '</td></tr>';
+		}
+		foreach ( $metrics['daily'] as $day ) {
+			echo '<tr><td>' . esc_html( $day['date'] ) . '</td><td>' . esc_html( number_format_i18n( $day['total'] ) ) . '</td><td>' . esc_html( number_format_i18n( $day['failed'] ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+
+		echo '<h3>' . esc_html__( 'Step outcomes and drop-off signals', 'groundhogg' ) . '</h3>';
+		echo '<p>' . esc_html__( 'Compare how many queued step events complete, fail, remain pending or are cancelled. These are event counts, not unique-contact conversion rates.', 'groundhogg' ) . '</p>';
+		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Flow ID', 'groundhogg' ) . '</th><th>' . esc_html__( 'Step ID', 'groundhogg' ) . '</th><th>' . esc_html__( 'Total', 'groundhogg' ) . '</th><th>' . esc_html__( 'Completed', 'groundhogg' ) . '</th><th>' . esc_html__( 'Failed', 'groundhogg' ) . '</th><th>' . esc_html__( 'Waiting', 'groundhogg' ) . '</th><th>' . esc_html__( 'Paused', 'groundhogg' ) . '</th><th>' . esc_html__( 'Cancelled', 'groundhogg' ) . '</th></tr></thead><tbody>';
+		if ( empty( $metrics['steps'] ) ) {
+			echo '<tr><td colspan="8">' . esc_html__( 'No step activity in this period.', 'groundhogg' ) . '</td></tr>';
+		}
+		foreach ( $metrics['steps'] as $step ) {
+			echo '<tr><td>' . esc_html( $step['flow_id'] ) . '</td><td>' . esc_html( $step['step_id'] ) . '</td><td>' . esc_html( number_format_i18n( $step['total'] ) ) . '</td><td>' . esc_html( number_format_i18n( $step['complete'] ) ) . '</td><td>' . esc_html( number_format_i18n( $step['failed'] ) ) . '</td><td>' . esc_html( number_format_i18n( $step['waiting'] ) ) . '</td><td>' . esc_html( number_format_i18n( $step['paused'] ) ) . '</td><td>' . esc_html( number_format_i18n( $step['cancelled'] ) ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
 
