@@ -97,3 +97,56 @@ jobs:
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
         run: phpunit --configuration phpunit.xml.dist --filter 'DotFlow_' --verbose
+
+  js-tests:
+    name: JavaScript unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run JavaScript unit tests
+        run: node --test tests/js/*.test.js
+
+  release-package:
+    name: Build and verify installable DotFlow ZIP
+    runs-on: ubuntu-latest
+    needs: [php-syntax, phpunit-dotflow, js-tests]
+    permissions:
+      contents: read
+    steps:
+      - name: Check out tested release commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build WordPress plugin archive from the tested commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          git archive --format=zip --prefix=dotflow/ HEAD > dist/dotflow-0.1.0.zip
+          test -s dist/dotflow-0.1.0.zip
+          unzip -t dist/dotflow-0.1.0.zip
+      - name: Verify installable archive contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -Z1 dist/dotflow-0.1.0.zip > dist/archive-files.txt
+          grep -Fx 'dotflow/groundhogg.php' dist/archive-files.txt
+          grep -Fx 'dotflow/README.txt' dist/archive-files.txt
+          grep -Fx 'dotflow/LICENSE.txt' dist/archive-files.txt
+          ! grep -Eq '^dotflow/(tests|vendor|node_modules|\.github|docs|bin)/' dist/archive-files.txt
+          ! grep -Eq '^dotflow/(composer\.json|package\.json|package-lock\.json|phpunit\.xml\.dist)$' dist/archive-files.txt
+          sha256sum dist/dotflow-0.1.0.zip | tee dist/dotflow-0.1.0.zip.sha256
+      - name: Upload verified plugin ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotflow-0.1.0-wordpress-plugin
+          path: |
+            dist/dotflow-0.1.0.zip
+            dist/dotflow-0.1.0.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
