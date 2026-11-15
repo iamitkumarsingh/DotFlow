@@ -35,6 +35,7 @@ class DotFlow_Webhook_Step_Tests extends GH_UnitTestCase {
 			'step_status' => 'active',
 			'meta'        => [ 'url' => 'https://example.com/dotflow-hook' ],
 		] );
+		$step->update_meta( 'url', 'https://example.com/dotflow-hook' );
 		$element = $step->get_step_element();
 		$event = new Event( [
 			'ID' => 9001,
