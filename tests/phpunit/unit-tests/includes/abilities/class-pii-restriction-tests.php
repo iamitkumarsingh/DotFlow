@@ -437,7 +437,7 @@ class Pii_Restriction_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'Hello Jane', Pii::scrub_text( 'Hello Jane' ) );
 	}
 
-	public function test_a_restricted_user_cannot_create_or_read_contact_notes() {
+	public function test_a_restricted_user_can_add_but_cannot_read_contact_notes() {
 
 		$this->admin( true );
 
