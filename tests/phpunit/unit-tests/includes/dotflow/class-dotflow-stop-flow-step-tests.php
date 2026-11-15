@@ -23,6 +23,7 @@ class DotFlow_Stop_Contact_Flow_Step_Tests extends GH_UnitTestCase {
 			'step_status' => 'active',
 			'meta' => [ 'delay_amount' => 3, 'delay_type' => 'days', 'run_when' => 'now' ],
 		] );
+		$target_step->commit();
 		$target_step->enqueue( $contact );
 
 		$reply_flow = new Funnel( [ 'title' => 'Reply handler', 'status' => 'active' ] );
@@ -33,6 +34,7 @@ class DotFlow_Stop_Contact_Flow_Step_Tests extends GH_UnitTestCase {
 			'step_status' => 'active',
 			'meta' => [ 'flow_id' => $target->get_id() ],
 		] );
+		$stop_step->commit();
 		$stop_step->update_meta( 'flow_id', $target->get_id() );
 		$element = $stop_step->get_step_element();
 		$event = new Event( [
