@@ -159,6 +159,7 @@ class DotFlow_Contact_Automation_Abilities_Tests extends GH_UnitTestCase {
 
 		$result = $this->ability( List_Contact_Automation_History::class )->__invoke( [
 			'contact_id' => $contact->get_id(),
+			'flow_id'    => $funnel->get_id(),
 		] );
 		$this->assertNotWPError( $result );
 		$this->assertCount( 1, $result['events'] );
