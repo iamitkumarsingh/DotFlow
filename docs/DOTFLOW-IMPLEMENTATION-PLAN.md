@@ -110,6 +110,14 @@ Stage 2 is complete for the first provider (Postmark) on the development branch.
 - Existing email sending already blocks non-transactional messages to contacts that are not marketable and blocks undeliverable contacts. Existing Groundhogg queue and event history provide durable delays and step-level outcomes; DotFlow does not add a second scheduler.
 
 
-Stage 3 CI verification: commit `95a97dab92844474f4ad47158d08554e1c3bb3b6` passed PHP syntax validation and WordPress integration tests on PHP 8.0, 8.2 and 8.3. The new tests cover contact-level pause/resume/cancel, atomic restart, per-contact permission enforcement and privacy-safe history output.
+Stage 3 CI verification: commit `3510bed113a60a7213c954edb319eed58a01d2ff` passed PHP syntax validation and WordPress integration tests on PHP 8.0, 8.2 and 8.3. Coverage includes contact-level pause/resume/cancel, atomic restart, per-contact permission enforcement, privacy-safe history, HTTPS/SSRF URL validation, HMAC-signed webhook payloads, and the reply-flow stop action.
 
 - Reply interruption can be composed without a global destructive default: create a DotFlow Event benchmark for `email.inbound.received` and add the Stop Contact in Flow action targeting the original nurture flow. This cancels only that contact's waiting/paused events in the selected flow and moves them to event history; the reply handler flow itself continues.
+
+
+### Remaining automation product work
+
+- A dedicated automation analytics/reporting surface (journey conversion, step drop-off, action failure trends and retry/recovery views) is not yet implemented; the existing Groundhogg reporting remains available.
+- Failed outbound webhook actions are recorded by the Groundhogg event history but are not automatically retried. Automatic retry is intentionally withheld until a receiver-side idempotency contract is enforced, to avoid duplicate external side effects.
+- Reply interruption is deliberately configured per flow rather than globally: use the `email.inbound.received` event benchmark followed by `dotflow_stop_flow` to stop only the relevant nurture flow for that contact.
+- Before using webhook actions, define `DOTFLOW_WEBHOOK_SECRET` in `wp-config.php` with at least 32 random characters (for example, generate a value locally with `openssl rand -hex 32`) and configure the same secret at the receiving endpoint. Do not commit the secret to Git or place it in a flow URL.
