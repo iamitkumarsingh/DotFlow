@@ -35,7 +35,7 @@ class Stop_Contact_Flow extends Action {
 	}
 
 	public function get_icon() {
-		return GROUNDHOGG_ASSETS_URL . 'images/funnel-icons/developer/stop.svg';
+		return GROUNDHOGG_ASSETS_URL . 'images/funnel-icons/developer/plugin-api-action.svg';
 	}
 
 	public function settings( $step ) {

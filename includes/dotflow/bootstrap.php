@@ -170,6 +170,10 @@ final class Bootstrap {
 		if ( \Groundhogg\Plugin::instance()->step_manager->type_is_registered( 'dotflow_webhook' ) && ! in_array( 'dotflow_webhook', Step_Type_Schema::supported_types(), true ) ) {
 			self::register_dotflow_webhook_schema();
 		}
+
+		if ( \Groundhogg\Plugin::instance()->step_manager->type_is_registered( 'dotflow_stop_flow' ) && ! in_array( 'dotflow_stop_flow', Step_Type_Schema::supported_types(), true ) ) {
+			self::register_dotflow_stop_flow_schema();
+		}
 	}
 
 	private static function register_dotflow_event_schema() {
