@@ -346,7 +346,6 @@ class Plugin {
 		$this->library = new Library();
 
 		new Blocks\Blocks();
-		new Extension_Upgrader();
 		new Email_Logger();
 
 		$this->user_syncing = new User_Syncing();
@@ -356,7 +355,6 @@ class Plugin {
 		\Groundhogg_Email_Services::init();
 
 		new Plugin_Compatibility();
-		new License_Manager();
 		new Background_Tasks();
 		new Big_File_Uploader();
 		new Cleanup_Actions();

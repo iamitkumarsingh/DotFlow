@@ -6,8 +6,6 @@ use Groundhogg\Funnel;
 use Groundhogg\Plugin;
 use function Groundhogg\get_request_var;
 use function Groundhogg\html;
-use function Groundhogg\is_pro_features_active;
-use function Groundhogg\is_white_labeled;
 
 /**
  * Add Funnel
@@ -80,9 +78,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				return false;
 			}
 
-			if ( Plugin::instance()->step_manager->get_element( $step->data->step_type )->is_premium() && ! is_pro_features_active() && ! is_white_labeled() ) {
-				$funnel->is_premium = true;
-			}
 		}
 
 		return true;
@@ -157,13 +152,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                      data-title="<?php echo esc_attr( $template->title ); ?>">
                     <div class="gh-panel-header">
                         <h2><?php echo esc_html( $template->get_title() ); ?></h2>
-						<?php if ( $template->is_premium ): ?>
-                            <div style="padding: 5px">
-                                <span class="pill dark">PRO
-                                    <div class="gh-tooltip top">This funnel contains paid features.</div>
-                                </span>
-                            </div>
-						<?php endif; ?>
+
                     </div>
                     <div class="inside display-flex column align-top" style="flex-grow: 1">
                         <div class="gh-tags space-below-20">
@@ -173,12 +162,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                         </div>
 						<?php $template->flow_preview() ?>
                         <p><?php echo wp_kses_post( $template->get_meta( 'description' ) ); ?></p>
-						<?php if ( $template->is_premium ): ?>
-                            <a style="margin-top: auto" class="gh-button primary text" href="https://groundhogg.io/pricing/" target="_blank"><?php echo esc_html_x( '🔓 Upgrade to unlock!', 'action', 'groundhogg' ); ?></a>
-						<?php else: ?>
                             <button style="margin-top: auto" class="gh-button primary" name="funnel_template"
                                     value="<?php echo esc_attr( $template->ID ) ?>"><?php echo esc_html_x( 'Use Template', 'action', 'groundhogg' ); ?></button>
-						<?php endif; ?>
                     </div>
                 </div>
 			<?php endforeach; ?>

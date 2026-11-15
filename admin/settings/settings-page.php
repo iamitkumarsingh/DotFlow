@@ -10,7 +10,6 @@ use Groundhogg\Api\V4\Base_Api;
 use Groundhogg\Extension;
 use Groundhogg\Extension_Upgrader;
 use Groundhogg\HTML;
-use Groundhogg\License_Manager;
 use Groundhogg\Mailhawk;
 use Groundhogg\Plugin;
 use Groundhogg\Tag_Mapping;
@@ -509,14 +508,7 @@ class Settings_Page extends Admin_Page {
 	}
 
 	public function view_extensions() {
-
-        License_Manager::missing_licenses_notice();
-
-        License_Manager::expired_licenses_notice();
-
-		License_Manager::add_license_form();
-
-        License_Manager::manage_licenses();
+		// DenFlow does not use a remote extension store or licence service.
 	}
 
 	/**
@@ -707,13 +699,6 @@ class Settings_Page extends Admin_Page {
 			),
 		];
 
-		if ( ! is_white_labeled() || ! is_multisite() || is_main_site() ) {
-			$tabs['extensions'] = [
-				'id'    => 'extensions',
-				'title' => _x( 'Licenses', 'settings_tabs', 'groundhogg' ),
-				'cap'   => 'manage_gh_licenses'
-			];
-		}
 
 		return apply_filters( 'groundhogg/admin/settings/tabs', $tabs );
 	}
