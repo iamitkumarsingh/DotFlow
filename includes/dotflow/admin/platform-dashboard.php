@@ -69,20 +69,23 @@ final class Platform_Dashboard {
 				if ( null === $events['last_event'] ) {
 					$events['last_event'] = (string) $row['occurred_at'];
 				}
-				if ( 'ai.mutation.completed' === $row['event_name'] && count( $events['audit'] ) < 20 ) {
-					$payload = json_decode( (string) ( $wpdb->get_var( $wpdb->prepare(
-						"SELECT payload FROM {$table} WHERE ID = %d",
-						absint( $row['ID'] )
-					) ) ), true );
-					$events['audit'][] = [
-						'id' => absint( $row['ID'] ),
-						'action' => is_array( $payload ) && isset( $payload['action'] ) ? sanitize_text_field( $payload['action'] ) : 'mutation',
-						'object_type' => sanitize_key( $row['object_type'] ),
-						'object_id' => ( Pii::is_restricted() && 'contact' === $row['object_type'] ) ? 0 : absint( $row['object_id'] ),
-						'actor_user_id' => is_array( $payload ) ? absint( $payload['actor_user_id'] ?? 0 ) : 0,
-						'occurred_at' => (string) $row['occurred_at'],
-					];
-				}
+
+			}
+
+			$audit_rows = $wpdb->get_results(
+				"SELECT ID, object_type, object_id, occurred_at, payload FROM {$table} WHERE event_name = 'ai.mutation.completed' ORDER BY ID DESC LIMIT 20",
+				ARRAY_A
+			);
+			foreach ( (array) $audit_rows as $audit_row ) {
+				$payload = json_decode( (string) $audit_row['payload'], true );
+				$events['audit'][] = [
+					'id' => absint( $audit_row['ID'] ),
+					'action' => is_array( $payload ) && isset( $payload['action'] ) ? sanitize_text_field( $payload['action'] ) : 'mutation',
+					'object_type' => sanitize_key( $audit_row['object_type'] ),
+					'object_id' => ( Pii::is_restricted() && 'contact' === $audit_row['object_type'] ) ? 0 : absint( $audit_row['object_id'] ),
+					'actor_user_id' => is_array( $payload ) ? absint( $payload['actor_user_id'] ?? 0 ) : 0,
+					'occurred_at' => (string) $audit_row['occurred_at'],
+				];
 			}
 		}
 
@@ -154,7 +157,14 @@ final class Platform_Dashboard {
 			echo '</tbody></table>';
 			echo '<h3>' . esc_html__( 'Registered adapters', 'groundhogg' ) . '</h3>';
 			self::list_items( array_merge( $snapshot['providers']['outbound_adapters'], $snapshot['providers']['inbound_adapters'] ) );
-			echo '<p>' . esc_html__( 'Configure Postmark under Groundhogg → Settings → Email. GA4, GTM and DotForm connectors are not yet part of this build.', 'groundhogg' ) . '</p>';
+			echo '<h3>' . esc_html__( 'Integration availability', 'groundhogg' ) . '</h3>';
+			echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Integration', 'groundhogg' ) . '</th><th>' . esc_html__( 'Status', 'groundhogg' ) . '</th></tr></thead><tbody>';
+			self::row( 'Elementor', $snapshot['wordpress']['elementor_active'] ? __( 'Detected', 'groundhogg' ) : __( 'Not detected', 'groundhogg' ) );
+			foreach ( [ 'DotForm', 'Google Analytics 4', 'Google Tag Manager', 'HubSpot', 'WooCommerce' ] as $integration ) {
+				self::row( $integration, __( 'Not integrated yet — planned integration phase', 'groundhogg' ) );
+			}
+			echo '</tbody></table>';
+			echo '<p>' . esc_html__( 'Configure Postmark under Groundhogg → Settings → Email. This screen reports status only; it does not reveal or modify provider credentials.', 'groundhogg' ) . '</p>';
 		} elseif ( 'events' === $tab ) {
 			echo '<h2>' . esc_html__( 'Recent event activity', 'groundhogg' ) . '</h2>';
 			echo '<p>' . esc_html( sprintf( __( '%s events recorded in the last 24 hours.', 'groundhogg' ), number_format_i18n( $snapshot['events']['total_24h'] ) ) ) . '</p>';
