@@ -20,6 +20,7 @@ use Groundhogg\DotFlow\Database\Postmark_Outbox as DotFlow_Postmark_Outbox_DB;
 use Groundhogg\DotFlow\Elementor\Widgets\Form_Widget;
 use Groundhogg\DotFlow\Events\Store;
 use Groundhogg\DotFlow\Events\Form_Submission;
+use Groundhogg\DotFlow\Events\CRM_Events;
 use Groundhogg\DotFlow\Events\Tracking_Events;
 use Groundhogg\DotFlow\REST\Routes;
 use Groundhogg\DotFlow\Inbound\Inbox_Addresses;
@@ -102,6 +103,7 @@ final class Bootstrap {
 		add_action( 'init', [ Store::class, 'maybe_install' ], 2 );
 		add_action( 'rest_api_init', [ Routes::class, 'register' ] );
 		Form_Submission::register();
+		CRM_Events::register();
 		Tracking_Events::register();
 
 		// Independent provider inbox mode is opt-in and never replaces a provisioned relay.
