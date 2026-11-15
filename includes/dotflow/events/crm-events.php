@@ -3,6 +3,7 @@
 namespace Groundhogg\DotFlow\Events;
 
 use Groundhogg\Contact;
+use Groundhogg\Preferences;
 
 /**
  * Bridges native Groundhogg CRM lifecycle changes into DotFlow events.
@@ -92,7 +93,7 @@ final class CRM_Events {
 	 */
 	public static function record_unsubscribe( $contact_id, $new_value, $old_value, $contact = null ) {
 
-		if ( ! self::valid_contact( $contact ) || absint( $contact->get_id() ) !== absint( $contact_id ) ) {
+		if ( $new_value !== Preferences::UNSUBSCRIBED || ! self::valid_contact( $contact ) || absint( $contact->get_id() ) !== absint( $contact_id ) ) {
 			return;
 		}
 
