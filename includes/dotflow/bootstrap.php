@@ -14,6 +14,7 @@ use Groundhogg\DotFlow\Abilities\Set_Message_Read_State;
 use Groundhogg\DotFlow\Abilities\Manage_Contact_Automation;
 use Groundhogg\DotFlow\Abilities\List_Contact_Automation_History;
 use Groundhogg\DotFlow\Admin\Automation_Dashboard;
+use Groundhogg\DotFlow\Admin\Platform_Dashboard;
 use Groundhogg\DotFlow\Abilities\List_Published_Forms;
 use Groundhogg\DotFlow\Database\Events as DotFlow_Events_DB;
 use Groundhogg\DotFlow\Database\Postmark_Outbox as DotFlow_Postmark_Outbox_DB;
@@ -52,6 +53,7 @@ final class Bootstrap {
 		spl_autoload_register( [ __CLASS__, 'autoload' ], true, true );
 		add_action( 'groundhogg/init/v2', [ __CLASS__, 'init' ], 10 );
 		add_action( 'groundhogg/admin/init', [ Automation_Dashboard::class, 'register' ] );
+		add_action( 'admin_menu', [ Platform_Dashboard::class, 'register' ] );
 		add_action( 'groundhogg/steps/init', [ __CLASS__, 'register_steps' ], 10, 1 );
 		add_action( 'groundhogg/abilities/register_step_types', [ __CLASS__, 'register_step_type_schema' ] );
 	}
