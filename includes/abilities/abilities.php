@@ -22,10 +22,6 @@ use Groundhogg\Abilities\Contacts\Update_Contact;
 use Groundhogg\Abilities\Contacts\Update_Custom_Field;
 use Groundhogg\Abilities\Db\Describe_Table;
 use Groundhogg\Abilities\Db\Query_Table;
-use Groundhogg\Abilities\Extensions\Activate_License;
-use Groundhogg\Abilities\Extensions\Check_License;
-use Groundhogg\Abilities\Extensions\Install_Extension;
-use Groundhogg\Abilities\Extensions\List_Extensions;
 use Groundhogg\Abilities\Funnels\Activate_Flow;
 use Groundhogg\Abilities\Funnels\Add_To_Flow;
 use Groundhogg\Abilities\Funnels\Create_Flow;
@@ -366,11 +362,6 @@ class Abilities {
 			'description' => __( 'General-purpose utilities that support the other categories but aren\'t specific to any one of them.', 'groundhogg' ),
 		] );
 
-		self::register_category( 'groundhogg-extensions', [
-			'label'       => __( 'Groundhogg Extensions', 'groundhogg' ),
-			'description' => __( 'Manage Groundhogg add-on extensions and their licenses.', 'groundhogg' ),
-		] );
-
 		self::register_category( 'groundhogg-settings', [
 			'label'       => __( 'Groundhogg Settings', 'groundhogg' ),
 			'description' => __( 'List and update Groundhogg settings that have been registered for ability access.', 'groundhogg' ),
@@ -438,10 +429,6 @@ class Abilities {
 			Describe_Table::class,
 			Query_Table::class,
 			Upload_Media::class,
-			Activate_License::class,
-			Check_License::class,
-			List_Extensions::class,
-			Install_Extension::class,
 			List_Settings::class,
 			Update_Settings::class,
 		], self::$extra_abilities );
