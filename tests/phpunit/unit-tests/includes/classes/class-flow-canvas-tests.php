@@ -185,8 +185,8 @@ class Flow_Canvas_Tests extends GH_UnitTestCase {
 
 			$saved = json_decode( file_get_contents( $file ), true );
 
-			$saved_html = str_replace( [ "\\r\\n", "\\r" ], "\\n", (string) $saved['html'] );
-			$actual_html = str_replace( [ "\\r\\n", "\\r" ], "\\n", (string) $fixture['html'] );
+			$saved_html = str_replace( [ "\r\n", "\r" ], "\n", (string) $saved['html'] );
+			$actual_html = str_replace( [ "\r\n", "\r" ], "\n", (string) $fixture['html'] );
 			$this->assertSame( $saved_html, $actual_html, "The server draws the $name flow differently than the JS fixture, run with GH_UPDATE_JS_FIXTURES=1 and check tests/js" );
 		}
 	}
