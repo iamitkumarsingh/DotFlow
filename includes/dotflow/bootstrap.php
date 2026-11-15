@@ -48,6 +48,7 @@ final class Bootstrap {
 	public static function register() {
 		spl_autoload_register( [ __CLASS__, 'autoload' ], true, true );
 		add_action( 'groundhogg/init/v2', [ __CLASS__, 'init' ], 10 );
+		add_action( 'groundhogg/admin/init', [ Automation_Dashboard::class, 'register' ] );
 		add_action( 'groundhogg/steps/init', [ __CLASS__, 'register_steps' ], 10, 1 );
 		add_action( 'groundhogg/abilities/register_step_types', [ __CLASS__, 'register_step_type_schema' ] );
 	}
@@ -110,7 +111,6 @@ final class Bootstrap {
 		// Groundhogg's Abilities registry fires these hooks at the correct
 		// WordPress registration phase. This keeps MCP discovery deterministic.
 		add_action( 'groundhogg/abilities/register_categories', [ __CLASS__, 'register_ability_category' ] );
-		add_action( 'groundhogg/admin/init', [ Automation_Dashboard::class, 'register' ] );
 		add_action( 'groundhogg/abilities/register_abilities', [ __CLASS__, 'register_abilities' ] );
 
 		// Elementor is optional. Register native widgets only after its API is available.
