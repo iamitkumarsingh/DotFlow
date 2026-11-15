@@ -3,6 +3,7 @@
 namespace Groundhogg\DotFlow\Admin;
 
 use Groundhogg\DotFlow\Messaging\Postmark_Provider;
+use Groundhogg\DotFlow\Analytics\Analytics_Forwarder;
 use Groundhogg\DotFlow\Messaging\Postmark_Retry_Queue;
 use Groundhogg\DotFlow\Messaging\Provider_Adapter_Registry;
 use Groundhogg\DotFlow\Inbound\Inbound_Provider_Registry;
@@ -106,8 +107,8 @@ final class Platform_Dashboard {
 				'outbound_adapters' => Provider_Adapter_Registry::ids(),
 				'inbound_adapters' => Inbound_Provider_Registry::ids(),
 				'postmark_outbox' => $outbox,
-\t\t\t\t'analytics' => Analytics_Forwarder::get_status(),
-\t\t\t\t'dotform_hook_registered' => false !== has_action( 'dotform/submission/after' ),
+				'analytics' => Analytics_Forwarder::get_status(),
+				'dotform_hook_registered' => false !== has_action( 'dotform/submission/after' ),
 			],
 			'wordpress' => [
 				'elementor_active' => class_exists( 'Elementor\Plugin' ),
