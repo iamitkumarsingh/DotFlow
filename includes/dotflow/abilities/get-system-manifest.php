@@ -115,8 +115,8 @@ class Get_System_Manifest extends Ability {
 					'id'          => 'automation',
 					'label'       => 'Visual automation',
 					'status'      => 'foundation',
-					'description' => 'Groundhogg flows and typed editing/simulation plus the AI-discoverable, buildable DotFlow Event benchmark, which starts contact workflows from durable, source-filterable DotFlow events. Duplicate event IDs do not re-trigger listeners; AI mutation audit events are excluded as customer journey triggers.',
-					'abilities'   => [ 'groundhogg/list-flows', 'groundhogg/get-flow', 'groundhogg/create-flow', 'groundhogg/edit-flow', 'groundhogg/simulate-flow', 'groundhogg/publish-flow-changes', 'groundhogg/activate-flow', 'groundhogg/deactivate-flow' ],
+					'description' => 'Groundhogg flows and typed editing/simulation, revision-checked publishing, explicit discard/rollback of staged changes, plus the AI-discoverable DotFlow Event benchmark, which starts contact workflows from durable, source-filterable DotFlow events. Duplicate event IDs do not re-trigger listeners; AI mutation audit events are excluded as customer journey triggers.',
+					'abilities'   => [ 'groundhogg/list-flows', 'groundhogg/get-flow', 'groundhogg/create-flow', 'groundhogg/edit-flow', 'groundhogg/simulate-flow', 'groundhogg/publish-flow-changes', 'groundhogg/discard-flow-changes', 'groundhogg/activate-flow', 'groundhogg/deactivate-flow' ],
 				],
 				[
 					'id'          => 'reporting',
@@ -136,7 +136,7 @@ class Get_System_Manifest extends Ability {
 					'id'          => 'domain-events',
 					'label'       => 'DotFlow domain events',
 					'status'      => 'implemented',
-					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction, privacy-safe event-type discovery and administrator-only event history discovery.',
+					'description' => 'Typed in-process event envelopes, durable event storage, source-scoped idempotency, sensitive-field redaction, privacy-safe event-type discovery, administrator-only event history, native Groundhogg form/consent/page-visit/email-click bridges, and a contact-aware CTA integration hook. Page and link paths are stored without query strings or fragments.',
 					'abilities'   => [ 'dotflow/list-events', 'dotflow/list-contact-events', 'dotflow/list-event-types' ],
 				],
 				[
