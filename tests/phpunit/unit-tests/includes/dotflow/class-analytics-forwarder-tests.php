@@ -19,6 +19,9 @@ class DotFlow_Analytics_Forwarder_Tests extends GH_UnitTestCase {
 	}
 
 	protected function add_test_filter( $name, $callback ) {
+		if ( isset( $this->filters[ $name ] ) ) {
+			remove_filter( $name, $this->filters[ $name ], 10 );
+		}
 		$this->filters[ $name ] = $callback;
 		add_filter( $name, $callback, 10, 2 );
 	}
