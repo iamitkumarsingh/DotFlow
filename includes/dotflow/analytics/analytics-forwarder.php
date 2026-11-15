@@ -89,6 +89,16 @@ final class Analytics_Forwarder {
 		return [ 'event' => $names[ $name ], 'event_id' => $event_id, 'params' => $params ];
 	}
 
+	/** Report configuration state without returning identifiers or secrets. */
+	public static function get_status() {
+		$gtm = self::setting( 'DOTFLOW_GTM_CONTAINER_ID', 'dotflow/analytics/gtm_container_id' );
+		return [
+			'ga4_configured' => '' !== self::setting( 'DOTFLOW_GA4_MEASUREMENT_ID', 'dotflow/analytics/ga4_measurement_id' ) && '' !== self::setting( 'DOTFLOW_GA4_API_SECRET', 'dotflow/analytics/ga4_api_secret' ),
+			'gtm_configured' => (bool) preg_match( '/^GTM-[A-Z0-9]+$/', $gtm ),
+			'consent_granted' => self::has_consent(),
+		];
+	}
+
 	/** Return whether analytics consent has explicitly been granted. */
 	public static function has_consent( $event = null ) {
 		return (bool) apply_filters( 'dotflow/analytics/consent_granted', false, $event );
