@@ -390,7 +390,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 			$this->assertSame( 'transactional-custom', Postmark_Provider::get_message_stream( 'transactional' ) );
 			$this->assertSame( 'marketing-custom', Postmark_Provider::get_message_stream( 'marketing' ) );
 			$this->assertSame( 'transactional-custom', Postmark_Provider::get_message_stream( 'wordpress' ) );
-			$this->assertSame( 'outbound', Postmark_Provider::get_message_stream( 'unknown-channel' ) );
+			$this->assertSame( 'transactional-custom', Postmark_Provider::get_message_stream( 'unknown-channel' ) );
 		} finally {
 			if ( empty( $before ) ) { delete_option( Postmark_Provider::OPTION ); } else { update_option( Postmark_Provider::OPTION, $before ); }
 		}
