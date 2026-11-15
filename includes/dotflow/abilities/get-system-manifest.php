@@ -85,7 +85,7 @@ class Get_System_Manifest extends Ability {
 
 		return [
 			'product'        => 'DotFlow',
-			'plugin_version' => defined( 'DOTFLOW_VERSION' ) ? DOTFLOW_VERSION : '0.1.0-dev',
+			'plugin_version' => defined( 'DOTFLOW_VERSION' ) ? DOTFLOW_VERSION : '0.1.0',
 			'api_version'    => defined( 'DOTFLOW_API_VERSION' ) ? DOTFLOW_API_VERSION : 'v1',
 			'foundation'     => 'Groundhogg GPLv3-derived WordPress plugin',
 			'api_base'       => untrailingslashit( rest_url() ),
