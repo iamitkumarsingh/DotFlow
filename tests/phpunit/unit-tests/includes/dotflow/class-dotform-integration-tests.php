@@ -35,7 +35,7 @@ class DotFlow_DotForm_Integration_Tests extends GH_UnitTestCase {
 		$this->contact_ids[] = $contact_id;
 		$contact = new Contact( $contact_id );
 		$event_id = 'dotform-test-' . wp_generate_uuid4();
-		$this->event_ids = [ $event_id, 'marketing-' . $event_id ];
+		$this->event_ids = [ $event_id, 'dotform-marketing-' . substr( hash( 'sha256', $event_id ), 0, 48 ) ];
 
 		DotForm_Integration::record_submission( $contact_id, 22, 33, $event_id );
 
@@ -63,6 +63,14 @@ class DotFlow_DotForm_Integration_Tests extends GH_UnitTestCase {
 		Store::maybe_install();
 		DotForm_Integration::record_submission( 999999999, 22, 33, 'missing-contact-test' );
 		DotForm_Integration::record_submission( 0, 22, 33, 'invalid-contact-test' );
-		$this->assertTrue( true );
+		global $wpdb;
+		$db = get_db( 'dotflow_events' );
+		$count = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$db->get_table_name()} WHERE source = %s AND event_id IN (%s,%s)",
+			'dotform',
+			'missing-contact-test',
+			'invalid-contact-test'
+		) );
+		$this->assertSame( 0, absint( $count ) );
 	}
 }
