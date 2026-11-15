@@ -437,7 +437,7 @@ class Pii_Restriction_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'Hello Jane', Pii::scrub_text( 'Hello Jane' ) );
 	}
 
-	public function test_a_restricted_user_gets_a_note_ability_without_the_contacts_details() {
+	public function test_a_restricted_user_cannot_create_or_read_contact_notes() {
 
 		$this->admin( true );
 
@@ -446,14 +446,10 @@ class Pii_Restriction_Tests extends GH_UnitTestCase {
 			'content'    => 'Jane Doe called from 555-0100 about renewal',
 		] );
 
-		$this->assertNotWPError( $added );
-		$this->assertStringContainsString( 'Jane Doe', $added['note']['content'] );
-
-		$this->admin( false );
+		$this->assertWPError( $added );
+		$this->assertSame( 'groundhogg_pii_restricted', $added->get_error_code() );
 
 		$listed = $this->execute( 'groundhogg/list-contact-notes', [ 'contact_id' => $this->contact_id ] );
-
-		$this->assertNotWPError( $listed );
-		$this->assertSame( '[redacted] called from [redacted] about renewal', $listed['notes'][0]['content'] );
-	}
-}
+		$this->assertWPError( $listed );
+		$this->assertSame( 'groundhogg_pii_restricted', $listed->get_error_code() );
+	}}
