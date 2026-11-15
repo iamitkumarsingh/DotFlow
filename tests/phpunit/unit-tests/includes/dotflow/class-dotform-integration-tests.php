@@ -44,7 +44,7 @@ class DotFlow_DotForm_Integration_Tests extends GH_UnitTestCase {
 			"SELECT event_name, payload FROM {$db->get_table_name()} WHERE source = %s AND event_id IN (%s,%s)",
 			'dotform',
 			$event_id,
-			'marketing-' . $event_id
+			'dotform-marketing-' . substr( hash( 'sha256', $event_id ), 0, 48 )
 		), ARRAY_A );
 
 		$this->assertCount( 2, $rows );
