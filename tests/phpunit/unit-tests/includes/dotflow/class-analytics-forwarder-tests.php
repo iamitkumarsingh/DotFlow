@@ -1,7 +1,7 @@
 <?php
 
-use Groundhogg\\DotFlow\\Analytics\\Analytics_Forwarder;
-use Groundhogg\\DotFlow\\Events\\Event;
+use Groundhogg\DotFlow\Analytics\Analytics_Forwarder;
+use Groundhogg\DotFlow\Events\Event;
 
 class DotFlow_Analytics_Forwarder_Tests extends GH_UnitTestCase {
 
