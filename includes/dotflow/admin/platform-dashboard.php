@@ -17,12 +17,13 @@ use function Groundhogg\get_db;
 final class Platform_Dashboard {
 
 	const PAGE = 'dotflow-platform';
+	const CAPABILITY = 'manage_options';
 
 	public static function register() {
 		add_options_page(
 			__( 'DotFlow', 'groundhogg' ),
 			__( 'DotFlow', 'groundhogg' ),
-			'manage_options',
+			self::CAPABILITY,
 			self::PAGE,
 			[ __CLASS__, 'render' ]
 		);
