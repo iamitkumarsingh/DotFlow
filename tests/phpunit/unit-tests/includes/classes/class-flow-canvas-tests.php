@@ -187,6 +187,12 @@ class Flow_Canvas_Tests extends GH_UnitTestCase {
 
 			$saved_html = str_replace( [ "\r\n", "\r" ], "\n", (string) $saved['html'] );
 			$actual_html = str_replace( [ "\r\n", "\r" ], "\n", (string) $fixture['html'] );
+
+			// Debug-only ID/position labels depend on WP_DEBUG and are not part of the canvas contract.
+			$debug_labels = '/<div class="step-label">(ID|Pos): [^<]*<\\/div>/';
+			$saved_html = preg_replace( $debug_labels, '', $saved_html );
+			$actual_html = preg_replace( $debug_labels, '', $actual_html );
+
 			$this->assertSame( $saved_html, $actual_html, "The server draws the $name flow differently than the JS fixture, run with GH_UPDATE_JS_FIXTURES=1 and check tests/js" );
 		}
 	}
