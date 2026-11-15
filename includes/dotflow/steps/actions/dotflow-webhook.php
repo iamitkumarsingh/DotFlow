@@ -106,6 +106,17 @@ class DotFlow_Webhook extends Action {
 		return true;
 	}
 
+
+	/**
+	 * Shared signing key is configured outside the database (wp-config.php or
+	 * a server-side filter) and is never exposed through the flow editor.
+	 */
+	public static function get_secret(): string {
+		$secret = defined( 'DOTFLOW_WEBHOOK_SECRET' ) ? DOTFLOW_WEBHOOK_SECRET : '';
+		$secret = apply_filters( 'dotflow/webhook/secret', $secret );
+		return is_string( $secret ) ? trim( $secret ) : '';
+	}
+
 	public function run( $contact, $event ) {
 		if ( ! $contact || ! $contact->exists() || ! $event instanceof Event ) {
 			return new \WP_Error( 'dotflow_webhook_context_invalid', __( 'The webhook step requires a valid contact and workflow event.', 'groundhogg' ) );
@@ -126,6 +137,8 @@ class DotFlow_Webhook extends Action {
 			'occurred_at'     => gmdate( 'c' ),
 		];
 
+		$body = wp_json_encode( $payload );
+		$signature = hash_hmac( 'sha256', $body, $secret );
 		$response = wp_safe_remote_post( $url, [
 			'timeout'             => 10,
 			'redirection'         => 0,
@@ -134,9 +147,12 @@ class DotFlow_Webhook extends Action {
 			'headers'             => [
 				'Accept'       => 'application/json',
 				'Content-Type' => 'application/json; charset=utf-8',
-				'User-Agent'   => 'DotFlow/' . ( defined( 'DOTFLOW_VERSION' ) ? DOTFLOW_VERSION : 'dev' ),
+				'User-Agent'          => 'DotFlow/' . ( defined( 'DOTFLOW_VERSION' ) ? DOTFLOW_VERSION : 'dev' ),
+				'X-DotFlow-Event'     => 'automation.step.completed',
+				'X-DotFlow-Delivery'  => (string) absint( $event->get_id() ),
+				'X-DotFlow-Signature' => 'sha256=' . $signature,
 			],
-			'body'                => wp_json_encode( $payload ),
+			'body'                => $body,
 			'data_format'         => 'body',
 			'sslverify'           => true,
 			'reject_unsafe_urls'  => true,
