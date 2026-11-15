@@ -38,11 +38,14 @@ class DotFlow_Webhook_Step_Tests extends GH_UnitTestCase {
 		$step->commit();
 		$step->update_meta( 'url', 'https://example.com/dotflow-hook' );
 		$element = $step->get_step_element();
-		$event = new Event( [
-			'ID' => 9001,
-			'funnel_id' => $funnel->get_id(),
-			'step_id' => $step->get_id(),
+		$event_id = event_queue_db()->add( [
+			'contact_id' => $contact_id,
+			'funnel_id'  => $funnel->get_id(),
+			'step_id'    => $step->get_id(),
+			'event_type' => Event::FUNNEL,
+			'status'     => Event::IN_PROGRESS,
 		] );
+		$event = new Event( $event_id, 'event_queue' );
 
 		$secret = str_repeat( 'test-secret-', 4 );
 		$seen = [];
@@ -73,6 +76,7 @@ class DotFlow_Webhook_Step_Tests extends GH_UnitTestCase {
 		} finally {
 			remove_filter( 'dotflow/webhook/secret', $secret_filter );
 			remove_filter( 'pre_http_request', $http_filter, 10 );
+			event_queue_db()->delete( [ 'ID' => $event_id ] );
 			$funnel->delete();
 		}
 	}
