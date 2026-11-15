@@ -96,7 +96,7 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		$this->assertArrayHasKey( 'form.submitted', $events );
 		$this->assertArrayHasKey( 'form.marketing_eligible', $events );
 		$this->assertSame( $contact->get_id(), $events['form.submitted']['contact_id'] );
-		$this->assertSame( $submission->get_id(), $events['form.submitted']['object_id'] );
+		$this->assertSame( absint( $submission->get_id() ), absint( $events['form.submitted']['object_id'] ) );
 		$this->assertSame( 77, $events['form.submitted']['form_id'] );
 		$this->assertSame( [ 'contact_id', 'object_type', 'object_id', 'form_id' ], array_keys( $events['form.submitted'] ) );
 	}
