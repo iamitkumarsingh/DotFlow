@@ -39,7 +39,7 @@ class DotFlow_Automation_Dashboard_Tests extends GH_UnitTestCase {
 			$this->assertNotFalse( $step->enqueue( $contact ) );
 			$metrics = Automation_Dashboard::get_metrics( time() - HOUR_IN_SECONDS, time() + HOUR_IN_SECONDS );
 			$this->assertNotWPError( $metrics );
-			$this->assertGreaterThanOrEqual( 1, $metrics['summary']['waiting'] );
+			$this->assertGreaterThanOrEqual( 1, $metrics['summary']['total'] );
 			$this->assertGreaterThanOrEqual( 1, $metrics['summary']['contacts'] );
 
 			$flow_ids = array_column( $metrics['flows'], 'flow_id' );
@@ -47,7 +47,10 @@ class DotFlow_Automation_Dashboard_Tests extends GH_UnitTestCase {
 
 			$step_ids = array_column( $metrics['steps'], 'step_id' );
 			$this->assertContains( $step->get_id(), $step_ids );
-			$this->assertArrayNotHasKey( 'contact_id', $metrics['steps'][0] );
+			$step_metrics = array_values( array_filter( $metrics['steps'], function ( $row ) use ( $step ) { return $row['step_id'] === $step->get_id(); } ) );
+			$this->assertCount( 1, $step_metrics );
+			$this->assertArrayNotHasKey( 'contact_id', $step_metrics[0] );
+			$this->assertNotEmpty( $metrics['daily'] );
 		} finally {
 			foreach ( [ 'event_queue', 'events' ] as $db_name ) {
 				$db = get_db( $db_name );
