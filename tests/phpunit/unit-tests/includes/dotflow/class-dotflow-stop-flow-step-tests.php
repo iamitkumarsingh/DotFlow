@@ -42,7 +42,7 @@ class DotFlow_Stop_Contact_Flow_Step_Tests extends GH_UnitTestCase {
 		] );
 
 		$this->assertTrue( $element->run( $contact, $event ) );
-		$this->assertContains( 'dotflow_stop_flow', \\Groundhogg\\Abilities\\Schemas\\Step_Type_Schema::supported_types() );
+		$this->assertContains( 'dotflow_stop_flow', \Groundhogg\Abilities\Schemas\Step_Type_Schema::supported_types() );
 		$this->assertCount( 0, event_queue_db()->query( [
 			'contact_id' => $contact_id,
 			'funnel_id' => $target->get_id(),
