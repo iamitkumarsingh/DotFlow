@@ -1,10 +1,10 @@
 <?php
 
-namespace Groundhogg\\DotFlow\\Integrations;
+namespace Groundhogg\DotFlow\Integrations;
 
-use Groundhogg\\Contact;
-use Groundhogg\\DotFlow\\Events\\Dispatcher;
-use Groundhogg\\DotFlow\\Events\\Event;
+use Groundhogg\Contact;
+use Groundhogg\DotFlow\Events\Dispatcher;
+use Groundhogg\DotFlow\Events\Event;
 
 /**
  * Optional DotForm-to-DotFlow event bridge.
