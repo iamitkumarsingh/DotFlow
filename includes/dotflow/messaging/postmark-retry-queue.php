@@ -73,22 +73,30 @@ final class Postmark_Retry_Queue {
 		$key = hash( 'sha256', $message_id );
 		$claim = wp_generate_uuid4();
 		$now = gmdate( 'Y-m-d H:i:s' );
-		$inserted = $db->insert( [
-			'idempotency_key' => $key,
-			'payload' => $encrypted,
-			'status' => 'processing',
-			'attempts' => 0,
-			'available_at' => $now,
-			'claim_token' => $claim,
-			'claimed_at' => $now,
-			'provider_message_id' => '',
-			'last_error_code' => '',
-			'created_at' => $now,
-			'updated_at' => $now,
-		] );
+		// INSERT IGNORE makes the unique idempotency constraint an expected,
+		// race-safe outcome without emitting a database error for duplicate sends.
+		$inserted = $wpdb->query( $wpdb->prepare(
+			"INSERT IGNORE INTO {$db->get_table_name()} (idempotency_key,payload,status,attempts,available_at,claim_token,claimed_at,provider_message_id,last_error_code,created_at,updated_at)
+			VALUES (%s,%s,%s,%d,%s,%s,%s,%s,%s,%s,%s)",
+			$key,
+			$encrypted,
+			'processing',
+			0,
+			$now,
+			$claim,
+			$now,
+			'',
+			'',
+			$now,
+			$now
+		) );
 
-		if ( $inserted ) {
-			return [ 'id' => absint( $inserted ), 'claim_token' => $claim, 'status' => 'reserved', 'message_id' => $message_id ];
+		if ( false === $inserted ) {
+			return false;
+		}
+
+		if ( 1 === (int) $inserted ) {
+			return [ 'id' => absint( $wpdb->insert_id ), 'claim_token' => $claim, 'status' => 'reserved', 'message_id' => $message_id ];
 		}
 
 		$row = $wpdb->get_row( $wpdb->prepare(
