@@ -1,6 +1,7 @@
 <?php
 
-use Groundhogg\Contact;\nuse Groundhogg\Preferences;
+use Groundhogg\Contact;
+use Groundhogg\Preferences;
 use Groundhogg\DotFlow\Events\Store;
 use Groundhogg\DotFlow\Integrations\DotForm_Integration;
 use function Groundhogg\get_db;
