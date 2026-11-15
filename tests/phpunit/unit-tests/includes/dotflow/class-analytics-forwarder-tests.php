@@ -73,4 +73,20 @@ class DotFlow_Analytics_Forwarder_Tests extends GH_UnitTestCase {
 		$this->assertFalse( $captured['args']['blocking'] );
 		$this->assertStringNotContainsString( 'server-secret-not-for-browser', $captured['args']['body'] );
 	}
+	public function test_gtm_is_not_enqueued_without_consent_and_bootstraps_after_grant() {
+		$this->add_test_filter( 'dotflow/analytics/gtm_container_id', static function () { return 'GTM-ABC123'; } );
+		$this->add_test_filter( 'dotflow/analytics/consent_granted', static function () { return false; } );
+
+		Analytics_Forwarder::enqueue_gtm();
+		$this->assertNotContains( 'dotflow-google-tag-manager', wp_scripts()->queue );
+
+		$this->add_test_filter( 'dotflow/analytics/consent_granted', static function () { return true; } );
+		Analytics_Forwarder::enqueue_gtm();
+		$this->assertContains( 'dotflow-google-tag-manager', wp_scripts()->queue );
+		$before = wp_scripts()->get_data( 'dotflow-google-tag-manager', 'before' );
+		$this->assertIsArray( $before );
+		$this->assertStringContainsString( 'gtm.start', implode( "\\n", $before ) );
+		$this->assertStringContainsString( 'dotflow_analytics_consent_granted', implode( "\\n", $before ) );
+	}
+
 }
