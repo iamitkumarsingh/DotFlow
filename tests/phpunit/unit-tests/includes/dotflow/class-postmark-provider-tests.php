@@ -364,4 +364,45 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 		$this->assertStringNotContainsString( 'one@example.test', $first['event_id'] );
 	}
 
+	public function test_postmark_settings_register_all_fields_in_their_declared_section() {
+		$previous_user_id = get_current_user_id();
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user_id );
+
+		try {
+			Postmark_Provider::register_settings();
+			global $wp_settings_fields;
+			$this->assertArrayHasKey( 'gh_dotflow_postmark', $wp_settings_fields['gh_email'] );
+			$this->assertArrayHasKey( 'dotflow_postmark_webhook_secret', $wp_settings_fields['gh_email']['gh_dotflow_postmark'] );
+		} finally {
+			wp_set_current_user( $previous_user_id );
+		}
+	}
+
+	public function test_saved_postmark_message_stream_settings_are_used_for_outbound_sends() {
+		$before = get_option( Postmark_Provider::OPTION, [] );
+		update_option( Postmark_Provider::OPTION, [
+			'transactional_stream' => 'transactional-custom',
+			'marketing_stream' => 'marketing-custom',
+		] );
+		$captured = [];
+		$this->http_filter = static function ( $pre, $args, $url ) use ( &$captured ) {
+			if ( Postmark_Provider::API !== $url ) { return $pre; }
+			$captured = json_decode( $args['body'], true );
+			return [ 'headers' => [], 'body' => wp_json_encode( [ 'ErrorCode' => 0, 'MessageID' => '4d3f6b1a-3d5e-4b0a-9d9e-000000000009' ] ), 'response' => [ 'code' => 200, 'message' => 'OK' ], 'cookies' => [], 'filename' => null ];
+		};
+		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
+
+		try {
+			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::TRANSACTIONAL );
+			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Transactional', 'Body' ) );
+			$this->assertSame( 'transactional-custom', $captured['MessageStream'] );
+			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::MARKETING );
+			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Marketing', 'Body' ) );
+			$this->assertSame( 'marketing-custom', $captured['MessageStream'] );
+		} finally {
+			if ( empty( $before ) ) { delete_option( Postmark_Provider::OPTION ); } else { update_option( Postmark_Provider::OPTION, $before ); }
+		}
+	}
+
 }
