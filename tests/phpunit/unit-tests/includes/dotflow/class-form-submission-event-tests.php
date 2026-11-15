@@ -133,14 +133,14 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 
 		$event_rows = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM {$db->get_table_name()} WHERE source = %s AND contact_id = %d AND event_name IN (%s, %s)",
+				"SELECT event_id FROM {$db->get_table_name()} WHERE source = %s AND contact_id = %d AND event_name IN (%s, %s)",
 				'groundhogg',
 				$contact_id,
 				'contact.marketing_consent.granted',
 				'contact.marketing_consent.revoked'
 			)
 		);
-		$this->event_ids = array_merge( $this->event_ids, array_map( 'absint', $event_rows ) );
+		$this->event_ids = array_merge( $this->event_ids, $event_rows );
 	}
 
 	public function test_unsubscribed_contact_gets_service_event_but_not_marketing_trigger() {
