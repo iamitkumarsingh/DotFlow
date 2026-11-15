@@ -43,6 +43,6 @@ class DotFlow_System_Manifest_Tests extends GH_UnitTestCase {
 		$this->assertSame( 'foundation', $modules['messaging']['status'] );
 		$this->assertSame( 'foundation', $modules['automation']['status'] );
 		$this->assertStringContainsString( 'DotFlow Event benchmark', $modules['automation']['description'] );
-		$this->assertSame( 'planned', $modules['integrations']['status'] );
+		$this->assertSame( 'partial', $modules['integrations']['status'] );
 	}
 }
