@@ -172,7 +172,7 @@ jobs:
   release-package:
     name: Build and verify installable DotFlow ZIP
     runs-on: ubuntu-latest
-    needs: [php-syntax, phpunit-dotflow, phpcs-dotflow, js-tests]
+    needs: [php-syntax, phpunit-dotflow, full-phpunit, phpcs-dotflow, js-tests]
     permissions:
       contents: read
     steps:
