@@ -398,6 +398,7 @@ class DotFlow_Postmark_Provider_Tests extends GH_UnitTestCase {
 			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Transactional', 'Body' ) );
 			$this->assertSame( 'transactional-custom', $captured['MessageStream'] );
 			Groundhogg_Email_Services::set_current_message_type( Groundhogg_Email_Services::MARKETING );
+			Groundhogg_Email_Services::set_message_id( '' );
 			$this->assertTrue( Postmark_Provider::send( [ 'recipient@example.test' ], 'Marketing', 'Body' ) );
 			$this->assertSame( 'marketing-custom', $captured['MessageStream'] );
 		} finally {
