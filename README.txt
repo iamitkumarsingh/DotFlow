@@ -25,7 +25,7 @@ Key capabilities in this release:
 * Optional DotForm submission bridge.
 * Consent-gated GA4 Measurement Protocol and Google Tag Manager event forwarding. Analytics is disabled unless the site's consent manager explicitly grants consent.
 
-Analytics and DotForm integrations require site-side configuration. See the [integration contract documentation](https://github.com/iamitkumarsingh/DotFlow/blob/dotflow/development/docs/TRACKING-EVENTS.md) for setup details. The analytics consent filter defaults to false; connect it to your cookie/consent manager before adding GA4 or GTM identifiers.
+Analytics, DotForm, Postmark and Elementor integrations require site-side configuration. See the [integration setup guide](https://github.com/iamitkumarsingh/DotFlow/blob/dotflow/development/docs/INTEGRATION-SETUP.md), [tracking event contract](https://github.com/iamitkumarsingh/DotFlow/blob/dotflow/development/docs/TRACKING-EVENTS.md) and [staging acceptance checklist](https://github.com/iamitkumarsingh/DotFlow/blob/dotflow/development/docs/STAGING-ACCEPTANCE.md). The analytics consent filter defaults to false; connect it to your cookie/consent manager before adding GA4 or GTM identifiers.
 
 == Installation ==
 
