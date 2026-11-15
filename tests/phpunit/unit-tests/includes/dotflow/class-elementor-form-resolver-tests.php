@@ -1,6 +1,6 @@
 <?php
 
-use Groundhogg\\DotFlow\\Elementor\\Form_Resolver;
+use Groundhogg\DotFlow\Elementor\Form_Resolver;
 
 class DotFlow_Elementor_Form_Resolver_Tests extends GH_UnitTestCase {
 
