@@ -107,6 +107,23 @@ final class Postmark_Provider {
 		return [ 'provider_event_id' => 'postmark-' . sanitize_key( $id ), 'from' => $from, 'to' => $to, 'envelope_to' => $to, 'cc' => $cc, 'subject' => $subject, 'text' => $text, 'html' => $html, 'source' => 'postmark-inbound' ];
 	}
 
+	/**
+	 * Resolve the configured Postmark stream for a Groundhogg message channel.
+	 *
+	 * @param string $channel Groundhogg message channel.
+	 * @return string
+	 */
+	public static function get_message_stream( string $channel ): string {
+		$channel = in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ? $channel : 'transactional';
+		$settings = get_option( self::OPTION, [] );
+		$marketing = 'marketing' === $channel;
+		$default = $marketing ? 'broadcasts' : 'outbound';
+		$key = $marketing ? 'marketing_stream' : 'transactional_stream';
+		$configured = is_array( $settings ) ? ( $settings[ $key ] ?? $default ) : $default;
+		$stream = sanitize_key( (string) $configured ) ?: $default;
+		return sanitize_key( apply_filters( 'dotflow/postmark/message_stream/' . $channel, $stream ) ) ?: $stream;
+	}
+
 	public static function send( $to, $subject, $message, $headers = '', $attachments = [] ) {
 		if ( '' === self::secret( 'server_token' ) ) { return self::fail( 'postmark_not_configured' ); }
 		if ( ! empty( $attachments ) ) { return self::fail( 'postmark_attachments_not_supported' ); }
@@ -126,11 +143,7 @@ final class Postmark_Provider {
 		if ( strlen( $body ) > 5 * MB_IN_BYTES ) { return self::fail( 'postmark_body_too_large' ); }
 		$channel = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_current_message_type() : 'transactional';
 		if ( ! in_array( $channel, [ 'wordpress', 'transactional', 'marketing' ], true ) ) { $channel = 'transactional'; }
-		$settings = get_option( self::OPTION, [] );
-		$default_stream = 'marketing' === $channel ? 'broadcasts' : 'outbound';
-		$configured_stream = is_array( $settings ) ? ( $settings[ 'marketing' === $channel ? 'marketing_stream' : 'transactional_stream' ] ?? $default_stream ) : $default_stream;
-		$stream = sanitize_key( (string) $configured_stream ) ?: $default_stream;
-		$stream = sanitize_key( apply_filters( 'dotflow/postmark/message_stream/' . $channel, $stream ) ) ?: $stream;
+		$stream = self::get_message_stream( $channel );
 		$html = false !== strpos( strtolower( (string) ( $headers['content-type'] ?? '' ) ), 'text/html' ) || (bool) preg_match( '/<[^>]+>/', $body );
 		$message_id = class_exists( '\Groundhogg_Email_Services' ) ? (string) \Groundhogg_Email_Services::get_message_id() : '';
 		if ( ! preg_match( '/^<[^<>\s@]+@[^<>\s@]+>$/', $message_id ) ) {
