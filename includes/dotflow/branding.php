@@ -8,6 +8,8 @@
  * @package DenFlow
  */
 
+namespace Groundhogg;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -53,5 +55,5 @@ function denflow_branding_replace_product_name_with_context( $translated, $origi
 	return denflow_branding_replace_product_name( $translated, $original, $domain );
 }
 
-add_filter( 'gettext', 'denflow_branding_replace_product_name', 99, 3 );
-add_filter( 'gettext_with_context', 'denflow_branding_replace_product_name_with_context', 99, 4 );
+add_filter( 'gettext', __NAMESPACE__ . '\\denflow_branding_replace_product_name', 99, 3 );
+add_filter( 'gettext_with_context', __NAMESPACE__ . '\\denflow_branding_replace_product_name_with_context', 99, 4 );
