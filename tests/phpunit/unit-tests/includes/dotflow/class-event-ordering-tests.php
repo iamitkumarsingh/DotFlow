@@ -1,8 +1,8 @@
 <?php
 
-use Groundhogg\\DotFlow\\Events\\Event;
-use Groundhogg\\DotFlow\\Events\\Store;
-use function Groundhogg\\get_db;
+use Groundhogg\DotFlow\Events\Event;
+use Groundhogg\DotFlow\Events\Store;
+use function Groundhogg\get_db;
 
 /**
  * Stage 4 event-delivery ordering and idempotency regression coverage.
@@ -27,7 +27,7 @@ class DotFlow_Event_Ordering_Tests extends GH_UnitTestCase {
 			$shared_id,
 			'2026-11-14T12:00:00+00:00'
 		);
-		$older     = new Event(
+		$older = new Event(
 			'contact.activity.recorded',
 			[ 'contact_id' => 701, 'object_type' => 'contact', 'object_id' => 701 ],
 			'provider_a',
@@ -47,10 +47,15 @@ class DotFlow_Event_Ordering_Tests extends GH_UnitTestCase {
 		try {
 			// Deliberately deliver the newer occurrence before the older occurrence.
 			$newer_result = Store::record_with_status( $newer );
+			if ( is_array( $newer_result ) && ! empty( $newer_result['inserted'] ) ) {
+				$recorded_ids[] = $newer_result['id'];
+			}
+
 			$older_result = Store::record_with_status( $older );
 			if ( is_array( $older_result ) && ! empty( $older_result['inserted'] ) ) {
 				$recorded_ids[] = $older_result['id'];
 			}
+
 			$duplicate    = Store::record_with_status( $newer );
 			$other_source = Store::record_with_status( $same_id_other_source );
 			if ( is_array( $other_source ) && ! empty( $other_source['inserted'] ) ) {
