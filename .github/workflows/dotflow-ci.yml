@@ -1,5 +1,5 @@
-          ! grep -Eq '\\.(po|pot|map)$' dist/archive-files.txt
-          grep -Eq '\\.mo$' dist/archive-files.txt
+          ! grep -Eq '\.(po|pot|map)$' dist/archive-files.txt
+          grep -Eq '\.mo$' dist/archive-files.txt
           du -h dist/dotflow-0.1.0.zip
 name: DotFlow development checks
 
