@@ -16,6 +16,12 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 	protected $submission_ids = [];
 	protected $event_ids = [];
 
+	public function setUp(): void {
+		parent::setUp();
+		Store::maybe_install();
+		Form_Submission::register();
+	}
+
 	public function tearDown(): void {
 		global $wpdb;
 
@@ -68,7 +74,7 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		$this->assertTrue( $submission->exists() );
 		$this->assertTrue( $contact->is_marketable() );
 
-		Form_Submission::record_submission( $submission, $contact );
+		do_action( 'groundhogg/form/submission_handler/after', $submission, $contact, null );
 
 		$db = get_db( 'dotflow_events' );
 		$rows = $wpdb->get_results(
@@ -99,7 +105,6 @@ class DotFlow_Form_Submission_Event_Tests extends GH_UnitTestCase {
 		global $wpdb;
 
 		Store::maybe_install();
-		Form_Submission::register();
 
 		$contact_id = self::factory()->contacts->create();
 		$contact    = new Contact( $contact_id );
