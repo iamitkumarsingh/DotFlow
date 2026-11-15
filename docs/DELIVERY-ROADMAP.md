@@ -62,7 +62,7 @@ Exit gates:
 
 ## Phase 4 — Campaigns, workflows and event automation
 
-**Status: workflow editing, simulation, revision-checked publishing, explicit discard/rollback, broadcast scheduling/cancellation and trigger-frequency controls are covered by integration tests. DotFlow bridges successful CRM form submissions, marketing-consent grant/revocation, native Groundhogg page visits and email link clicks into privacy-minimised events. A contact-aware CTA hook is available for consent-aware integrations. Marketing-eligible form triggers are gated by Groundhogg marketability. Duplicate, source-scoped idempotency, out-of-order delivery, query-string redaction and staged-change rollback regression tests are included. Final cross-version integration validation and operational retry validation remain before this phase can be marked complete.**
+**Status: workflow editing, simulation, revision-checked publishing, explicit discard/rollback, broadcast scheduling/cancellation and trigger-frequency controls are covered by integration tests. DotFlow bridges contact creation, tag apply/remove, unsubscribe preference changes, successful CRM form submissions, marketing-consent grant/revocation, native Groundhogg page visits and email link clicks into privacy-minimised events. A contact-aware CTA hook is available for consent-aware integrations. Marketing-eligible form triggers are gated by Groundhogg marketability. Duplicate, source-scoped idempotency, out-of-order delivery, query-string redaction and staged-change rollback regression tests are included. Final cross-version integration validation and operational retry validation remain before this phase can be marked complete.**
 
 Scope:
 - Connect consent-aware form, page, CTA and CRM events to workflow triggers.
