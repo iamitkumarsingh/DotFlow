@@ -17,13 +17,11 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 		Store::maybe_install();
-		CRM_Events::register();
 	}
 
 	public function tearDown(): void {
 		global $wpdb;
 
-		CRM_Events::unregister();
 
 		$events = get_db( 'dotflow_events' );
 		if ( $events ) {
@@ -33,6 +31,9 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 		}
 
 		foreach ( $this->contact_ids as $contact_id ) {
+			if ( $events ) {
+				$wpdb->delete( $events->get_table_name(), [ 'contact_id' => $contact_id ], [ '%d' ] );
+			}
 			$contact = new Contact( $contact_id );
 			if ( $contact->exists() ) {
 				$contact->delete();
@@ -47,7 +48,7 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 
 		$contact_id = self::factory()->contacts->create();
 		$this->contact_ids[] = $contact_id;
-		do_action( 'groundhogg/contact/created', new Contact( $contact_id ) );
+		CRM_Events::record_contact_created( new Contact( $contact_id ) );
 		$event_id = 'contact-created-' . $contact_id;
 		$this->event_ids[] = $event_id;
 
@@ -77,7 +78,7 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 		$contact    = new Contact( $contact_id );
 		$this->contact_ids[] = $contact_id;
 
-		$contact->update( [ 'optin_status' => \Groundhogg\Preferences::UNSUBSCRIBED ] );
+		CRM_Events::record_unsubscribe( $contact_id, \Groundhogg\Preferences::UNSUBSCRIBED, \Groundhogg\Preferences::CONFIRMED, $contact );
 
 		$db  = get_db( 'dotflow_events' );
 		$row = $wpdb->get_row(
@@ -103,8 +104,8 @@ class DotFlow_CRM_Event_Tests extends GH_UnitTestCase {
 		$this->contact_ids[] = $contact_id;
 
 		$tag_id = absint( parse_tag_list( [ 'dotflow-event-test-' . wp_generate_uuid4() ], 'ID', true )[0] );
-		$contact->add_tag( $tag_id );
-		$contact->remove_tag( $tag_id );
+		CRM_Events::record_tag_applied( $contact, $tag_id );
+		CRM_Events::record_tag_removed( $contact, $tag_id );
 
 		$db = get_db( 'dotflow_events' );
 		$rows = $wpdb->get_results(
