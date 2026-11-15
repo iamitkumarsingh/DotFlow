@@ -163,8 +163,8 @@ class Get_System_Manifest extends Ability {
 				[
 					'id'          => 'integrations',
 					'label'       => 'External integrations',
-					'status'      => 'planned',
-					'description' => 'Elementor, DotForm, HubSpot, WooCommerce, GA4 and generic webhook adapters.',
+					'status'      => 'partial',
+					'description' => 'DotForm submission bridge contract and consent-gated GA4 Measurement Protocol / GTM dataLayer forwarding are implemented. DotForm must emit dotform/submission/after; analytics consent and a consented client ID must be supplied by the site consent manager. HubSpot, WooCommerce, CRM attribution and campaign reporting are not included in this release.',
 					'abilities'   => [],
 				],
 			],
