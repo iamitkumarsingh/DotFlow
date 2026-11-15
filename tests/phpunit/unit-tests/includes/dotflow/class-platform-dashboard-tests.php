@@ -1,9 +1,9 @@
 <?php
 
-use Groundhogg\\DotFlow\\Admin\\Platform_Dashboard;
-use Groundhogg\\DotFlow\\Events\\Event;
-use Groundhogg\\DotFlow\\Events\\Store;
-use function Groundhogg\\get_db;
+use Groundhogg\DotFlow\Admin\Platform_Dashboard;
+use Groundhogg\DotFlow\Events\Event;
+use Groundhogg\DotFlow\Events\Store;
+use function Groundhogg\get_db;
 
 class DotFlow_Platform_Dashboard_Tests extends GH_UnitTestCase {
 
