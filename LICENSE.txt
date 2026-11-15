@@ -1,0 +1,9 @@
+DotFlow is distributed under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later).
+
+This is a derivative work based on Groundhogg. Preserve all original Groundhogg copyright, attribution, warranty and license notices in source files. DotFlow modifications are also licensed under GPL-3.0-or-later.
+
+The complete GNU GPL version 3 text is available at:
+https://www.gnu.org/licenses/gpl-3.0.txt
+
+License information:
+https://www.gnu.org/licenses/gpl-3.0.html
